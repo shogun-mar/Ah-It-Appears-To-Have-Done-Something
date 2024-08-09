@@ -25,6 +25,6 @@ def render_start_menu(game):
 
     screen.fill('white')
     screen.blit(game.logo_surf, game.logo_rect) #Draw the logo
+    screen.blit(game.start_menu_ground_surf, game.start_menu_ground_rect) #Draw the ground
     screen.blit(game.start_button_surf, game.start_button_rect) #Draw the start button
-    game.tilemap.render(screen, game.tilemap.current_level) #Draw the tilemap
-    #screen.blit(game.player.sprite, game.player.rect) #Draw the player
+    screen.blit(game.player.sprite, game.player.rect) #Draw the player

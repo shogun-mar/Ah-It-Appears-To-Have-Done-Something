@@ -3,7 +3,6 @@ import pygame as pg
 from logic.states.gameState import GameState
 from logic.states.startMenu import handle_start_menu_events, update_start_menu, render_start_menu
 from logic.physicsEntities import Player
-from logic.tilemap import Tilemap
 
 from settings import *
 
@@ -21,6 +20,7 @@ class Game:
 
         #Game variables
         self.gameState = GameState.START_MENU
+        self.current_level_num = 0
         self.screen_rect=self.screen.get_rect()
 
         #Game objects
@@ -63,6 +63,9 @@ class Game:
 
         self.start_button_surf = pg.image.load("graphics/assets/start menu/start.png").convert_alpha()
         self.start_button_rect = self.start_button_surf.get_rect(midtop = (SCREEN_WIDTH // 2, self.logo_rect.midbottom[1] + 50))
-        
+
+        self.start_menu_ground_surf = pg.image.load("graphics/assets/start menu/ground.png").convert_alpha()
+        self.start_menu_ground_rect = self.start_menu_ground_surf.get_rect(bottomleft = (0, SCREEN_HEIGHT))
+
 if __name__ == "__main__":
     Game().run()

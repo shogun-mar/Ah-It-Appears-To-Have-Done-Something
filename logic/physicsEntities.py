@@ -1,6 +1,7 @@
 import os
 import pygame as pg
 from settings import *
+from logic.collisionManager import CollisionManager, PlayerCollisionManager
 
 class PhysicsEntity:
     def __init__(self, game, speed, sprite = None, rect = None,):
@@ -10,22 +11,19 @@ class PhysicsEntity:
         self.movement = [False, False]
         self.game = game
         self.screen_rect = game.screen_rect
+        self.collision_manager = CollisionManager(game.current_level_num)
         self.speed = speed
 
     def move(self):
-        self.rect.centerx  += (self.movement[1] - self.movement[0]) * self.speed #Boolean values are implicitly converted to 1 or 0
-        #self.apply_gravity()
+        self.apply_gravity()
 
         #Clamp the player rect to the screen rect to ensure that the player doesn't go off screen
         self.rect.clamp_ip(self.screen_rect)
 
     def apply_gravity(self):
-        collidable_objects_y_values = [rect.topleft[1] for rect in self.game.collidable_objects]
-        player_foot_y = self.rect.midbottom[1]
-        
-        if player_foot_y < SCREEN_HEIGHT and player_foot_y not in collidable_objects_y_values:
-            self.vertical_vel -= GRAVITY_STRENGTH
-            self.rect.midbottom = (self.rect.midbottom[0], self.rect.midbottom[1] + self.vertical_vel)
+        desired_x, desired_y = self.rect.midbottom[0], self.rect.midbottom[1] + GRAVITY_STRENGTH #The position the player would be in if gravity was applied
+        if self.collision_manager.allow_movement(desired_x, desired_y):
+            self.rect.midbottom = (desired_x, desired_y)
 
 class Player(PhysicsEntity):
     def __init__(self, game):
@@ -36,9 +34,19 @@ class Player(PhysicsEntity):
         
         self.current_animation_frame = 0
         self.animation_switching_delay = PLAYER_ANIMATION_SWITCHING_DELAY
+        self.collision_manager = PlayerCollisionManager(game.current_level_num)
         self.sprite = self.standing_frames[self.current_animation_frame]
-        self.rect = self.sprite.get_rect(midbottom = (50, SCREEN_HEIGHT - 125))
+        self.rect = self.sprite.get_rect(midbottom = (50, 500))
         self.status = 'standing'
+
+    def move(self):
+        desired_x, desired_y = self.rect.centerx + (self.movement[1] - self.movement[0]) * self.speed, self.rect.centery #Boolean values are implicitly converted to 1 or 0
+        if self.collision_manager.allow_movement(desired_x, desired_y):
+            self.rect.center = (desired_x, desired_y)
+
+        self.apply_gravity()
+        #Clamp the player rect to the screen rect to ensure that the player doesn't go off screen
+        self.rect.clamp_ip(self.screen_rect)
 
     def update_animation(self):
         self.animation_switching_delay -= 1

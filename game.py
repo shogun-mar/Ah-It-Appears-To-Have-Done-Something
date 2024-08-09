@@ -25,7 +25,6 @@ class Game:
 
         #Game objects
         self.player = Player(self)
-        self.tilemap = Tilemap()
 
         #Init assets
         self.init_assets()
@@ -62,7 +61,7 @@ class Game:
         self.logo_surf = self.logo_font.render("Ah It Appears To Have Done Something", True, 'black')
         self.logo_rect = self.logo_surf.get_rect(midbottom = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4))
 
-        self.start_button_surf = pg.image.load("graphics/buttons/start menu/start.png")
+        self.start_button_surf = pg.image.load("graphics/assets/start menu/start.png").convert_alpha()
         self.start_button_rect = self.start_button_surf.get_rect(midtop = (SCREEN_WIDTH // 2, self.logo_rect.midbottom[1] + 50))
         
 if __name__ == "__main__":

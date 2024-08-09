@@ -17,7 +17,7 @@ def handle_start_menu_events(game, event):
 def update_start_menu(game):
     
     #Player
-    game.player.move(game) #Move the player
+    game.player.move() #Move the player
     game.player.update_animation() #Update the player's animation
 
 def render_start_menu(game):
@@ -26,5 +26,5 @@ def render_start_menu(game):
     screen.fill('white')
     screen.blit(game.logo_surf, game.logo_rect) #Draw the logo
     screen.blit(game.start_button_surf, game.start_button_rect) #Draw the start button
-    screen.blit(game.ground_surf, game.ground_rect) #Draw the ground
-    screen.blit(game.player.sprite, game.player.rect) #Draw the player
+    game.tilemap.render(screen, game.tilemap.current_level) #Draw the tilemap
+    #screen.blit(game.player.sprite, game.player.rect) #Draw the player

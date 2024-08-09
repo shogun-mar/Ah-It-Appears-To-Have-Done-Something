@@ -14,7 +14,7 @@ class PhysicsEntity:
 
     def move(self):
         self.rect.centerx  += (self.movement[1] - self.movement[0]) * self.speed #Boolean values are implicitly converted to 1 or 0
-        self.apply_gravity()
+        #self.apply_gravity()
 
         #Clamp the player rect to the screen rect to ensure that the player doesn't go off screen
         self.rect.clamp_ip(self.screen_rect)

@@ -2,17 +2,26 @@ import pygame as pg
 from settings import *
 
 class Tilemap:
-    def __init__(self, tile_size = TILE_SIZE):
-        self.tile_size = tile_size
-        self.tilemap = {}
+    def __init__(self):
+        self.tilemaps = []
         self.offgrid_tiles = []
+        self.current_level = 0
+        self.load_tilemaps()
 
-        for i in range(0, SCREEN_WIDTH, tile_size):
-            for j in range(0, SCREEN_HEIGHT, tile_size):
-                self.tilemap[(i, j)] = Tile("grass", (i, j))
+    def load_tilemaps(self):
+        #Start menu
+        tiles = pg.sprite.Group()
+        tiles.add(Tile("ground", (0, 7)))
+        self.tilemaps.append(tiles)
 
-class Tile:
+        tiles = pg.sprite.Group()
+
+    def render(self, screen, level_num):
+        self.tilemaps[level_num].draw(screen)
+
+class Tile(pg.sprite.Sprite):
     def __init__(self, tile_type, grid_pos):
+        super().__init__()
         self.tile_type = tile_type
-        self.sprite = pg.image.load(f"graphics/assets/tiles/{tile_type}_1.png")
-        self.pos = grid_pos * TILE_SIZE
+        self.image = pg.image.load(f"graphics/assets/tiles/{tile_type}_1.png").convert_alpha()
+        self.rect = self.image.get_rect(topleft=(grid_pos[0] * TILE_SIZE, grid_pos[1] * TILE_SIZE))

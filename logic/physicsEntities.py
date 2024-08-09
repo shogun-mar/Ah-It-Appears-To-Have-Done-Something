@@ -1,46 +1,44 @@
-import pygame as pg
 import os
-from settings import PLAYER_SPEED, JUMP_STRENGTH, GRAVITY_STRENGTH, SCREEN_HEIGHT, PLAYER_ANIMATION_SWITCHING_DELAY
+import pygame as pg
+from settings import *
 
-class Player:
-    def __init__(self, screen_rect):
-        #Animations (lists that keep all the frames of the animations)
-        self.standing_frames = self.load_animation_frames('graphics/assets/player/standing')
-        
-        self.current_animation_frame = 0
-        self.animation_switching_delay = PLAYER_ANIMATION_SWITCHING_DELAY
+class PhysicsEntity:
+    def __init__(self, game, speed, sprite = None, rect = None,):
+        self.sprite = sprite
+        self.rect = rect
+        self.velocity = [0, 0]
+        self.movement = [False, False]
+        self.game = game
+        self.screen_rect = game.screen_rect
+        self.speed = speed
 
-        self.sprite = self.standing_frames[self.current_animation_frame]
-        self.rect = self.sprite.get_rect(midbottom = (50, SCREEN_HEIGHT - 125))
-        self.status = 'standing'
-        self.screen_rect = screen_rect
-        self.speed = PLAYER_SPEED
-        self.vertical_vel = 0
-
-    def move(self, keys):
-        if keys[pg.K_d]: #Right
-            self.rect.centerx += self.speed
-        elif keys[pg.K_a]: #Left
-            self.rect.centerx -= self.speed
-        elif keys[pg.K_SPACE] and self.status != 'jumping': #Jump
-            self.status = 'jumping'
-            self.vertical_vel = JUMP_STRENGTH
-
+    def move(self):
+        self.rect.centerx  += (self.movement[1] - self.movement[0]) * self.speed #Boolean values are implicitly converted to 1 or 0
         self.apply_gravity()
 
         #Clamp the player rect to the screen rect to ensure that the player doesn't go off screen
         self.rect.clamp_ip(self.screen_rect)
 
     def apply_gravity(self):
-        if self.rect.midbottom[1] < SCREEN_HEIGHT - 125:
-            self.vertical_vel += GRAVITY_STRENGTH
+        collidable_objects_y_values = [rect.topleft[1] for rect in self.game.collidable_objects]
+        player_foot_y = self.rect.midbottom[1]
+        
+        if player_foot_y < SCREEN_HEIGHT and player_foot_y not in collidable_objects_y_values:
+            self.vertical_vel -= GRAVITY_STRENGTH
             self.rect.midbottom = (self.rect.midbottom[0], self.rect.midbottom[1] + self.vertical_vel)
-        if self.rect.midbottom[1] >= SCREEN_HEIGHT - 125:
-            self.rect.midbottom = (self.rect.midbottom[0], SCREEN_HEIGHT - 125)
-            self.vertical_vel = 0
-            self.status = 'standing'
 
-        #print(self.rect.midbottom[1])
+class Player(PhysicsEntity):
+    def __init__(self, game):
+        super().__init__(game, speed = PLAYER_SPEED)
+
+        #Animations (lists that keep all the frames of the animations)
+        self.standing_frames = self.load_animation_frames('graphics/assets/player/standing')
+        
+        self.current_animation_frame = 0
+        self.animation_switching_delay = PLAYER_ANIMATION_SWITCHING_DELAY
+        self.sprite = self.standing_frames[self.current_animation_frame]
+        self.rect = self.sprite.get_rect(midbottom = (50, SCREEN_HEIGHT - 125))
+        self.status = 'standing'
 
     def update_animation(self):
         self.animation_switching_delay -= 1
@@ -65,5 +63,3 @@ class Player:
             frames_surfs.append(pg.image.load(frame_path).convert_alpha())
         
         return frames_surfs
-        
-

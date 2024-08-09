@@ -22,10 +22,14 @@ def init_start_menu():
     ground_rect = ground_surf.get_rect(bottomleft = (0, SCREEN_HEIGHT))
 
 def handle_start_menu_events(game, event):
-    pass
+    pass   
 
 def update_start_menu(game):
-    pass
+    pressed_keys = pg.key.get_pressed()
+    
+    #Player
+    game.player.move(pressed_keys) #Move the player (would make more sense in the handle events function but that wouldn't allow for continuos movement)
+    game.player.update_animation() #Update the player's animation
 
 def render_start_menu(game):
     screen = game.screen #Rename screen to make draw calls easier to read
@@ -34,3 +38,4 @@ def render_start_menu(game):
     screen.blit(logo_surf, logo_rect) #Draw the logo
     screen.blit(start_button_surf, start_button_rect) #Draw the start button
     screen.blit(ground_surf, ground_rect) #Draw the ground
+    screen.blit(game.player.sprite, game.player.rect) #Draw the player

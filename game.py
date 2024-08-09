@@ -2,6 +2,7 @@ import pygame as pg
 
 from logic.states.gameState import GameState
 from logic.states.startMenu import init_start_menu, handle_start_menu_events, update_start_menu, render_start_menu
+from logic.player import Player
 
 from settings import *
 
@@ -19,6 +20,7 @@ class Game:
 
         #Game variables
         self.gameState = GameState.START_MENU
+        self.player = Player(screen_rect=self.screen.get_rect())
 
         #Generic assets
         self.generic_font = pg.font.Font("graphics/font/silver.ttf", 36)
@@ -41,7 +43,6 @@ class Game:
             if self.gameState == GameState.START_MENU:
                 handle_start_menu_events(self, event)
             
-
     def update(self):
         if self.gameState == GameState.START_MENU:
             update_start_menu(self)

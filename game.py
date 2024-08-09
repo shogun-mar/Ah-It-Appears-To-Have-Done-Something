@@ -1,12 +1,16 @@
 import pygame as pg
-from logic.states import GameState
+
+from logic.states.gameState import GameState
+from logic.states.startMenu import init_start_menu, handle_start_menu_events, update_start_menu, render_start_menu
+
+from settings import *
 
 class Game:
     def __init__(self):
         pg.init()
 
         #Screen settings
-        self.screen = pg.display.set_mode((800, 600))
+        self.screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pg.display.set_caption("Ah It Appears To Have Done Something")
         pg.display.set_icon(pg.image.load("graphics/loophole_icon.jpg"))
         
@@ -15,6 +19,12 @@ class Game:
 
         #Game variables
         self.gameState = GameState.START_MENU
+
+        #Generic assets
+        self.generic_font = pg.font.Font("graphics/font/silver.ttf", 36)
+
+        #Init game state specific assets
+        init_start_menu()
 
     def run(self):
         while True:
@@ -29,16 +39,16 @@ class Game:
                 quit()
             
             if self.gameState == GameState.START_MENU:
-                self.handle_start_menu_events(self, event)
+                handle_start_menu_events(self, event)
             
 
     def update(self):
         if self.gameState == GameState.START_MENU:
-            self.update_start_menu(self)
+            update_start_menu(self)
 
     def render(self):
         if self.gameState == GameState.START_MENU:
-            self.render_start_menu(self.screen)
+            render_start_menu(self)
 
         pg.display.flip()
         self.clock.tick(60)

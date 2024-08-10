@@ -29,12 +29,13 @@ class PlayerCollisionManager(CollisionManager):
         super().__init__(level_num)
 
     def allow_movement(self, x, y):
-        print(f"coords: {x, y} color: {maps[self.level_num][y][x]}")
-        if maps[self.level_num][y][x] == (0, 0, 0, 0):
+        pixel_color = maps[self.level_num][y][x]
+        
+        if pixel_color == [0, 0, 0, 0]:
             return True
-        elif maps[self.level_num][y][x] == (0, 0, 0, 255):
+        elif pixel_color == [0, 0, 0, 255]:
             return False
-        elif maps[self.level_num][y][x] == (255, 0, 0, 255):
+        elif pixel_color == [255, 0, 0, 255]:
             return 'death'
         #Add level switching color
         

@@ -40,13 +40,33 @@ class Player(PhysicsEntity):
         self.status = 'standing'
 
     def move(self):
-        desired_x, desired_y = self.rect.centerx + (self.movement[1] - self.movement[0]) * self.speed, self.rect.centery #Boolean values are implicitly converted to 1 or 0
-        if self.collision_manager.allow_movement(desired_x, desired_y):
-            self.rect.center = (desired_x, desired_y)
+        desired_x, desired_y = self.rect.centerx, self.rect.centery #The position the player with no movement applied, will be modified if the player is moving
 
+        if self.movement[0] and not self.movement[1]: #If the player is moving left
+            desired_x, desired_y = self.rect.midleft[0] + (self.movement[1] - self.movement[0]) * self.speed, self.rect.midleft[1] #Boolean values are implicitly converted to 1 or 0
+        elif self.movement[1] and not self.movement[0]: #If the player is moving right
+            desired_x, desired_y = self.rect.midright[0] + (self.movement[1] - self.movement[0]) * self.speed, self.rect.midright[1]
+        
+        result = self.collision_manager.allow_movement(desired_x, desired_y)
+        if result:
+            if self.movement[0] and not self.movement[1]: self.rect.midleft = desired_x, desired_y #If the player is moving left
+            elif self.movement[1] and not self.movement[0]: self.rect.midright = desired_x, desired_y #If the player is moving right       
+        elif result == 'death':
+            print('Death')
+            #Add death logic here
+        
         self.apply_gravity()
         #Clamp the player rect to the screen rect to ensure that the player doesn't go off screen
         self.rect.clamp_ip(self.screen_rect)
+
+    def apply_gravity(self):
+        desired_x, desired_y = self.rect.midbottom[0], self.rect.midbottom[1] + GRAVITY_STRENGTH #The position the player would be in if gravity was applied
+        result = self.collision_manager.allow_movement(desired_x, desired_y)
+        if result:
+            self.rect.midbottom = (desired_x, desired_y)
+        elif result == 'death':
+            print('Death')
+            #Add death logic here
 
     def update_animation(self):
         self.animation_switching_delay -= 1

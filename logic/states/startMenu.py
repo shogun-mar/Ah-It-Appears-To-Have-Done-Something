@@ -7,9 +7,9 @@ def handle_start_menu_events(game, event):
             game.player.movement[0] = True
         elif event.key == pg.K_d or event.key == pg.K_RIGHT:
             game.player.movement[1] = True
-        elif event.key == pg.K_SPACE and game.player.velocity[1] == 0: #If the user presses space and the player is on the ground
-            pass
-            #game.player.velocity[1] = MAX_JUMP_SPEED #Set the player vertical velocity to the jump strength 
+        elif event.key == pg.K_SPACE and game.player.velocity[1] == BASE_GRAVITY_PULL: #If the user presses space and the player is on the ground
+            game.player.velocity[1] = MAX_JUMP_SPEED #Set the player vertical velocity to the jump strength 
+            game.player.is_jumping = True #Set the player to be jumping
 
     elif event.type == pg.KEYUP:
         if event.key == pg.K_a or event.key == pg.K_LEFT:
@@ -19,7 +19,6 @@ def handle_start_menu_events(game, event):
     
 
 def update_start_menu(game):
-    
     #Player
     game.player.move() #Move the player
     game.player.update_animation() #Update the player's animation

@@ -28,12 +28,15 @@ class Player(PhysicsEntity):
         self.standing_frames = self.load_animation_frames('graphics/assets/player/standing')
         self.running_left_frames = self.load_animation_frames('graphics/assets/player/running/left')
         self.running_right_frames = self.load_animation_frames('graphics/assets/player/running/right')
+        self.jumping_frames = self.load_animation_frames('graphics/assets/player/jumping')
 
         self.current_animation_frame = 0
         self.current_animation_list = self.standing_frames
         self.animation_switching_delay = PLAYER_ANIMATION_SWITCHING_DELAY
         
         self.collision_manager = PlayerCollisionManager(game.current_level_num)
+        self.gravity_pull_delay = PLAYER_GRAVITY_PULL_DELAY
+        self.is_jumping = False
         self.sprite = self.current_animation_list[self.current_animation_frame]
         self.rect = self.sprite.get_rect(midbottom = (50, 500))
 
@@ -84,43 +87,53 @@ class Player(PhysicsEntity):
         elif result == 'death':
             self.rect.midbottom = (50, 500)
         elif result == 'collision':
-            # Handle collision by stopping the jump
-            if self.velocity[1] > 0:  # If falling
-                self.velocity[1] = 0
-            elif self.velocity[1] < 0:  # If jumping
-                self.velocity[1] = 0
+            pass
 
         # Slow down the player's velocity (simulate friction)
         self.velocity[0] = max(0, self.velocity[0] - 1) if self.velocity[0] > 0 else min(0, self.velocity[0] + 1)
         self.velocity[1] = max(0, self.velocity[1] - 1) if self.velocity[1] > 0 else min(0, self.velocity[1] + 1)
 
     def apply_gravity(self):
-        desired_x, desired_y = self.rect.midbottom[0], self.rect.midbottom[1] + self.velocity[1]
-        result = self.collision_manager.allow_movement(desired_x, desired_y)
-        if result == 'allowed':
-            self.rect.midbottom = (desired_x, desired_y)
-            if self.velocity[1] <= MAX_FALL_SPEED:
-                self.velocity[1] += FALLLING_SPEED
-            else: self.velocity[1] = MAX_FALL_SPEED
+        self.gravity_pull_delay -= 1 #Decrease the delay
+        if self.gravity_pull_delay == 0: #If the delay has passed
+            self.gravity_pull_delay = PLAYER_GRAVITY_PULL_DELAY #Reset the delay
 
-        elif result == 'collision':
-            self.velocity[1] = BASE_GRAVITY_PULL #Reset the vertical velocity
-        elif result == 'death':
-            self.rect.midbottom = (50, 500)
+            # Apply gravity to vertical velocity
+            desired_x, desired_y = self.rect.midbottom[0], self.rect.midbottom[1] + self.velocity[1]
+            result = self.collision_manager.allow_movement(desired_x, desired_y)
+            if result == 'allowed':
+                self.rect.midbottom = (desired_x, desired_y)
+                if self.velocity[1] <= MAX_FALL_SPEED:
+                    self.velocity[1] += FALLLING_SPEED
+                else: self.velocity[1] = MAX_FALL_SPEED
+
+            elif result == 'collision':
+                self.velocity[1] = BASE_GRAVITY_PULL #Reset the vertical velocity
+                self.is_jumping = False
+                self.current_animation_frame = 0
+            elif result == 'death':
+                self.rect.midbottom = (50, 500)
+            
 
     def update_animation(self):
-        #print(self.movement)
 
         # Animation list switching (need extra conditions to prevent the current frame counter from resetting when the animation is already the same)
         if self.movement[0] and not self.movement[1]:  # Moving left
             if self.current_animation_list != self.running_left_frames:
+                print("Switching to left running")
                 self.current_animation_list = self.running_left_frames  # Set the player's animation to the left running animation
                 self.current_animation_frame = 0  # Reset the animation frame to the first frame
         elif self.movement[1] and not self.movement[0]:  # Moving right
             if self.current_animation_list != self.running_right_frames:
+                print("Switching to right running")
                 self.current_animation_list = self.running_right_frames  # Set the player's animation to the right running animation
                 self.current_animation_frame = 0  # Reset the animation frame to the first frame
-        elif (not self.movement[0] and not self.movement[1]) or (self.movement[0] and self.movement[1]):  # All inputs or none pressed
+        elif self.is_jumping and self.current_animation_list != self.jumping_frames: #If the player is jumping
+            print("Switching to jumping")
+            self.current_animation_list = self.jumping_frames #Set the player's animation to the jumping animation
+            self.current_animation_frame = 0 #Reset the animation frame to the first frame
+        elif (not self.movement[0] and not self.movement[1]) or (self.movement[0] and self.movement[1]) and (self.is_jumping == False):  # All inputs or none pressed and the player is not jumping
+            print("Switching to standing")
             if self.current_animation_list != self.standing_frames:
                 self.current_animation_list = self.standing_frames  # Set the player's animation to the idle animation
                 self.current_animation_frame = 0  # Reset the animation frame to the first frame
@@ -143,8 +156,8 @@ class Player(PhysicsEntity):
     def load_animation_frames(self, path): #Function that returns an array containing all the frames of an animation loaded as pygame surfaces
         frames_surfs = []
         frames = sorted(os.listdir(path))
-        for frame in frames:
-            frame_path = os.path.join(path, frame)
-            frames_surfs.append(pg.image.load(frame_path).convert_alpha())
+        for frame_path in frames:
+            final_path = os.path.join(path, frame_path)
+            frames_surfs.append(pg.image.load(final_path).convert_alpha())
         
         return frames_surfs

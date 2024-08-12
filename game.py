@@ -45,6 +45,8 @@ class Game:
                 handle_start_menu_events(self, event)
             
     def update(self):
+        pg.display.set_caption(f"FPS: {int(self.clock.get_fps())}") #Set the window title to show the FPS
+
         if self.gameState == GameState.START_MENU:
             update_start_menu(self)
 
@@ -53,7 +55,7 @@ class Game:
             render_start_menu(self)
 
         pg.display.flip()
-        self.clock.tick(60)
+        self.clock.tick(MAX_FPS)
 
     def init_assets(self):
         #Init start menu

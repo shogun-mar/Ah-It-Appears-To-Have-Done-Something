@@ -22,7 +22,8 @@ class PhysicsEntity:
 
     def apply_gravity(self):
         desired_x, desired_y = self.rect.midbottom[0], self.rect.midbottom[1] + GRAVITY_STRENGTH #The position the player would be in if gravity was applied
-        if self.collision_manager.allow_movement(desired_x, desired_y):
+        result = self.collision_manager.allow_movement(desired_x, desired_y)
+        if result == 'allowed':
             self.rect.midbottom = (desired_x, desired_y)
 
 class Player(PhysicsEntity):
@@ -31,42 +32,86 @@ class Player(PhysicsEntity):
 
         #Animations (lists that keep all the frames of the animations)
         self.standing_frames = self.load_animation_frames('graphics/assets/player/standing')
-        
+    
         self.current_animation_frame = 0
         self.animation_switching_delay = PLAYER_ANIMATION_SWITCHING_DELAY
+        
         self.collision_manager = PlayerCollisionManager(game.current_level_num)
         self.sprite = self.standing_frames[self.current_animation_frame]
         self.rect = self.sprite.get_rect(midbottom = (50, 500))
-        self.status = 'standing'
 
     def move(self):
-        desired_x, desired_y = self.rect.centerx, self.rect.centery #The position the player with no movement applied, will be modified if the player is moving
+        # Initialize desired position with the player's current position
+        desired_x, desired_y = self.rect.centerx, self.rect.centery
 
-        if self.movement[0] and not self.movement[1]: #If the player is moving left
-            desired_x, desired_y = self.rect.midleft[0] + (self.movement[1] - self.movement[0]) * self.speed, self.rect.midleft[1] #Boolean values are implicitly converted to 1 or 0
-        elif self.movement[1] and not self.movement[0]: #If the player is moving right
-            desired_x, desired_y = self.rect.midright[0] + (self.movement[1] - self.movement[0]) * self.speed, self.rect.midright[1]
-        
+        # Update desired position based on player movement
+        if self.movement[0] and not self.movement[1]:  # Moving left
+            desired_x = self.rect.midleft[0] - self.speed
+            desired_y = self.rect.midleft[1]
+        elif self.movement[1] and not self.movement[0]:  # Moving right
+            desired_x = self.rect.midright[0] + self.speed
+            desired_y = self.rect.midright[1]
+
+        # Check if movement is allowed
         result = self.collision_manager.allow_movement(desired_x, desired_y)
-        if result:
-            if self.movement[0] and not self.movement[1]: self.rect.midleft = desired_x, desired_y #If the player is moving left
-            elif self.movement[1] and not self.movement[0]: self.rect.midright = desired_x, desired_y #If the player is moving right       
+        if result == 'allowed':
+            if self.movement[0] and not self.movement[1]:  #Update the rect position based on the movement
+                self.rect.midleft = desired_x, desired_y
+            elif self.movement[1] and not self.movement[0]:  # Update the rect position based on the movement
+                self.rect.midright = desired_x, desired_y
         elif result == 'death':
             print('Death')
-            #Add death logic here
-        
-        self.apply_gravity()
+            # Add death logic here
+
+        self.apply_inertia() #Apply movement caused by inertia
+        self.apply_gravity() #Apply gravity
+
         #Clamp the player rect to the screen rect to ensure that the player doesn't go off screen
         self.rect.clamp_ip(self.screen_rect)
 
-    def apply_gravity(self):
-        desired_x, desired_y = self.rect.midbottom[0], self.rect.midbottom[1] + GRAVITY_STRENGTH #The position the player would be in if gravity was applied
+    def apply_inertia(self):
+        # Apply gravity to vertical velocity
+        self.velocity[1] += GRAVITY_STRENGTH
+
+        # Clamp the velocity to a maximum value
+        self.velocity[0] = max(min(self.velocity[0], MAX_SPEED), -MAX_SPEED)
+        self.velocity[1] = max(min(self.velocity[1], MAX_FALL_SPEED), -MAX_JUMP_SPEED)
+
+        # Calculate desired position based on velocity
+        desired_x = self.rect.midtop[0] + self.velocity[0]
+        desired_y = self.rect.midtop[1] + self.velocity[1]
+
+        # Check for collisions and update position
         result = self.collision_manager.allow_movement(desired_x, desired_y)
-        if result:
+        if result == 'allowed':
+            self.rect.midtop = (desired_x, desired_y)
+        elif result == 'death':
+            print('Death')
+            # Add death logic here
+        elif result == 'collision':
+            # Handle collision by stopping the jump
+            if self.velocity[1] > 0:  # If falling
+                self.velocity[1] = 0
+            elif self.velocity[1] < 0:  # If jumping
+                self.velocity[1] = 0
+
+        # Slow down the player's velocity (simulate friction)
+        self.velocity[0] = max(0, self.velocity[0] - 1) if self.velocity[0] > 0 else min(0, self.velocity[0] + 1)
+        self.velocity[1] = max(0, self.velocity[1] - 1) if self.velocity[1] > 0 else min(0, self.velocity[1] + 1)
+
+    def apply_gravity(self):
+        desired_x, desired_y = self.rect.midbottom[0], self.rect.midbottom[1] + self.velocity[1]
+        result = self.collision_manager.allow_movement(desired_x, desired_y)
+        if result == 'allowed':
             self.rect.midbottom = (desired_x, desired_y)
+        elif result == 'collision':
+            self.velocity[1] = 0 #Reset the vertical velocity
         elif result == 'death':
             print('Death')
             #Add death logic here
+
+        # Slow down the player's vertical velocity
+        self.velocity[1] = max(0, self.velocity[1] - 1) if self.velocity[1] > 0 else min(0, self.velocity[1] + 1)
 
     def update_animation(self):
         self.animation_switching_delay -= 1

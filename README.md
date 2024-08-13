@@ -1,4 +1,4 @@
-# Ah-It-Appears-To-Have-Done-Something
+## Ah-It-Appears-To-Have-Done-Something
 
 Title inspired by the meme of the same name (https://youtu.be/bzmIitaLMfA).
 
@@ -13,3 +13,9 @@ Knowing this I structured my game in a plethora of levels with varying mechanics
 
 
 Solutions will be available in a separate file to avoid spoilers.
+
+#Assets credits
+
+Player spritesheet: https://dani-maccari.itch.io/player-animations-tim  
+Font: https://poppyworks.itch.io/silver  
+Spike sprite: https://omniclause.itch.io/spikes  

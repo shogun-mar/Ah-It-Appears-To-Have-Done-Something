@@ -24,20 +24,19 @@ class Player(PhysicsEntity):
     def __init__(self, game):
         super().__init__(game, speed = PLAYER_SPEED)
 
-        #Animations (lists that keep all the frames of the animations)
-        self.standing_frames = self.load_animation_frames('graphics/assets/player/standing')
-        self.running_left_frames = self.load_animation_frames('graphics/assets/player/running/left')
-        self.running_right_frames = self.load_animation_frames('graphics/assets/player/running/right')
-        self.jumping_frames = self.load_animation_frames('graphics/assets/player/jumping')
-
+        #Variables to keep track of animations
+        standing_frames = self.load_animation_frames('graphics/assets/player/standing')
+        running_left_frames = self.load_animation_frames('graphics/assets/player/running/left')
+        running_right_frames = self.load_animation_frames('graphics/assets/player/running/right')
+        jumping_frames = self.load_animation_frames('graphics/assets/player/jumping')
+        self.animations = [standing_frames, running_left_frames, running_right_frames, jumping_frames]
+        self.current_animation = 0
         self.current_animation_frame = 0
-        self.current_animation_list = self.standing_frames
         self.animation_switching_delay = PLAYER_ANIMATION_SWITCHING_DELAY
         
         self.collision_manager = PlayerCollisionManager(game.current_level_num)
         self.gravity_pull_delay = PLAYER_GRAVITY_PULL_DELAY
-        self.is_jumping = False
-        self.sprite = self.current_animation_list[self.current_animation_frame]
+        self.sprite = self.animations[self.current_animation][self.current_animation_frame]
         self.rect = self.sprite.get_rect(midbottom = (50, 500))
 
     def move(self):
@@ -60,7 +59,7 @@ class Player(PhysicsEntity):
             elif self.movement[1] and not self.movement[0]:  # Update the rect position based on the movement
                 self.rect.midright = desired_x, desired_y
         elif result == 'death':
-            self.rect.midbottom = (50, 500)
+            self.reset_position()
 
         #if self.velocity[0] != 0 and self.velocity[1] > 0: self.apply_inertia() #Apply movement caused by inertia
         self.apply_gravity() #Apply gravity if player is standing or falling
@@ -84,10 +83,11 @@ class Player(PhysicsEntity):
         result = self.collision_manager.allow_movement(desired_x, desired_y)
         if result == 'allowed':
             self.rect.midtop = (desired_x, desired_y)
-        elif result == 'death':
-            self.rect.midbottom = (50, 500)
         elif result == 'collision':
-            pass
+            self.current_animation = 0 #Set the current animation to standing
+            self.current_animation_frame = 0 #Reset the animation frame
+        elif result == 'death':
+            self.reset_position()
 
         # Slow down the player's velocity (simulate friction)
         self.velocity[0] = max(0, self.velocity[0] - 1) if self.velocity[0] > 0 else min(0, self.velocity[0] + 1)
@@ -109,49 +109,44 @@ class Player(PhysicsEntity):
 
             elif result == 'collision':
                 self.velocity[1] = BASE_GRAVITY_PULL #Reset the vertical velocity
-                self.is_jumping = False
-                self.current_animation_frame = 0
+                self.current_animation = 0 #Set the current animation to standing
+                self.current_animation_frame = 0 #Reset the animation frame
             elif result == 'death':
-                self.rect.midbottom = (50, 500)
+                self.reset_position()
             
 
     def update_animation(self):
+        #print(f"Current_animation : {self.get_current_animation_name()} and frame : {self.current_animation_frame}")
 
-        # Animation list switching (need extra conditions to prevent the current frame counter from resetting when the animation is already the same)
-        if self.movement[0] and not self.movement[1]:  # Moving left
-            if self.current_animation_list != self.running_left_frames:
-                print("Switching to left running")
-                self.current_animation_list = self.running_left_frames  # Set the player's animation to the left running animation
+        # Check and switch animation based on player state
+        if self.velocity[0] == 0 and self.velocity[1] == 0:  # Standing still
+            if self.current_animation != 0:
+                self.current_animation = 0
                 self.current_animation_frame = 0  # Reset the animation frame to the first frame
-        elif self.movement[1] and not self.movement[0]:  # Moving right
-            if self.current_animation_list != self.running_right_frames:
-                print("Switching to right running")
-                self.current_animation_list = self.running_right_frames  # Set the player's animation to the right running animation
+        elif self.movement == [True, False]:  # Moving left
+            if self.current_animation != 1:
+                self.current_animation = 1
                 self.current_animation_frame = 0  # Reset the animation frame to the first frame
-        elif self.is_jumping and self.current_animation_list != self.jumping_frames: #If the player is jumping
-            print("Switching to jumping")
-            self.current_animation_list = self.jumping_frames #Set the player's animation to the jumping animation
-            self.current_animation_frame = 0 #Reset the animation frame to the first frame
-        elif (not self.movement[0] and not self.movement[1]) or (self.movement[0] and self.movement[1]) and (self.is_jumping == False):  # All inputs or none pressed and the player is not jumping
-            print("Switching to standing")
-            if self.current_animation_list != self.standing_frames:
-                self.current_animation_list = self.standing_frames  # Set the player's animation to the idle animation
+        elif self.movement == [False, True]:  # Moving right
+            if self.current_animation != 2:
+                self.current_animation = 2
+                self.current_animation_frame = 0  # Reset the animation frame to the first frame
+        elif self.velocity[1] > BASE_GRAVITY_PULL:  # Jumping or falling
+            if self.current_animation != 3:
+                self.current_animation = 3
                 self.current_animation_frame = 0  # Reset the animation frame to the first frame
 
-        #Animation frame switching
+        # Animation frame switching
         self.animation_switching_delay -= 1
-        if self.animation_switching_delay == 0:
-            self.animation_switching_delay = PLAYER_ANIMATION_SWITCHING_DELAY #Reset the delay
-            #Switch the animation frame
-            if self.current_animation_frame <= 4:
-                self.current_animation_frame += 1
-            else:
-                self.current_animation_frame = 0
-            try:
-                self.sprite = self.current_animation_list[self.current_animation_frame]
-            except IndexError:
-                self.current_animation_frame = 0
-                self.sprite = self.current_animation_list[self.current_animation_frame]
+        if self.animation_switching_delay == 0: # If the delay has passed
+            self.animation_switching_delay = PLAYER_ANIMATION_SWITCHING_DELAY  # Reset the delay
+
+            # Increment the animation frame
+            if self.current_animation_frame < 3: self.current_animation_frame += 1
+            else: self.current_animation_frame = 0
+
+            # Update the sprite to the new frame
+            self.sprite = self.animations[self.current_animation][self.current_animation_frame]
 
     def load_animation_frames(self, path): #Function that returns an array containing all the frames of an animation loaded as pygame surfaces
         frames_surfs = []
@@ -161,3 +156,15 @@ class Player(PhysicsEntity):
             frames_surfs.append(pg.image.load(final_path).convert_alpha())
         
         return frames_surfs
+    
+    def reset_position(self):
+        self.current_animation = 0
+        self.current_animation_frame = 0
+        self.rect.midbottom = (50, 500)
+
+    def get_current_animation_name(self):
+        if self.current_animation == 0: return 'standing'
+        elif self.current_animation == 1: return 'running left'
+        elif self.current_animation == 2: return 'running right'
+        elif self.current_animation == 3: return 'jumping'
+        else: return 'unknown'

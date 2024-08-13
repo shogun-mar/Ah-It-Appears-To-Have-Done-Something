@@ -8,8 +8,7 @@ def handle_start_menu_events(game, event):
         elif event.key == pg.K_d or event.key == pg.K_RIGHT:
             game.player.movement[1] = True
         elif event.key == pg.K_SPACE and game.player.velocity[1] == BASE_GRAVITY_PULL: #If the user presses space and the player is on the ground
-            game.player.velocity[1] = MAX_JUMP_SPEED #Set the player vertical velocity to the jump strength 
-            game.player.is_jumping = True #Set the player to be jumping
+            game.player.velocity[1] = MAX_JUMP_SPEED #Set the player vertical velocity to the jump strength (negative value because in pygame up is negative)
 
     elif event.type == pg.KEYUP:
         if event.key == pg.K_a or event.key == pg.K_LEFT:

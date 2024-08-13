@@ -16,6 +16,6 @@ Solutions will be available in a separate file to avoid spoilers.
 
 #Assets credits
 
-Player spritesheet: https://dani-maccari.itch.io/player-animations-tim
-Font: https://poppyworks.itch.io/silver
-Spike sprite: https://omniclause.itch.io/spikes 
+Player spritesheet: https://dani-maccari.itch.io/player-animations-tim  
+Font: https://poppyworks.itch.io/silver  
+Spike sprite: https://omniclause.itch.io/spikes  

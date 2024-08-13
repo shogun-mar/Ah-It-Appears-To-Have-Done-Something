@@ -25,18 +25,17 @@ class Player(PhysicsEntity):
         super().__init__(game, speed = PLAYER_SPEED)
 
         #Variables to keep track of animations
-        standing_frames = self.load_animation_frames('graphics/assets/player/standing')
-        running_left_frames = self.load_animation_frames('graphics/assets/player/running/left')
-        running_right_frames = self.load_animation_frames('graphics/assets/player/running/right')
-        jumping_frames = self.load_animation_frames('graphics/assets/player/jumping')
-        self.animations = [standing_frames, running_left_frames, running_right_frames, jumping_frames]
-        self.current_animation = 0
+        self.standing_frames = self.load_animation_frames('graphics/assets/player/standing')
+        self.running_left_frames = self.load_animation_frames('graphics/assets/player/running/left')
+        self.running_right_frames = self.load_animation_frames('graphics/assets/player/running/right')
+        self.jumping_frames = self.load_animation_frames('graphics/assets/player/jumping')
         self.current_animation_frame = 0
         self.animation_switching_delay = PLAYER_ANIMATION_SWITCHING_DELAY
         
         self.collision_manager = PlayerCollisionManager(game.current_level_num)
         self.gravity_pull_delay = PLAYER_GRAVITY_PULL_DELAY
-        self.sprite = self.animations[self.current_animation][self.current_animation_frame]
+        self.status = 'standing' #Variable to keep track of the player's status (standing, running left, running right, airborne)
+        self.sprite = self.standing_frames[self.current_animation_frame]
         self.rect = self.sprite.get_rect(midbottom = (50, 500))
 
     def move(self):
@@ -68,9 +67,6 @@ class Player(PhysicsEntity):
         self.rect.clamp_ip(self.screen_rect)
 
     def apply_inertia(self):
-        # Apply gravity to vertical velocity
-        #self.velocity[1] += GRAVITY_STRENGTH
-
         # Clamp the velocity to a maximum value
         self.velocity[0] = max(min(self.velocity[0], MAX_SPEED), -MAX_SPEED)
         self.velocity[1] = max(min(self.velocity[1], MAX_FALL_SPEED), -MAX_JUMP_SPEED)
@@ -102,6 +98,7 @@ class Player(PhysicsEntity):
             desired_x, desired_y = self.rect.midbottom[0], self.rect.midbottom[1] + self.velocity[1]
             result = self.collision_manager.allow_movement(desired_x, desired_y)
             if result == 'allowed':
+                self.status = 'airborne'
                 self.rect.midbottom = (desired_x, desired_y)
                 if self.velocity[1] <= MAX_FALL_SPEED:
                     self.velocity[1] += FALLLING_SPEED
@@ -111,34 +108,15 @@ class Player(PhysicsEntity):
                 self.velocity[1] = BASE_GRAVITY_PULL #Reset the vertical velocity
                 self.current_animation = 0 #Set the current animation to standing
                 self.current_animation_frame = 0 #Reset the animation frame
+                self.status = 'standing'
             elif result == 'death':
                 self.reset_position()
             
 
     def update_animation(self):
-        #print(f"Current_animation : {self.get_current_animation_name()} and frame : {self.current_animation_frame}")
-
-        # Check and switch animation based on player state
-        if self.velocity[0] == 0 and self.velocity[1] == 0:  # Standing still
-            if self.current_animation != 0:
-                self.current_animation = 0
-                self.current_animation_frame = 0  # Reset the animation frame to the first frame
-        elif self.movement == [True, False]:  # Moving left
-            if self.current_animation != 1:
-                self.current_animation = 1
-                self.current_animation_frame = 0  # Reset the animation frame to the first frame
-        elif self.movement == [False, True]:  # Moving right
-            if self.current_animation != 2:
-                self.current_animation = 2
-                self.current_animation_frame = 0  # Reset the animation frame to the first frame
-        elif self.velocity[1] > BASE_GRAVITY_PULL:  # Jumping or falling
-            if self.current_animation != 3:
-                self.current_animation = 3
-                self.current_animation_frame = 0  # Reset the animation frame to the first frame
-
         # Animation frame switching
         self.animation_switching_delay -= 1
-        if self.animation_switching_delay == 0: # If the delay has passed
+        if self.animation_switching_delay <= 0: # If the delay has passed
             self.animation_switching_delay = PLAYER_ANIMATION_SWITCHING_DELAY  # Reset the delay
 
             # Increment the animation frame
@@ -146,7 +124,32 @@ class Player(PhysicsEntity):
             else: self.current_animation_frame = 0
 
             # Update the sprite to the new frame
-            self.sprite = self.animations[self.current_animation][self.current_animation_frame]
+            if self.status == 'running left': self.running_left_frames[self.current_animation_frame]
+            elif self.status == 'running right': self.running_right_frames[self.current_animation_frame]
+            elif self.status == 'jumping': self.jumping_frames[self.current_animation_frame]
+            else: self.sprite = self.standing_frames[self.current_animation_frame]
+
+    def switch_animation(self, event):
+        
+        # Check and switch status based on input
+        key = event.key
+
+        if event == pg.KEYDOWN:
+            if key == pg.K_a or key == pg.K_LEFT:
+                self.status = 'running left'
+                self.current_animation_frame = -1
+            elif key == pg.K_d or key == pg.K_RIGHT:
+                self.status = 'running right'
+                self.current_animation_frame = -1
+            elif key == pg.K_SPACE and self.status != 'airborne':
+                self.status = 'jumping'
+                self.current_animation_frame = -1
+
+        elif event == pg.KEYUP:
+            if key == pg.K_a or key == pg.K_LEFT or key == pg.K_d or key == pg.K_RIGHT:
+                self.status = 'standing'
+                self.current_animation_frame = -1
+            
 
     def load_animation_frames(self, path): #Function that returns an array containing all the frames of an animation loaded as pygame surfaces
         frames_surfs = []

@@ -5,20 +5,21 @@ def handle_start_menu_events(game, event):
     if event.type == pg.KEYDOWN:
         if event.key == pg.K_a or event.key == pg.K_LEFT:
             game.player.movement[0] = True
+            game.player.status = 'left'
         elif event.key == pg.K_d or event.key == pg.K_RIGHT:
             game.player.movement[1] = True
+            game.player.status = 'right'
         elif event.key == pg.K_SPACE and game.player.velocity[1] == BASE_GRAVITY_PULL: #If the user presses space and the player is on the ground
             game.player.velocity[1] = MAX_JUMP_SPEED #Set the player vertical velocity to the jump strength (negative value because in pygame up is negative)
-
-        game.player.switch_animation(event) #Switch the player's animation
+            game.player.status = 'airborne'
     
     elif event.type == pg.KEYUP:
         if event.key == pg.K_a or event.key == pg.K_LEFT:
             game.player.movement[0] = False
+            game.player.status = 'standing'
         elif event.key == pg.K_d or event.key == pg.K_RIGHT:
             game.player.movement[1] = False
-
-        game.player.switch_animation(event) #Switch the player's animation
+            game.player.status = 'standing'
     
 def update_start_menu(game):
     #Player

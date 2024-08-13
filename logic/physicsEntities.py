@@ -4,15 +4,22 @@ from settings import *
 from logic.collisionManager import CollisionManager, PlayerCollisionManager
 
 class PhysicsEntity:
-    def __init__(self, game, speed, sprite = None, rect = None,):
+    def __init__(self, game, speed, sprite = None, rect = None):
+        
+        #Graphical representation of the entity
         self.sprite = sprite
         self.rect = rect
+        
+        #Physics variables
         self.velocity = [0, BASE_GRAVITY_PULL] #The velocity of the entity in the x and y axis
         self.movement = [False, False]
-        self.game = game
         self.screen_rect = game.screen_rect
-        self.collision_manager = CollisionManager(game.current_level_num)
+        self.collision_manager = CollisionManager(game.gameState.value)
         self.speed = speed
+    
+        #Miscellaneous variables
+        self.game = game
+        self.level_num = game.gameState.value #The current level number
 
     def move(self):
         self.apply_gravity()
@@ -34,9 +41,15 @@ class Player(PhysicsEntity):
         'standing': self.load_animation_frames('graphics/assets/player/standing')
         }
         
-        self.collision_manager = PlayerCollisionManager(game.current_level_num) #Create a collision manager for the player
+        #Variables to keep track of the player's physics
+        self.collision_manager = PlayerCollisionManager(self.level_num) #Create a collision manager for the player
         self.gravity_delay_counter = PLAYER_GRAVITY_PULL_DELAY #Counter to delay the gravity pull
         self.status = 'standing' #Variable to keep track of the player's status (standing, left, right, airborne)
+        #Miscellaneous
+        self.beginning_of_jump_charge = 0 #Variable to keep track of when the player started charging the jump
+        self.jump_charge_time = 0 #Variable to keep track of how long the player has been charging the jump
+
+        #Variables to keep track of the player's graphical representation
         self.sprite = self.frame_mapping.get(self.status)[self.current_animation_frame] #Initial sprite
         self.rect = self.sprite.get_rect(midbottom = (50, 400)) #Initial position
 
@@ -52,7 +65,11 @@ class Player(PhysicsEntity):
             desired_x = self.rect.midright[0] + self.speed
             desired_y = self.rect.midright[1]
 
-        # Check if movement is allowed
+        # Clamp desired_x and desired_y to the screen dimensions to avoid IndexErrors and to keep the player on screen
+        desired_x = max(0, min(desired_x, SCREEN_WIDTH - 1))
+        desired_y = max(0, min(desired_y, SCREEN_HEIGHT - 1))
+
+        #Check if movement is possible
         result = self.collision_manager.allow_movement(desired_x, desired_y)
         if result == 'allowed':
             if self.movement[0] and not self.movement[1]:  #Update the rect position based on the movement
@@ -63,15 +80,12 @@ class Player(PhysicsEntity):
             self.reset_position()
 
         #if self.velocity[0] != 0 and self.velocity[1] > 0: self.apply_inertia() #Apply movement caused by inertia
-        self.apply_gravity() #Apply gravity
-
-        #Clamp the player rect to the screen rect to ensure that the player doesn't go off screen
-        self.rect.clamp_ip(self.screen_rect)
+        self.apply_gravity() #Apply movement caused by gravity
 
     def apply_inertia(self):
         # Clamp the velocity to a maximum value
-        self.velocity[0] = max(min(self.velocity[0], MAX_SPEED), -MAX_SPEED)
-        self.velocity[1] = max(min(self.velocity[1], MAX_FALL_SPEED), -MAX_JUMP_SPEED)
+        self.velocity[0] = max(min(self.velocity[0], MAX_ENTITY_SPEED), -MAX_ENTITY_SPEED)
+        self.velocity[1] = max(min(self.velocity[1], MAX_FALL_SPEED), -BASE_JUMP_SPEED)
 
         # Calculate desired position based on velocity
         desired_x = self.rect.midtop[0] + self.velocity[0]
@@ -114,7 +128,22 @@ class Player(PhysicsEntity):
             elif result == 'death':
                 self.reset_position()
 
+    def secondary_movement(self, pressed_keys):
+
+        # Check if the player is charging a jump
+        if pressed_keys[pg.K_SPACE]: 
+            self.jump_charge_time = pg.time.get_ticks() - self.beginning_of_jump_charge #If the user releases the space key, calculate for how much time the player has been charging the jump
+        elif self.jump_charge_time > 0 and self.velocity[1] == BASE_GRAVITY_PULL: #If the player has been charging the jump and is not airborne
+            self.velocity[1] = min(BASE_JUMP_SPEED - (self.jump_charge_time // 1000 * 10), MAX_JUMP_SPEED)
+            self.jump_charge_time = 0 #Reset the jump charge time
+
     def update_animation(self):
+
+        # Update the player's status based on the movement
+        if self.movement[0] and not self.movement[1]: self.status = 'left'
+        elif self.movement[1] and not self.movement[0]: self.status = 'right'
+        elif self.velocity[1] != BASE_GRAVITY_PULL: self.status = 'airborne'
+        elif ((self.movement == [False, False]) or (self.movement == [True, True])) and self.status != 'airborne': self.status = 'standing'
         
         # Animation frame switching
         self.animation_switching_delay -= 1
@@ -124,7 +153,6 @@ class Player(PhysicsEntity):
             # Update the current animation frame
             if self.current_animation_frame < len(self.frame_mapping[self.status]) - 1: self.current_animation_frame += 1
             else: self.current_animation_frame = 0
-
             # Update the sprite based on the current animation frame
             self.sprite = self.frame_mapping[self.status][self.current_animation_frame]
 
@@ -138,5 +166,5 @@ class Player(PhysicsEntity):
         return frames_surfs
     
     def reset_position(self):
-        self.current_animation_frame = 0
-        self.rect.midbottom = (50, 400)
+        self.current_animation_frame = -1 #Reset the animation frame counter
+        self.rect.midbottom = INITIAL_COORDS_PLAYER[self.level_num] #Reset the player's position to the initial values

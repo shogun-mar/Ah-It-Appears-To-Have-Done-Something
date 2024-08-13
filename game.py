@@ -20,7 +20,6 @@ class Game:
 
         #Game variables
         self.gameState = GameState.START_MENU
-        self.current_level_num = 0
         self.screen_rect=self.screen.get_rect()
 
         #Game objects
@@ -45,7 +44,7 @@ class Game:
                 handle_start_menu_events(self, event)
             
     def update(self):
-        pg.display.set_caption(f"FPS: {int(self.clock.get_fps())}") #Set the window title to show the FPS
+        pg.display.set_caption(f" Ah It Appears To Have Done Something - FPS: {int(self.clock.get_fps())}") #Set the window title to show the FPS
 
         if self.gameState == GameState.START_MENU:
             update_start_menu(self)
@@ -65,6 +64,7 @@ class Game:
 
         self.start_button_surf = pg.image.load("graphics/assets/start menu/start.png").convert_alpha()
         self.start_button_rect = self.start_button_surf.get_rect(midtop = (SCREEN_WIDTH // 2, self.logo_rect.midbottom[1] + 50))
+        print(self.start_button_rect.topleft)
 
         self.start_menu_ground_surf = pg.image.load("graphics/assets/start menu/ground.png").convert_alpha()
         self.start_menu_ground_rect = self.start_menu_ground_surf.get_rect(bottomleft = (0, SCREEN_HEIGHT))

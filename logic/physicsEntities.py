@@ -4,7 +4,7 @@ from settings import *
 from logic.collisionManager import CollisionManager, PlayerCollisionManager
 
 class PhysicsEntity:
-    def __init__(self, game, mass, speed, sprite = None, rect = None):
+    def __init__(self, game, mass, speed = 1, sprite = None, rect = None):
         
         #Graphical representation of the entity
         self.sprite = sprite
@@ -29,7 +29,7 @@ class PhysicsEntity:
         self.rect.clamp_ip(self.screen_rect)
 
     def apply_gravity(self):
-        desired_x, desired_y = self.rect.bottomleft[0], self.rect.bottomleft[1] + self.velocity[1]
+        desired_x, desired_y = self.rect.midbottom[0], self.rect.midbottom[1] + self.velocity[1]
         result = self.collision_manager.allow_movement(desired_x, desired_y)
 
         if result == 'allowed':

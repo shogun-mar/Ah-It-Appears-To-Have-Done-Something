@@ -15,6 +15,7 @@ class Game:
         self.screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pg.display.set_caption("Ah It Appears To Have Done Something")
         pg.display.set_icon(pg.image.load("graphics/loophole_icon.jpg"))
+        pg.mouse.set_visible(False) #Hide the mouse cursor
         
         #Clock and time objects
         self.clock = pg.time.Clock()
@@ -25,6 +26,7 @@ class Game:
 
         #Game objects
         self.player = Player(self)
+        self.entities = []
 
         #Init assets
         self.init_assets()
@@ -71,6 +73,8 @@ class Game:
 
         self.start_menu_ground_surf = pg.image.load("graphics/assets/start menu/ground.png").convert_alpha()
         self.start_menu_ground_rect = self.start_menu_ground_surf.get_rect(bottomleft = (0, SCREEN_HEIGHT))
+
+        self.cursor_surf = pg.image.load("graphics/assets/start menu/cursor.png").convert_alpha()
 
 if __name__ == "__main__":
     Game().run()

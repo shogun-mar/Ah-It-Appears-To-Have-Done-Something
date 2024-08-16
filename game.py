@@ -62,7 +62,9 @@ class Game:
         self.logo_surf = self.logo_font.render("Ah It Appears To Have Done Something", True, 'black')
         self.logo_rect = self.logo_surf.get_rect(midbottom = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4))
 
-        self.start_button_surf = pg.image.load("graphics/assets/start menu/start.png").convert_alpha()
+        self.start_button_surf_original = pg.image.load("graphics/assets/start menu/start.png").convert_alpha()
+        self.start_button_surf = self.start_button_surf_original.copy()
+        self.broken_start_button_surfs = [pg.image.load(f"graphics/assets/start menu/broken_start{i}.png").convert_alpha() for i in range(1, 4)]
         self.start_button_rect = self.start_button_surf.get_rect(midtop = (SCREEN_WIDTH // 2, self.logo_rect.midbottom[1] + 50))
 
         self.start_menu_ground_surf = pg.image.load("graphics/assets/start menu/ground.png").convert_alpha()

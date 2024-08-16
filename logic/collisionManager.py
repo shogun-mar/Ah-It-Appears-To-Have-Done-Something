@@ -22,9 +22,9 @@ class CollisionManager:
         pixel_color = maps[self.level_num][y][x]
 
         if pixel_color[-1] == 0:
-            return True
+            return 'allowed'
         elif pixel_color == [0, 0, 0, 255]:
-            return False
+            return 'collision'
 
 class PlayerCollisionManager(CollisionManager):
     def __init__(self, level_num):

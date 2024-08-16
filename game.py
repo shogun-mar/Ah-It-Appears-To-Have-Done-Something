@@ -1,5 +1,6 @@
-import pygame as pg
-
+import contextlib
+with contextlib.redirect_stdout(None): #Suppress pygame welcome message
+    import pygame as pg
 from logic.states.gameState import GameState
 from logic.states.startMenu import handle_start_menu_events, update_start_menu, render_start_menu
 from logic.physicsEntities import Player
@@ -62,10 +63,11 @@ class Game:
         self.logo_surf = self.logo_font.render("Ah It Appears To Have Done Something", True, 'black')
         self.logo_rect = self.logo_surf.get_rect(midbottom = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4))
 
-        self.start_button_surf_original = pg.image.load("graphics/assets/start menu/start.png").convert_alpha()
-        self.start_button_surf = self.start_button_surf_original.copy()
-        self.broken_start_button_surfs = [pg.image.load(f"graphics/assets/start menu/broken_start{i}.png").convert_alpha() for i in range(1, 4)]
-        self.start_button_rect = self.start_button_surf.get_rect(midtop = (SCREEN_WIDTH // 2, self.logo_rect.midbottom[1] + 50))
+        self.level_button_surf = pg.image.load("graphics/assets/start menu/level.png").convert_alpha()
+        self.level_button_rect = self.level_button_surf.get_rect(topleft = (100, self.logo_rect.midbottom[1] + 50))
+
+        self.start_button_surf = pg.image.load("graphics/assets/start menu/start.png").convert_alpha()
+        self.start_button_rect = self.start_button_surf.get_rect(topleft = (498, self.logo_rect.midbottom[1] + 50))
 
         self.start_menu_ground_surf = pg.image.load("graphics/assets/start menu/ground.png").convert_alpha()
         self.start_menu_ground_rect = self.start_menu_ground_surf.get_rect(bottomleft = (0, SCREEN_HEIGHT))

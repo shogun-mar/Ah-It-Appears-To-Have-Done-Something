@@ -4,14 +4,15 @@ from settings import *
 from logic.collisionManager import CollisionManager, PlayerCollisionManager
 
 class PhysicsEntity:
-    def __init__(self, game, speed, sprite = None, rect = None):
+    def __init__(self, game, mass, speed, sprite = None, rect = None):
         
         #Graphical representation of the entity
         self.sprite = sprite
         self.rect = rect
         
         #Physics variables
-        self.velocity = [0, BASE_GRAVITY_PULL] #The velocity of the entity in the x and y axis
+        self.mass = mass #The mass of the entity
+        self.velocity = [0, BASE_GRAVITY_PULL * mass] #The velocity of the entity in the x and y axis
         self.movement = [False, False]
         self.screen_rect = game.screen_rect
         self.collision_manager = CollisionManager(game.gameState.value)
@@ -27,9 +28,18 @@ class PhysicsEntity:
         #Clamp the player rect to the screen rect to ensure that the player doesn't go off screen
         self.rect.clamp_ip(self.screen_rect)
 
+    def apply_gravity(self):
+        desired_x, desired_y = self.rect.bottomleft[0], self.rect.bottomleft[1] + self.velocity[1]
+        result = self.collision_manager.allow_movement(desired_x, desired_y)
+
+        if result == 'allowed':
+            self.rect.midbottom = (desired_x, desired_y)
+        elif result == 'collision':
+            self.velocity[1] = BASE_GRAVITY_PULL
+
 class Player(PhysicsEntity):
     def __init__(self, game):
-        super().__init__(game, speed = PLAYER_SPEED)
+        super().__init__(game, speed = PLAYER_SPEED, mass=1)
 
         #Variables to keep track of animations
         self.current_animation_frame = 0
@@ -86,6 +96,13 @@ class Player(PhysicsEntity):
             if result == 'allowed':
                 self.rect.midtop = (desired_x, desired_y)
             elif result == 'collision':
+                for i in range(abs(self.velocity[1])): #Iterate over the player's vertical velocity to find the first position where the player can move to
+                    desired_y = self.rect.midtop[1] - i #without this loop the player would stop n pixels before the ceiling with n being the player's vertical velocity
+                    result = self.collision_manager.allow_movement(desired_x, desired_y)
+                    if result == 'allowed':
+                        self.rect.midtop = (desired_x, desired_y)
+                        break
+
                 self.velocity[1] = BASE_GRAVITY_PULL
             elif result == 'death':
                 self.reset_position()
@@ -118,10 +135,7 @@ class Player(PhysicsEntity):
                         result = self.collision_manager.allow_movement(desired_x, desired_y)
                         if result == 'allowed':  # If the player can move to the desired position
                             self.rect.midbottom = (desired_x, desired_y)  # Update the player's position
-                            print(f"number of iterations: {i}")
                             break
-
-                    print(f"\nLanded, velocity: {self.velocity[1]}")
 
                     self.status = 'standing' #Update the player's status
                     self.sprite = self.frame_mapping['airborne'][3] #Set the sprite to the landing frame

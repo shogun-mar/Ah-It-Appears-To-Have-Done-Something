@@ -11,7 +11,7 @@ MAX_FALL_SPEED = min(FALLLING_SPEED * 16, 32) #The maximum speed the player can 
 
 #Player movement settings
 PLAYER_SPEED = 120 // MAX_FPS #The speed of the player in pixels per frame
-PLAYER_ANIMATION_SWITCHING_DELAY = max(1, 5 * (MAX_FPS // 30))  #After how many frames the animation of the player should progress
+PLAYER_ANIMATION_SWITCHING_DELAY = max(1, 6 * (MAX_FPS // 30))  #After how many frames the animation of the player should progress
 BASE_JUMP_SPEED = -10  #Initial player jump speed in pixel per frame (negative value for jumping up)
 MAX_JUMP_SPEED = -BASE_JUMP_SPEED * 3 #The maximum speed the player can jump at in pixels per frame (should be multiple of BASE_JUMP_SPEED)
 

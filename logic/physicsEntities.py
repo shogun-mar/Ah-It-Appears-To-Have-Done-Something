@@ -44,7 +44,7 @@ class Player(PhysicsEntity):
         #Variables to keep track of the player's physics
         self.collision_manager = PlayerCollisionManager(self.level_num) #Create a collision manager for the player
         self.gravity_delay_counter = PLAYER_GRAVITY_PULL_DELAY #Counter to delay the gravity pull
-        self.status = 'standing' #Variable to keep track of the player's status (standing, left, right, airborne)
+        self.status = 'airborne' #Variable to keep track of the player's status (standing, left, right, airborne)
         #Miscellaneous
         self.beginning_of_jump_charge = 0 #Variable to keep track of when the player started charging the jump
         self.jump_charge_time = 0 #Variable to keep track of how long the player has been charging the jump
@@ -113,7 +113,7 @@ class Player(PhysicsEntity):
             # Apply gravity to vertical velocity
             desired_x, desired_y = self.rect.midbottom[0], self.rect.midbottom[1] + self.velocity[1]
             result = self.collision_manager.allow_movement(desired_x, desired_y)
-            if result == 'allowed':
+            if result == 'allowed' and self.status != 'standing': #If the player is airborne and there is no collision with the ground
                 self.status = 'airborne'
                 self.rect.midbottom = (desired_x, desired_y)
                 if self.velocity[1] <= MAX_FALL_SPEED:
@@ -121,21 +121,14 @@ class Player(PhysicsEntity):
                 else: self.velocity[1] = MAX_FALL_SPEED
 
             elif result == 'collision' and self.status == 'airborne': #If the player is airborne and collides with the ground
+                self.status = 'standing' #Update the player's status
+                self.sprite = self.frame_mapping['airborne'][3] #Set the sprite to the landing frame
+                self.current_animation_frame = 0 #Reset the animation frame
+                self.animation_switching_delay = int(PLAYER_ANIMATION_SWITCHING_DELAY * (0.8 + (self.velocity[1] / 10))) #Dinamically set the delay to make so the landing seems heavy
+                #print(f"vertical velocity: {self.velocity[1]}, delay: {self.animation_switching_delay}\n")
                 self.velocity[1] = BASE_GRAVITY_PULL #Reset the vertical velocity
-                self.current_animation = 0 #Set the current animation to standing
-                self.current_animation_frame = -1 #Reset the animation frame
-                self.status = 'standing'
             elif result == 'death':
                 self.reset_position()
-
-    def secondary_movement(self, pressed_keys):
-
-        # Check if the player is charging a jump
-        if pressed_keys[pg.K_SPACE]: 
-            self.jump_charge_time = pg.time.get_ticks() - self.beginning_of_jump_charge #If the user releases the space key, calculate for how much time the player has been charging the jump
-        elif self.jump_charge_time > 0 and self.velocity[1] == BASE_GRAVITY_PULL: #If the player has been charging the jump and is not airborne
-            self.velocity[1] = min(BASE_JUMP_SPEED - (self.jump_charge_time // 1000 * 10), MAX_JUMP_SPEED)
-            self.jump_charge_time = 0 #Reset the jump charge time
 
     def update_animation(self):
 
@@ -151,10 +144,11 @@ class Player(PhysicsEntity):
             self.animation_switching_delay = PLAYER_ANIMATION_SWITCHING_DELAY  # Reset the delay
 
             # Update the current animation frame
-            if self.current_animation_frame < len(self.frame_mapping[self.status]) - 1: self.current_animation_frame += 1
+            if (self.current_animation_frame < len(self.frame_mapping[self.status]) - 1) and (self.status != 'airborne' and self.current_animation_frame != 2): 
+                    self.current_animation_frame += 1
             else: self.current_animation_frame = 0
-            # Update the sprite based on the current animation frame
-            self.sprite = self.frame_mapping[self.status][self.current_animation_frame]
+            
+            self.sprite = self.frame_mapping[self.status][self.current_animation_frame]# Update the sprite based on the current animation frame
 
     def load_animation_frames(self, path): #Function that returns an array containing all the frames of an animation loaded as pygame surfaces
         frames_surfs = []

@@ -16,7 +16,10 @@ def handle_start_menu_events(game, event):
             
 def update_start_menu(game):
 
+    print(f"Player status: {game.player.status}")
+
     game.player.move() #Move the player
+    game.player.handle_multiple_inputs(pg.key.get_pressed()) #Handle multiple inputs FOR DEBUGGING ONLY
     game.player.update_animation() #Update the player animation
 
     [entity.move() for entity in game.entities] #Move all the entities 
@@ -32,4 +35,3 @@ def render_start_menu(game):
     screen.blit(game.player.sprite, game.player.rect) #Draw the player
     [screen.blit(entity.sprite, entity.rect) for entity in game.entities] #Draw all the entities
     screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor
-    

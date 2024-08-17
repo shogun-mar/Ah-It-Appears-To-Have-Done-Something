@@ -8,21 +8,9 @@ mouse_physics_entities = []
 def handle_start_menu_events(game, event):
     global mouse_physics_entity
 
-    if event.type == pg.KEYDOWN:
-        if event.key == pg.K_a or event.key == pg.K_LEFT:
-            game.player.velocity[0] = -PLAYER_SPEED
-        elif event.key == pg.K_d or event.key == pg.K_RIGHT:
-            game.player.velocity[0] = PLAYER_SPEED
-        elif event.key == pg.K_SPACE and game.player.velocity[1] == BASE_GRAVITY_PULL:
-            game.player.velocity[1] = BASE_JUMP_SPEED
+    game.player.handle_input(event) #Handle player input
 
-    elif event.type == pg.KEYUP:
-        if event.key == pg.K_a or event.key == pg.K_LEFT:
-            game.player.velocity[0] = 0
-        elif event.key == pg.K_d or event.key == pg.K_RIGHT:
-            game.player.velocity[0] = 0
-
-    elif event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
+    if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
         if game.start_button_rect.collidepoint(pg.mouse.get_pos()):
             game.entities.append(PhysicsEntity(game=game, mass=1, sprite = game.cursor_surf, rect = pg.Rect(pg.mouse.get_pos(), (game.cursor_surf.get_width(), game.cursor_surf.get_height()))))
             

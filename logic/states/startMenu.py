@@ -6,7 +6,7 @@ current_broken_start_index = -1  #Index of the current broken start button (-1 s
 mouse_physics_entities = []
 
 def handle_start_menu_events(game, event):
-    global beginning_of_jump_charge, mouse_physics_entity
+    global mouse_physics_entity
 
     if event.type == pg.KEYDOWN:
         if event.key == pg.K_a or event.key == pg.K_LEFT:

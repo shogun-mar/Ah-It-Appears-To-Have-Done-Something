@@ -4,7 +4,7 @@ from settings import *
 from logic.collisionManager import CollisionManager, PlayerCollisionManager
 
 class PhysicsEntity:
-    def __init__(self, game, mass, speed = 1, sprite = None, rect = None):
+    def __init__(self, game, mass, sprite = None, rect = None):
         
         #Graphical representation of the entity
         self.sprite = sprite
@@ -13,10 +13,8 @@ class PhysicsEntity:
         #Physics variables
         self.mass = mass #The mass of the entity
         self.velocity = [0, BASE_GRAVITY_PULL * mass] #The velocity of the entity in the x and y axis
-        self.movement = [False, False]
         self.screen_rect = game.screen_rect
         self.collision_manager = CollisionManager(game.gameState.value)
-        self.speed = speed
     
         #Miscellaneous variables
         self.game = game
@@ -39,7 +37,7 @@ class PhysicsEntity:
 
 class Player(PhysicsEntity):
     def __init__(self, game):
-        super().__init__(game, speed = PLAYER_SPEED, mass=1)
+        super().__init__(game, mass=1)
 
         #Variables to keep track of animations
         self.current_animation_frame = 0
@@ -64,22 +62,23 @@ class Player(PhysicsEntity):
 
         #Variables to keep track of the player's graphical representation
         self.sprite = self.frame_mapping.get(self.status)[self.current_animation_frame] #Initial sprite
-        self.rect = self.sprite.get_rect(midbottom = (50, 400)) #Initial position
+        self.rect = self.sprite.get_rect(midbottom = INITIAL_COORDS_PLAYER[self.level_num]) #Initial position
 
     def move(self):
+        #print(f"player velocity: {self.velocity} with status: {self.status}")
 
         # Initialize desired position with the player's current position
         desired_x, desired_y = self.rect.centerx, self.rect.centery
 
         # Update desired position based on player movement
-        if self.status == 'left':  # Moving left
-            desired_x, desired_y = self.clamp_to_screen(self.rect.midleft[0] - self.speed, self.rect.midleft[1])
-        elif self.status == 'right':  # Moving right
-            desired_x, desired_y = self.clamp_to_screen(self.rect.midright[0] + self.speed, self.rect.midright[1])
+        if self.status == 'left':
+            desired_x, desired_y = self.clamp_to_screen(self.rect.midleft[0] - abs(self.velocity[0]), self.rect.midleft[1])
+        elif self.status == 'right': # Moving right
+            desired_x, desired_y = self.clamp_to_screen(self.rect.midright[0] + abs(self.velocity[0]), self.rect.midright[1])
         elif self.status == 'left airborne' and self.velocity[1] < 0:
-            desired_x, desired_y = self.clamp_to_screen(self.rect.midleft[0] - self.speed, self.rect.midleft[1] - abs(self.velocity[1])) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards
+            desired_x, desired_y = self.clamp_to_screen(self.rect.midleft[0] - abs(self.velocity[0]), self.rect.midleft[1] - abs(self.velocity[1]))
         elif self.status == 'right airborne' and self.velocity[1] < 0:
-            desired_x, desired_y = self.clamp_to_screen(self.rect.midright[0] + self.speed, self.rect.midright[1] - abs(self.velocity[1])) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards
+            desired_x, desired_y = self.clamp_to_screen(self.rect.midleft[0] + abs(self.velocity[0]), self.rect.midleft[1] - abs(self.velocity[1])) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards")
         elif self.status == 'airborne' and self.velocity[1] < 0: #If moving upwards (jumping)
             desired_x = self.rect.midtop[0]
             desired_y = self.rect.midtop[1] - abs(self.velocity[1]) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards
@@ -89,6 +88,7 @@ class Player(PhysicsEntity):
             result = self.collision_manager.allow_movement(desired_x, desired_y)
             if result == 'allowed':
                 self.rect.midleft = desired_x, desired_y
+                print(f"allowed coords: {desired_x, desired_y} with player position: {self.rect.midleft} and speed {self.velocity[0]}\n")
             elif result == 'death':
                 self.reset_position()
 
@@ -112,6 +112,7 @@ class Player(PhysicsEntity):
             result = self.collision_manager.allow_movement(desired_x, desired_y)
             if result == 'allowed':
                 self.rect.midright = desired_x, desired_y
+                print(f"allowed coords: {desired_x, desired_y} with player position: {self.rect.midleft} and speed {self.velocity[0]}\n")
             elif result == 'death':
                 self.reset_position()
 
@@ -150,14 +151,14 @@ class Player(PhysicsEntity):
         self.apply_gravity() #Apply movement caused by gravity
 
         # Update the player's status based on the movement
-        if self.movement[0] and not self.movement[1]:
+        if self.velocity[0] < 0:
             if self.velocity[1] != BASE_GRAVITY_PULL: self.status = 'left airborne' 
             else: self.status = 'left'
-        elif self.movement[1] and not self.movement[0]: 
+        elif self.velocity[0] > 0:
             if self.velocity[1] != BASE_GRAVITY_PULL: self.status = 'right airborne'
             else: self.status = 'right'
+        elif self.velocity[0] == 0 and self.status != 'airborne': self.status = 'standing'
         elif self.velocity[1] != BASE_GRAVITY_PULL: self.status = 'airborne'
-        elif ((self.movement == [False, False]) or (self.movement == [True, True])) and self.status != 'airborne': self.status = 'standing'
 
         #print(f"status: {self.status}")
 
@@ -185,10 +186,11 @@ class Player(PhysicsEntity):
                         result = self.collision_manager.allow_movement(desired_x, desired_y)
                         if result == 'allowed':  # If the player can move to the desired position
                             self.rect.midbottom = (desired_x, desired_y)  # Update the player's position
-                            print(f"final allowed coords: {desired_x, desired_y} with ground topleft coords: {self.game.start_menu_ground_rect.topleft}")
+                            #print(f"final allowed coords: {desired_x, desired_y} with ground topleft coords: {self.game.start_menu_ground_rect.topleft}")
                             break
                         elif result == 'collision':  # If the player would collide
-                            print(f"rejected coords: {desired_x, desired_y} with ground topleft coords: {self.game.start_menu_ground_rect.topleft} and iteration number: {i}")
+                            ...
+                            #print(f"rejected coords: {desired_x, desired_y} with ground topleft coords: {self.game.start_menu_ground_rect.topleft} and iteration number: {i}")
 
                     self.status = 'standing' #Update the player's status
                     self.sprite = self.frame_mapping['airborne'][3] #Set the sprite to the landing frame

@@ -10,17 +10,17 @@ def handle_start_menu_events(game, event):
 
     if event.type == pg.KEYDOWN:
         if event.key == pg.K_a or event.key == pg.K_LEFT:
-            game.player.movement[0] = True
+            game.player.velocity[0] = -PLAYER_SPEED
         elif event.key == pg.K_d or event.key == pg.K_RIGHT:
-            game.player.movement[1] = True
+            game.player.velocity[0] = PLAYER_SPEED
         elif event.key == pg.K_SPACE and game.player.velocity[1] == BASE_GRAVITY_PULL:
             game.player.velocity[1] = BASE_JUMP_SPEED
 
     elif event.type == pg.KEYUP:
         if event.key == pg.K_a or event.key == pg.K_LEFT:
-            game.player.movement[0] = False
+            game.player.velocity[0] = 0
         elif event.key == pg.K_d or event.key == pg.K_RIGHT:
-            game.player.movement[1] = False
+            game.player.velocity[0] = 0
 
     elif event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
         if game.start_button_rect.collidepoint(pg.mouse.get_pos()):

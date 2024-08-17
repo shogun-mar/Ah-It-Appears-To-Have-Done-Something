@@ -13,14 +13,14 @@ def handle_start_menu_events(game, event):
             game.player.movement[0] = True
         elif event.key == pg.K_d or event.key == pg.K_RIGHT:
             game.player.movement[1] = True
+        elif event.key == pg.K_SPACE and game.player.velocity[1] == BASE_GRAVITY_PULL:
+            game.player.velocity[1] = BASE_JUMP_SPEED
 
     elif event.type == pg.KEYUP:
         if event.key == pg.K_a or event.key == pg.K_LEFT:
             game.player.movement[0] = False
         elif event.key == pg.K_d or event.key == pg.K_RIGHT:
             game.player.movement[1] = False
-        elif event.key == pg.K_SPACE and game.player.velocity[1] == BASE_GRAVITY_PULL:
-            game.player.velocity[1] = BASE_JUMP_SPEED
 
     elif event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
         if game.start_button_rect.collidepoint(pg.mouse.get_pos()):

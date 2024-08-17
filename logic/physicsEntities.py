@@ -46,7 +46,9 @@ class Player(PhysicsEntity):
         self.animation_switching_delay = PLAYER_ANIMATION_SWITCHING_DELAY
         self.frame_mapping = {
         'left': self.load_animation_frames('graphics/assets/player/running/left'),
+        'left airborne': self.load_animation_frames('graphics/assets/player/running/left'), 
         'right': self.load_animation_frames('graphics/assets/player/running/right'),
+        'right airborne': self.load_animation_frames('graphics/assets/player/running/right'),
         'airborne': self.load_animation_frames('graphics/assets/player/airborne'),
         'standing': self.load_animation_frames('graphics/assets/player/standing')
         }
@@ -55,6 +57,7 @@ class Player(PhysicsEntity):
         self.collision_manager = PlayerCollisionManager(self.level_num) #Create a collision manager for the player
         self.gravity_delay_counter = PLAYER_GRAVITY_PULL_DELAY #Counter to delay the gravity pull
         self.status = 'airborne' #Variable to keep track of the player's status (standing, left, right, airborne)
+
         #Miscellaneous
         self.beginning_of_jump_charge = 0 #Variable to keep track of when the player started charging the jump
         self.jump_charge_time = 0 #Variable to keep track of how long the player has been charging the jump
@@ -64,37 +67,76 @@ class Player(PhysicsEntity):
         self.rect = self.sprite.get_rect(midbottom = (50, 400)) #Initial position
 
     def move(self):
+
         # Initialize desired position with the player's current position
         desired_x, desired_y = self.rect.centerx, self.rect.centery
 
         # Update desired position based on player movement
-        if self.movement[0] and not self.movement[1]:  # Moving left
-            desired_x = self.rect.midleft[0] - self.speed
-            desired_y = self.rect.midleft[1]
-        elif self.movement[1] and not self.movement[0]:  # Moving right
-            desired_x = self.rect.midright[0] + self.speed
-            desired_y = self.rect.midright[1]
+        if self.status == 'left':  # Moving left
+            desired_x, desired_y = self.clamp_to_screen(self.rect.midleft[0] - self.speed, self.rect.midleft[1])
+        elif self.status == 'right':  # Moving right
+            desired_x, desired_y = self.clamp_to_screen(self.rect.midright[0] + self.speed, self.rect.midright[1])
+        elif self.status == 'left airborne' and self.velocity[1] < 0:
+            desired_x, desired_y = self.clamp_to_screen(self.rect.midleft[0] - self.speed, self.rect.midleft[1] - abs(self.velocity[1])) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards
+        elif self.status == 'right airborne' and self.velocity[1] < 0:
+            desired_x, desired_y = self.clamp_to_screen(self.rect.midright[0] + self.speed, self.rect.midright[1] - abs(self.velocity[1])) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards
+        elif self.status == 'airborne' and self.velocity[1] < 0: #If moving upwards (jumping)
+            desired_x = self.rect.midtop[0]
+            desired_y = self.rect.midtop[1] - abs(self.velocity[1]) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards
 
-        # Clamp desired_x and desired_y to the screen dimensions to avoid IndexErrors and to keep the player on screen
-        desired_x = max(0, min(desired_x, SCREEN_WIDTH - 1))
-        desired_y = max(0, min(desired_y, SCREEN_HEIGHT - 1))
-
-        #Check if movement is possible
-        result = self.collision_manager.allow_movement(desired_x, desired_y)
-        if result == 'allowed':
-            if self.movement[0] and not self.movement[1]:  #Update the rect position based on the movement
-                self.rect.midleft = desired_x, desired_y
-            elif self.movement[1] and not self.movement[0]:  # Update the rect position based on the movement
-                self.rect.midright = desired_x, desired_y
-        elif result == 'death':
-            self.reset_position()
-
-        if self.status == 'airborne' and self.velocity[1] < 0: #If moving upwards (jumping)
-            desired_x, desired_y = self.rect.midtop[0], self.rect.midtop[1] - abs(self.velocity[1]) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards-
-
+        #Check if desired movement is possible
+        if self.status == 'left':
             result = self.collision_manager.allow_movement(desired_x, desired_y)
             if result == 'allowed':
-                self.rect.midtop = (desired_x, desired_y)
+                self.rect.midleft = desired_x, desired_y
+            elif result == 'death':
+                self.reset_position()
+
+        elif self.status == 'airborne left':
+            result = self.collision_manager.allow_movement(desired_x, desired_y)
+            if result == 'allowed':
+                self.rect.midleft = desired_x, desired_y
+            elif result == 'collision':
+                for i in range(abs(self.velocity[1])): #Iterate over the player's vertical velocity to find the first position where the player can move to
+                    desired_y = self.rect.midleft[1] - i #without this loop the player would stop n pixels before the ceiling with n being the player's vertical velocity
+                    result = self.collision_manager.allow_movement(desired_x, desired_y)
+                    if result == 'allowed':
+                        self.rect.midleft = (desired_x, desired_y)
+                        break
+
+                self.velocity[1] = BASE_GRAVITY_PULL
+            elif result == 'death':
+                self.reset_position()
+            
+        elif self.status == 'right' or self.status == 'airbone right':
+            result = self.collision_manager.allow_movement(desired_x, desired_y)
+            if result == 'allowed':
+                self.rect.midright = desired_x, desired_y
+            elif result == 'death':
+                self.reset_position()
+
+        elif self.status == 'airborne right':    
+            result = self.collision_manager.allow_movement(desired_x, desired_y)
+            if result == 'allowed':
+                self.rect.midright = desired_x, desired_y
+            elif result == 'death':
+                self.reset_position()
+            elif result == 'collision':
+                for i in range(abs(self.velocity[1])): #Iterate over the player's vertical velocity to find the first position where the player can move to
+                    desired_y = self.rect.midleft[1] - i #without this loop the player would stop n pixels before the ceiling with n being the player's vertical velocity
+                    result = self.collision_manager.allow_movement(desired_x, desired_y)
+                    if result == 'allowed':
+                        self.rect.midleft = (desired_x, desired_y)
+                        break
+
+                self.velocity[1] = BASE_GRAVITY_PULL
+
+        elif self.status == 'airborne':
+            result = self.collision_manager.allow_movement(desired_x, desired_y)
+            if result == 'allowed':
+                self.rect.midtop = desired_x, desired_y
+            elif result == 'death':
+                self.reset_position()
             elif result == 'collision':
                 for i in range(abs(self.velocity[1])): #Iterate over the player's vertical velocity to find the first position where the player can move to
                     desired_y = self.rect.midtop[1] - i #without this loop the player would stop n pixels before the ceiling with n being the player's vertical velocity
@@ -104,12 +146,20 @@ class Player(PhysicsEntity):
                         break
 
                 self.velocity[1] = BASE_GRAVITY_PULL
-            elif result == 'death':
-                self.reset_position()
-
+        
         self.apply_gravity() #Apply movement caused by gravity
 
-        #if self.velocity[0] != 0 and self.velocity[1] > 0: self.apply_inertia() #Apply movement caused by inertia
+        # Update the player's status based on the movement
+        if self.movement[0] and not self.movement[1]:
+            if self.velocity[1] != BASE_GRAVITY_PULL: self.status = 'left airborne' 
+            else: self.status = 'left'
+        elif self.movement[1] and not self.movement[0]: 
+            if self.velocity[1] != BASE_GRAVITY_PULL: self.status = 'right airborne'
+            else: self.status = 'right'
+        elif self.velocity[1] != BASE_GRAVITY_PULL: self.status = 'airborne'
+        elif ((self.movement == [False, False]) or (self.movement == [True, True])) and self.status != 'airborne': self.status = 'standing'
+
+        #print(f"status: {self.status}")
 
     def apply_gravity(self):
         self.gravity_delay_counter -= 1 #Decrease the delay
@@ -135,7 +185,10 @@ class Player(PhysicsEntity):
                         result = self.collision_manager.allow_movement(desired_x, desired_y)
                         if result == 'allowed':  # If the player can move to the desired position
                             self.rect.midbottom = (desired_x, desired_y)  # Update the player's position
+                            print(f"final allowed coords: {desired_x, desired_y} with ground topleft coords: {self.game.start_menu_ground_rect.topleft}")
                             break
+                        elif result == 'collision':  # If the player would collide
+                            print(f"rejected coords: {desired_x, desired_y} with ground topleft coords: {self.game.start_menu_ground_rect.topleft} and iteration number: {i}")
 
                     self.status = 'standing' #Update the player's status
                     self.sprite = self.frame_mapping['airborne'][3] #Set the sprite to the landing frame
@@ -174,12 +227,6 @@ class Player(PhysicsEntity):
         self.velocity[1] = max(0, self.velocity[1] - 1) if self.velocity[1] > 0 else min(0, self.velocity[1] + 1)
 
     def update_animation(self):
-
-        # Update the player's status based on the movement
-        if self.movement[0] and not self.movement[1]: self.status = 'left'
-        elif self.movement[1] and not self.movement[0]: self.status = 'right'
-        elif self.velocity[1] != BASE_GRAVITY_PULL: self.status = 'airborne'
-        elif ((self.movement == [False, False]) or (self.movement == [True, True])) and self.status != 'airborne': self.status = 'standing'
         
         # Animation frame switching
         self.animation_switching_delay -= 1
@@ -202,6 +249,12 @@ class Player(PhysicsEntity):
         
         return frames_surfs
     
+    def clamp_to_screen(self, x, y):
+        # Clamp desired_x and desired_y to the screen dimensions to avoid IndexErrors and to keep the player on screen
+        clamped_x = max(0, min(x, SCREEN_WIDTH - 1))
+        clamped_y = max(0, min(y, SCREEN_HEIGHT - 1))
+        return clamped_x, clamped_y
+
     def reset_position(self):
         self.current_animation_frame = -1 #Reset the animation frame counter
         self.rect.midbottom = INITIAL_COORDS_PLAYER[self.level_num] #Reset the player's position to the initial values

@@ -13,7 +13,7 @@ MAX_DOWN_VELOCITY = 16 #The maximum speed the player can fall at in pixels per f
 
 #Player movement settings
 PLAYER_SPEED = 2 #The speed of the player in pixels per frame while on the ground (suggested: 2)
-PLAYER_SPEED_MID_AIR = PLAYER_SPEED / 2  #The speed of the player in pixels per frame while in mid air (suggested: PLAYER_SPEED / 2)
+PLAYER_SPEED_MID_AIR = PLAYER_SPEED // 2  #The speed of the player in pixels per frame while in mid air (suggested: PLAYER_SPEED / 2)
 PLAYER_ANIMATION_SWITCHING_DELAY = 12  #After how many frames the animation of the player should progress (suggested: 12)
 BASE_JUMP_SPEED = -10 #Initial player jump speed in pixel per frame (negative value for jumping up) (suggested: -10 --> value should be negative)
 INITIAL_COORDS_PLAYER = [(50, 500)] #Initial coordinates the player should have in each level (midbottom) (DO NOT CHANGE)

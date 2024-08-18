@@ -19,8 +19,9 @@ class CollisionManager:
         self.level_num = level_num
 
     def allow_movement(self, x, y):
+        """" Function that given coordinates of a point on a 2D plane looks at the value of a matrix representing a collision maps and returns whether the player can move to that point or not, based on the color of the pixel at that point. """
+        
         pixel_color = maps[self.level_num][y][x]
-
         if pixel_color[-1] == 0:
             return 'allowed'
         elif pixel_color == [0, 0, 0, 255]:
@@ -31,6 +32,8 @@ class PlayerCollisionManager(CollisionManager):
         super().__init__(level_num)
 
     def allow_movement(self, x, y):
+        """" Function that given coordinates of a point on a 2D plane looks at the value of a matrix representing a collision maps and returns whether the player can move to that point or not, based on the color of the pixel at that point. """
+
         pixel_color = maps[self.level_num][y][x]
         if pixel_color[-1] == 0: #If the pixel is transparent
             return 'allowed'

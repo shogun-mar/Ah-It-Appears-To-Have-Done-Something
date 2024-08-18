@@ -57,74 +57,52 @@ class Player(PhysicsEntity):
         self.gravity_delay_counter = PLAYER_GRAVITY_PULL_DELAY #Counter to delay the gravity pull
         self.status = 'airborne' #Variable to keep track of the player's status (standing, left, right, airborne)
         self.sprite_width = self.frame_mapping.get(self.status)[self.current_animation_frame].get_width() #Width of the player's sprite
+        self.moving_up = False
         self.collision_line_x_coord = 0 #X coordinate of the collision line used to check if the player is standing on the ground
 
         #Variables to keep track of the player's graphical representation
         self.sprite = self.frame_mapping.get(self.status)[self.current_animation_frame] #Initial sprite
         self.rect = self.sprite.get_rect(midbottom = INITIAL_COORDS_PLAYER[self.level_num]) #Rect of the player
 
-    def handle_input_event_based(self, event): #Event based input handling (does everything except handle correctly when left and right keys are pressed and then one is released (the player doesn't move instead of resuming movement in the direction of the still pressed key) and when the jump keys is continuously pressed (only one jump is performed))
-        if event.type == pg.KEYDOWN:
-            if (event.key == pg.K_a or event.key == pg.K_LEFT):
-                if self.status == 'right': # This is done to prevent that movement to the right is overridden even if the right key is still being hold
-                    self.velocity[0] = 0
-                elif self.velocity[0] < -PLAYER_SPEED: self.velocity[0] -= PLAYER_SPEED #If the player was moving left add PLAYER_SPEED to the player's velocity (this is done to keep eventual inertia)
-                elif self.velocity[0] >= -PLAYER_SPEED: self.velocity[0] = -PLAYER_SPEED #If the player was not moving left set the player's velocity to PLAYER_SPEED
-                 
-            elif event.key == pg.K_d or event.key == pg.K_RIGHT:
-                if self.status == 'left': # This is done to prevent that movement to the left is overridden even if the left key is still being hold
-                    self.velocity[0] = 0
-                elif self.velocity[0] > PLAYER_SPEED: self.velocity[0] += PLAYER_SPEED #If the player was moving right add PLAYER_SPEED to the player's velocity (this is done to keep eventual inertia)
-                elif self.velocity[0] <= PLAYER_SPEED: self.velocity[0] = PLAYER_SPEED #If the player was not moving right set the player's velocity to PLAYER_SPEED
-                    
-            elif event.key == pg.K_SPACE and self.status == 'standing' and not self.has_just_landed():
-                self.velocity[1] = BASE_JUMP_SPEED
-
-        elif event.type == pg.KEYUP:
-            if (event.key == pg.K_a or event.key == pg.K_LEFT):
-                if self.velocity[0] < 0: self.velocity[0] += PLAYER_SPEED #If the player was moving left remove PLAYER_SPEED from the player's velocity (this is done to keep eventual inertia)
-
-            elif (event.key == pg.K_d or event.key == pg.K_RIGHT): #If sideways movement keys are released 
-                if self.velocity[0] > 0: self.velocity[0] -= PLAYER_SPEED #If the player was moving left remove PLAYER_SPEED from the player's velocity (this is done to keep eventual inertia)
-
-    def handle_input_tuple_based(self): #Input handling based on the get pressed method (There is no way to know the order of keys pressed, and rapidly pushed keys can be completely unnoticed between two calls)
+    def handle_input(self): #Input handling based on the get pressed method (There is no way to know the order of keys pressed, and rapidly pushed keys can be completely unnoticed between two calls)
         keys = pg.key.get_pressed()
+        CURRENT_SPEED_VALUE = PLAYER_SPEED_MID_AIR if self.moving_up else PLAYER_SPEED #Set the speed value based on the player's vertical velocity
 
         #Manage pressed keys
         if (keys[pg.K_a] or keys[pg.K_LEFT]) and (keys[pg.K_d] or keys[pg.K_RIGHT]): 
             self.velocity[0] = 0 #Reset the player's horizontal velocity
 
         elif keys[pg.K_a] or keys[pg.K_LEFT]:
-            if self.velocity[0] < -PLAYER_SPEED: self.velocity[0] -= PLAYER_SPEED #If the player was moving left add PLAYER_SPEED to the player's velocity (this is done to keep eventual inertia)
-            else: self.velocity[0] = -PLAYER_SPEED #If the player was not moving left set the player's velocity to PLAYER_SPEED
+            if self.velocity[0] < -CURRENT_SPEED_VALUE: self.velocity[0] -= CURRENT_SPEED_VALUE #If the player was moving left add CURRENT_SPEED_VALUE to the player's velocity (this is done to keep eventual inertia)
+            else: self.velocity[0] = -CURRENT_SPEED_VALUE #If the player was not moving left set the player's velocity to CURRENT_SPEED_VALUE
         
         elif keys[pg.K_d] or keys[pg.K_RIGHT]:
-            if self.velocity[0] > PLAYER_SPEED: self.velocity[0] += PLAYER_SPEED #If the player was moving right add PLAYER_SPEED to the player's velocity (this is done to keep eventual inertia)
-            else: self.velocity[0] = PLAYER_SPEED #If the player was not moving right set the player's velocity to PLAYER_SPEED
+            if self.velocity[0] > CURRENT_SPEED_VALUE: self.velocity[0] += CURRENT_SPEED_VALUE #If the player was moving right add CURRENT_SPEED_VALUE to the player's velocity (this is done to keep eventual inertia)
+            else: self.velocity[0] = CURRENT_SPEED_VALUE #If the player was not moving right set the player's velocity to CURRENT_SPEED_VALUE
 
         if keys[pg.K_SPACE] and self.status == 'standing' and not self.has_just_landed():
             self.velocity[1] = BASE_JUMP_SPEED
 
         #Manage not pressed keys
-        if not keys[pg.K_a] and not keys[pg.K_LEFT]: #If the player was moving left remove PLAYER_SPEED from the player's velocity (this is done to keep eventual inertia)
-            if self.velocity[0] < 0: self.velocity[0] += PLAYER_SPEED
+        if not keys[pg.K_a] and not keys[pg.K_LEFT]: #If the player was moving left remove CURRENT_SPEED_VALUE from the player's velocity (this is done to keep eventual inertia)
+            if self.velocity[0] < 0: self.velocity[0] += CURRENT_SPEED_VALUE
 
-        if not keys[pg.K_d] and not keys[pg.K_RIGHT]: #If the player was moving right remove PLAYER_SPEED from the player's velocity (this is done to keep eventual inertia)
-            if self.velocity[0] > 0: self.velocity[0] -= PLAYER_SPEED
+        if not keys[pg.K_d] and not keys[pg.K_RIGHT]: #If the player was moving right remove CURRENT_SPEED_VALUE from the player's velocity (this is done to keep eventual inertia)
+            if self.velocity[0] > 0: self.velocity[0] -= CURRENT_SPEED_VALUE
 
     def move(self):
 
         # Inizialize desired coords based on player movement
-        moving_up = self.velocity[1] < 0
+        self.moving_up = self.velocity[1] < BASE_GRAVITY_PULL
         if self.status == 'left': # Moving left (second condition is to prevent the player from moving left right after landing)
             desired_x, desired_y = self.clamp_to_screen(self.rect.midleft[0] - abs(self.velocity[0]), self.rect.midleft[1])
         elif self.status == 'right': # Moving right (second condition is to prevent the player from moving left right after landing)
             desired_x, desired_y = self.clamp_to_screen(self.rect.midright[0] + abs(self.velocity[0]), self.rect.midright[1])
-        elif self.status == 'left airborne':# and moving_up:
+        elif self.status == 'left airborne' and self.moving_up:
             desired_x, desired_y = self.clamp_to_screen(self.rect.topleft[0] - abs(self.velocity[0]), self.rect.topleft[1] - abs(self.velocity[1])) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards
-        elif self.status == 'right airborne':# and moving_up:
+        elif self.status == 'right airborne' and self.moving_up:
             desired_x, desired_y = self.clamp_to_screen(self.rect.topright[0] + abs(self.velocity[0]), self.rect.topright[1] - abs(self.velocity[1])) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards")        
-        elif self.status == 'airborne' and moving_up:
+        elif self.status == 'airborne' and self.moving_up:
             desired_x, desired_y = self.clamp_to_screen(self.rect.midtop[0], self.rect.midtop[1] - abs(self.velocity[1])) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards
             
         #Check if desired movement is possible
@@ -146,7 +124,8 @@ class Player(PhysicsEntity):
             elif result == 'death':
                 self.reset_position()
         
-        elif self.status == 'left airborne':
+        elif self.status == 'left airborne' and self.moving_up:
+            #print(f"Vertical velocity: {self.velocity[1]}") 
             result = self.collision_manager.allow_movement(desired_x, desired_y)
             if result == 'allowed': self.rect.topleft = desired_x, desired_y
             elif result == 'death': self.reset_position()
@@ -161,7 +140,8 @@ class Player(PhysicsEntity):
 
                 self.velocity = [0, BASE_GRAVITY_PULL] #Reset the player's velocity
 
-        elif self.status == 'right airborne':   
+        elif self.status == 'right airborne' and self.moving_up: 
+            #print(f"Vertical velocity: {self.velocity[1]}")
             result = self.collision_manager.allow_movement(desired_x, desired_y)
             if result == 'allowed': self.rect.topright = desired_x, desired_y
             elif result == 'death': self.reset_position()

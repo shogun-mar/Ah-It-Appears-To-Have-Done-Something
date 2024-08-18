@@ -30,3 +30,4 @@ I plan to make an executable of this game at the end of development.
 Player spritesheet: https://dani-maccari.itch.io/player-animations-tim  
 Font: https://poppyworks.itch.io/silver  
 Spike sprite: https://omniclause.itch.io/spikes  
+Portal sprite: https://pixelnauta.itch.io/pixel-dimensional-portal-32x32 

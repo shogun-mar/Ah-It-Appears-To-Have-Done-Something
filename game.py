@@ -22,6 +22,7 @@ class Game:
 
         #Game variables
         self.gameState: GameState = GameState.START_MENU
+        self.current_level_num: int = self.gameState.value
         self.screen_rect: pg.Rect = self.screen.get_rect()
 
         #Game objects
@@ -72,6 +73,16 @@ class Game:
     def init_assets(self):
         """Function that initializes all the assets for the game"""
 
+        #Init general assets
+
+        #Portal animation and sprites
+        self.portal_coords: list[tuple] = [(800, 499)] #Coordinates of the portal in each level (bottomright) (DO NOT CHANGE) (result may appear strange but its because the portal sprite have extra width to accomodate the particles)
+        self.portal_animation_current_frame: int = 0 #Variable to keep track of the index of the current frame of the portal animation
+        self.portal_animation_switching_delay: int = PORTAL_ANIMATION_SWITCHING_DELAY #Variable to keep track of when to progress the animation
+        self.portal_animation: list[pg.Surface] = [pg.image.load(f"graphics/assets/portal/{i}.png").convert_alpha() for i in range(1, 7)]
+        self.current_portal_sprite: pg.Surface = self.portal_animation[self.portal_animation_current_frame] #Variable to keep track of the current sprite of the portal animation
+        self.portal_rect: pg.Rect = self.current_portal_sprite.get_rect(bottomright = self.portal_coords[self.current_level_num]) 
+
         #Init start menu
         self.logo_font: pg.Font = pg.font.Font("graphics/font/silver.ttf", 58)
         self.logo_surf: pg.Surface = self.logo_font.render("Ah It Appears To Have Done Something", True, 'black')
@@ -87,6 +98,15 @@ class Game:
         self.start_menu_ground_rect: pg.Rect = self.start_menu_ground_surf.get_rect(bottomleft = (0, SCREEN_HEIGHT))
 
         self.cursor_surf: pg.Surface = pg.image.load("graphics/assets/start menu/cursor.png").convert_alpha()
+
+    def update_portal_animation(self): #Written here so that it can be reused in all game states
+        """Function that updates the portal animation"""
+        self.portal_animation_switching_delay -= 1 #Decrease the delay
+        if self.portal_animation_switching_delay == 0: #If the delay has reached 0
+            self.portal_animation_switching_delay = PORTAL_ANIMATION_SWITCHING_DELAY #Reset the delay
+            self.portal_animation_current_frame += 1 #Progress the frame index
+            if self.portal_animation_current_frame == len(self.portal_animation): self.portal_animation_current_frame = 0 #Reset the frame index if it exceeds the length of the animation
+            self.current_portal_sprite = self.portal_animation[self.portal_animation_current_frame] #Update the current sprite
 
 if __name__ == "__main__":
     Game().run()

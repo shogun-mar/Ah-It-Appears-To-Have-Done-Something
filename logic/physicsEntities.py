@@ -18,7 +18,7 @@ class PhysicsEntity:
     
         #Miscellaneous variables
         self.game = game
-        self.level_num: int = game.gameState.value #The current level number
+        self.current_level_num: int = game.current_level_num #The current level number
 
     def move(self):
         self.apply_gravity()
@@ -53,16 +53,15 @@ class Player(PhysicsEntity):
         }
         
         #Variables to keep track of the player's physics
-        self.collision_manager: PlayerCollisionManager = PlayerCollisionManager(self.level_num) #Create a collision manager for the player
+        self.collision_manager: PlayerCollisionManager = PlayerCollisionManager(game.current_level_num) #Create a collision manager for the player
         self.gravity_delay_counter: int = PLAYER_GRAVITY_PULL_DELAY #Counter to delay the gravity pull
         self.status: str = 'airborne' #Variable to keep track of the player's status (standing, left, right, airborne)
         self.sprite_width: int = self.frame_mapping.get(self.status)[self.current_animation_frame].get_width() #Width of the player's sprite
         self.moving_up: bool = False
-        self.collision_line_x_coord: int = 0 #X coordinate of the collision line used to check if the player is standing on the ground
 
         #Variables to keep track of the player's graphical representation
         self.sprite: pg.Surface = self.frame_mapping.get(self.status)[self.current_animation_frame] #Initial sprite
-        self.rect: pg.Rect = self.sprite.get_rect(midbottom = INITIAL_COORDS_PLAYER[self.level_num]) #Rect of the player
+        self.rect: pg.Rect = self.sprite.get_rect(midbottom = INITIAL_COORDS_PLAYER[self.current_level_num]) #Rect of the player
 
     def handle_input(self): #Input handling based on the get pressed method (There is no way to know the order of keys pressed, and rapidly pushed keys can be completely unnoticed between two calls)
         """Function that manages player related input by altering player's velocity list based on the pressed keys at the moment of the call."""
@@ -82,7 +81,7 @@ class Player(PhysicsEntity):
             if self.velocity[0] > CURRENT_SPEED_VALUE: self.velocity[0] += CURRENT_SPEED_VALUE #If the player was moving right add CURRENT_SPEED_VALUE to the player's velocity (this is done to keep eventual inertia)
             else: self.velocity[0] = CURRENT_SPEED_VALUE #If the player was not moving right set the player's velocity to CURRENT_SPEED_VALUE
 
-        if keys[PLAYER_JUMP_KEY] and self.status in ['standing', 'left', 'right'] and not self.has_just_landed():
+        if keys[PLAYER_JUMP_KEY] and self.status in ['standing', 'left', 'right'] and not self.has_just_landed(): 
             self.velocity[1] = BASE_JUMP_SPEED
 
         #Manage not pressed keys
@@ -128,34 +127,49 @@ class Player(PhysicsEntity):
                 self.reset_position()
         
         elif self.status == 'left airborne' and self.moving_up:
-            result = self.collision_manager.allow_movement(desired_x, desired_y)
-            if result == 'allowed': self.rect.topleft = desired_x, desired_y
-            elif result == 'death': self.reset_position()
-            elif result == 'collision':
+            #Check if vertical component of the movement is possible
+            ver_result = self.collision_manager.allow_movement(self.rect.topleft[0], desired_y)
+            if ver_result == 'allowed': self.rect.topleft = self.rect.topleft[0], desired_y
+            elif ver_result == 'death': self.reset_position()
+            elif ver_result == 'collision':
                 initial_desired_y = desired_y
                 for i in range(abs(self.velocity[1]), -1, -1):
                     desired_y = initial_desired_y + i
-                    result = self.collision_manager.allow_movement(desired_x, initial_desired_y)
-                    if result == 'allowed':
+                    ver_result = self.collision_manager.allow_movement(desired_x, initial_desired_y)
+                    if ver_result == 'allowed':
                         self.rect.topleft = desired_x, desired_y
                         break
 
                 self.velocity = [0, BASE_GRAVITY_PULL] #Reset the player's velocity
 
+            #Check if horizontal component of the movement is possible
+            hor_result = self.collision_manager.allow_movement(desired_x, self.rect.topleft[1])
+            if hor_result == 'allowed': self.rect.topleft = desired_x, self.rect.topleft[1]; print('left airborne allowed at pos:', self.rect.topleft)
+            elif hor_result == 'death': self.reset_position()
+            elif hor_result == 'collision': self.velocity[0] = 0; print('left airborne collision')
+
         elif self.status == 'right airborne' and self.moving_up:  
-            result = self.collision_manager.allow_movement(desired_x, desired_y)
-            if result == 'allowed': self.rect.topright = desired_x, desired_y
-            elif result == 'death': self.reset_position()
-            elif result == 'collision':
+
+            #Check if vertical component of the movement is possible
+            ver_result = self.collision_manager.allow_movement(self.rect.topright[0], desired_y)
+            if ver_result == 'allowed': self.rect.topright = self.rect.topright[0], desired_y
+            elif ver_result == 'death': self.reset_position()
+            elif ver_result == 'collision':
                 initial_desired_y = desired_y
                 for i in range(abs(self.velocity[1]), -1, -1):
                     desired_y = initial_desired_y + i
-                    result = self.collision_manager.allow_movement(desired_x, initial_desired_y)
-                    if result == 'allowed':
+                    ver_result = self.collision_manager.allow_movement(desired_x, initial_desired_y)
+                    if ver_result == 'allowed':
                         self.rect.right = desired_x, desired_y
                         break
 
                 self.velocity = [0, BASE_GRAVITY_PULL] #Reset the player's velocity
+
+            #Check if horizontal component of the movement is possible
+            hor_result = self.collision_manager.allow_movement(desired_x, self.rect.topright[1])
+            if hor_result == 'allowed': self.rect.topright = desired_x, self.rect.topright[1]
+            elif hor_result == 'death': self.reset_position()
+            elif hor_result == 'collision': self.velocity[0] = 0; print('right airborne collision')
 
         elif self.status == 'airborne':
             if self.velocity[1] < 0:
@@ -213,8 +227,6 @@ class Player(PhysicsEntity):
                     desired_x, desired_y = self.rect.bottomleft[0] + hor_offset, self.rect.bottomleft[1] + (self.velocity[1] * FALLING_SPEED_INCR)
                 else:
                     desired_x, desired_y = self.rect.midbottom[0], self.rect.midbottom[1] + (self.velocity[1] * FALLING_SPEED_INCR)
-
-                self.collision_line_x_coord = desired_x #Update the collision line coords TOFIX TOREMOVE FOR DEBUGGING
 
                 #Check if the player can move to the desired position
                 result = self.collision_manager.allow_movement(desired_x, desired_y)
@@ -318,4 +330,4 @@ class Player(PhysicsEntity):
     def reset_position(self):
         """"Function that resets the player's position to the initial position in the current level and resets the frame counter to make the player's animation start from the beginning."""
         self.current_animation_frame = -1 #Reset the animation frame counter
-        self.rect.midbottom = INITIAL_COORDS_PLAYER[self.level_num] #Reset the player's position to the initial values
+        self.rect.midbottom = INITIAL_COORDS_PLAYER[self.current_level_num] #Reset the player's position to the initial values

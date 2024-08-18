@@ -1,8 +1,11 @@
 import pygame as pg
 
 #Graphical representation settings
-SCREEN_WIDTH, SCREEN_HEIGHT = 800, 640 #The width and height of the screen in pixels
+SCREEN_WIDTH, SCREEN_HEIGHT = 800, 640 #The width and height of the screen in pixels (DO NOT CHANGE)
 MAX_FPS = 60 #The maximum frames per second the game should run at (suggested: 60)
+
+#Miscellaneous graphical representation settings
+PORTAL_ANIMATION_SWITCHING_DELAY = 10 #After how many frames the portal animation should progress (suggested: 10)
 
 #Physics simulation settings
 MAX_ENTITY_SPEED = 10 #The maximum speed of any entity in pixels per frame (suggested: 10)

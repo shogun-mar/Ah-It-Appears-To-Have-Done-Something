@@ -14,7 +14,7 @@ Knowing this I structured my game in a plethora of levels with varying mechanics
 
 Solutions will be available in a separate file to avoid spoilers.
 
-##Installation
+## Installation
 Python 3 required, the specific version of python used to write this project is Python 3.12 64 bit
 All the necessary pip packages can be installed through this command in the windows command prompt or any other equivalent command line tool of an OS which supports pip.
 
@@ -22,7 +22,7 @@ All the necessary pip packages can be installed through this command in the wind
 pip3 install pygame numpy pillow
 ```
 
-##Assets credits
+## Assets credits
 
 Player spritesheet: https://dani-maccari.itch.io/player-animations-tim  
 Font: https://poppyworks.itch.io/silver  

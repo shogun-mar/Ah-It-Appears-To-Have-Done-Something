@@ -59,7 +59,7 @@ class Game:
             update_start_menu(self)
 
     def render(self):
-        """Function that renders the game by calling the appropriate render function by consulting the current game state"""
+        """Function that renders the game by calling the appropriate render function by consulting the current game state""" 
 
         self.screen.fill('white') #Clear the screen
         

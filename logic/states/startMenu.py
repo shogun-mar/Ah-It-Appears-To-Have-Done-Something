@@ -32,3 +32,6 @@ def render_start_menu(game):
     screen.blit(game.player.sprite, game.player.rect) #Draw the player
     
     screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor
+
+    pg.draw.line(screen, 'red', (game.player.gravity_x_coord, 0), (game.player.gravity_x_coord, SCREEN_HEIGHT), 2) #Draw the gravity line
+    pg.draw.rect(screen, 'green', game.player.rect, 2)  # Draw the player's rect with a red outline

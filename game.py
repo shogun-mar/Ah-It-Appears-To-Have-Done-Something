@@ -1,6 +1,7 @@
 import contextlib
 with contextlib.redirect_stdout(None): #Suppress pygame welcome message
     import pygame as pg
+del contextlib
 from logic.states.gameState import GameState
 from logic.states.startMenu import handle_start_menu_events, update_start_menu, render_start_menu
 from logic.physicsEntities import Player
@@ -53,14 +54,12 @@ class Game:
         """Function that updates generic values not specific to any game state and calls the appropriate update function by consulting the current game state"""
 
         pg.display.set_caption(f" Ah It Appears To Have Done Something - FPS: {int(self.clock.get_fps())}") #Update the window title to show the FPS
-
         
         if self.gameState == GameState.START_MENU:
             update_start_menu(self)
 
     def render(self):
         """Function that renders the game by calling the appropriate render function by consulting the current game state"""
-
 
         self.screen.fill('white') #Clear the screen
         

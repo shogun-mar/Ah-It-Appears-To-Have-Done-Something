@@ -39,12 +39,11 @@ class PlayerCollisionManager(CollisionManager):
         except IndexError:
             return 'collision'
         
-        if pixel_color[-1] == 0: #If the pixel is transparent
+        if pixel_color[-1] == 0: #Transparent pixel
             return 'allowed'
-        elif pixel_color == [0, 0, 0, 255]:
+        elif pixel_color == [0, 0, 0, 255]: #Fully opaque black
             return 'collision'
-        elif pixel_color == [255, 0, 0, 255]:
-            return 'death'
-        elif pixel_color == [0, 255, 0, 255]:
+        elif pixel_color == [0, 0, 255, 255]: #Fully opaque blue
             return 'changing level'
-        
+        elif pixel_color == [255, 0, 0, 255]: #Fully opaque red
+            return 'death'

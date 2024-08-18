@@ -57,12 +57,13 @@ class Player(PhysicsEntity):
         self.gravity_delay_counter = PLAYER_GRAVITY_PULL_DELAY #Counter to delay the gravity pull
         self.status = 'airborne' #Variable to keep track of the player's status (standing, left, right, airborne)
         self.sprite_width = self.frame_mapping.get(self.status)[self.current_animation_frame].get_width() #Width of the player's sprite
+        self.collision_line_x_coord = 0 #X coordinate of the collision line used to check if the player is standing on the ground
 
         #Variables to keep track of the player's graphical representation
         self.sprite = self.frame_mapping.get(self.status)[self.current_animation_frame] #Initial sprite
         self.rect = self.sprite.get_rect(midbottom = INITIAL_COORDS_PLAYER[self.level_num]) #Rect of the player
 
-    def handle_input_event_based(self, event): #Event based input handling (does everything except handle correctly when left and right keys are pressed and then one is released (the player doesn't move instead of resuming movement in the direction of the still pressed key))
+    def handle_input_event_based(self, event): #Event based input handling (does everything except handle correctly when left and right keys are pressed and then one is released (the player doesn't move instead of resuming movement in the direction of the still pressed key) and when the jump keys is continuously pressed (only one jump is performed))
         if event.type == pg.KEYDOWN:
             if (event.key == pg.K_a or event.key == pg.K_LEFT):
                 if self.status == 'right': # This is done to prevent that movement to the right is overridden even if the right key is still being hold
@@ -93,11 +94,11 @@ class Player(PhysicsEntity):
         if (keys[pg.K_a] or keys[pg.K_LEFT]) and (keys[pg.K_d] or keys[pg.K_RIGHT]): 
             self.velocity[0] = 0 #Reset the player's horizontal velocity
 
-        elif keys[pg.K_a] or keys[pg.K_LEFT]: 
+        elif keys[pg.K_a] or keys[pg.K_LEFT]:
             if self.velocity[0] < -PLAYER_SPEED: self.velocity[0] -= PLAYER_SPEED #If the player was moving left add PLAYER_SPEED to the player's velocity (this is done to keep eventual inertia)
             else: self.velocity[0] = -PLAYER_SPEED #If the player was not moving left set the player's velocity to PLAYER_SPEED
         
-        elif keys[pg.K_d] or keys[pg.K_RIGHT]: 
+        elif keys[pg.K_d] or keys[pg.K_RIGHT]:
             if self.velocity[0] > PLAYER_SPEED: self.velocity[0] += PLAYER_SPEED #If the player was moving right add PLAYER_SPEED to the player's velocity (this is done to keep eventual inertia)
             else: self.velocity[0] = PLAYER_SPEED #If the player was not moving right set the player's velocity to PLAYER_SPEED
 
@@ -119,10 +120,10 @@ class Player(PhysicsEntity):
             desired_x, desired_y = self.clamp_to_screen(self.rect.midleft[0] - abs(self.velocity[0]), self.rect.midleft[1])
         elif self.status == 'right': # Moving right (second condition is to prevent the player from moving left right after landing)
             desired_x, desired_y = self.clamp_to_screen(self.rect.midright[0] + abs(self.velocity[0]), self.rect.midright[1])
-        elif self.status == 'left airborne' and moving_up:
-            desired_x, desired_y = self.clamp_to_screen(self.rect.midleft[0] - abs(self.velocity[0]), self.rect.midleft[1] - abs(self.velocity[1]))
-        elif self.status == 'right airborne' and moving_up:
-            desired_x, desired_y = self.clamp_to_screen(self.rect.midleft[0] + abs(self.velocity[0]), self.rect.midleft[1] - abs(self.velocity[1])) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards")        
+        elif self.status == 'left airborne':# and moving_up:
+            desired_x, desired_y = self.clamp_to_screen(self.rect.topleft[0] - abs(self.velocity[0]), self.rect.topleft[1] - abs(self.velocity[1])) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards
+        elif self.status == 'right airborne':# and moving_up:
+            desired_x, desired_y = self.clamp_to_screen(self.rect.topright[0] + abs(self.velocity[0]), self.rect.topright[1] - abs(self.velocity[1])) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards")        
         elif self.status == 'airborne' and moving_up:
             desired_x, desired_y = self.clamp_to_screen(self.rect.midtop[0], self.rect.midtop[1] - abs(self.velocity[1])) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards
             
@@ -145,10 +146,9 @@ class Player(PhysicsEntity):
             elif result == 'death':
                 self.reset_position()
         
-        elif self.status == 'airborne left':
-            print(f"Player with status {self.status} wants to move to {desired_x, desired_y} with velocity {self.velocity}")
+        elif self.status == 'left airborne':
             result = self.collision_manager.allow_movement(desired_x, desired_y)
-            if result == 'allowed': self.rect.midleft = desired_x, desired_y
+            if result == 'allowed': self.rect.topleft = desired_x, desired_y
             elif result == 'death': self.reset_position()
             elif result == 'collision':
                 initial_desired_y = desired_y
@@ -156,15 +156,14 @@ class Player(PhysicsEntity):
                     desired_y = initial_desired_y + i
                     result = self.collision_manager.allow_movement(desired_x, initial_desired_y)
                     if result == 'allowed':
-                        self.rect.midleft = desired_x, desired_y
+                        self.rect.topleft = desired_x, desired_y
                         break
 
                 self.velocity = [0, BASE_GRAVITY_PULL] #Reset the player's velocity
 
-        elif self.status == 'airborne right': 
-            print(f"Player with status {self.status} wants to move to {desired_x, desired_y} with velocity {self.velocity}")   
+        elif self.status == 'right airborne':   
             result = self.collision_manager.allow_movement(desired_x, desired_y)
-            if result == 'allowed': self.rect.midright = desired_x, desired_y
+            if result == 'allowed': self.rect.topright = desired_x, desired_y
             elif result == 'death': self.reset_position()
             elif result == 'collision':
                 initial_desired_y = desired_y
@@ -172,7 +171,7 @@ class Player(PhysicsEntity):
                     desired_y = initial_desired_y + i
                     result = self.collision_manager.allow_movement(desired_x, initial_desired_y)
                     if result == 'allowed':
-                        self.rect.midleft = desired_x, desired_y
+                        self.rect.right = desired_x, desired_y
                         break
 
                 self.velocity = [0, BASE_GRAVITY_PULL] #Reset the player's velocity
@@ -201,13 +200,14 @@ class Player(PhysicsEntity):
         if self.velocity[0] < 0:
             if self.velocity[1] != BASE_GRAVITY_PULL: self.status = 'left airborne' 
             else: self.status = 'left'
+        
         elif self.velocity[0] > 0:
             if self.velocity[1] != BASE_GRAVITY_PULL: self.status = 'right airborne'
             else: self.status = 'right'
+        
         elif self.velocity[1] < 0: self.status = 'airborne'
+        
         elif self.velocity[0] == 0 and self.velocity[1] == BASE_GRAVITY_PULL and self.status != 'airborne': self.status = 'standing'
-
-        #print(f"Player status: {self.status} with velocity: {self.velocity}")
 
     def apply_gravity(self): #Function that manages gravity based movement complete of sideways movement and collision detection
         self.gravity_delay_counter -= 1 #Decrease the delay
@@ -233,6 +233,9 @@ class Player(PhysicsEntity):
 
                 #Check if the player can move to the desired position
                 result = self.collision_manager.allow_movement(desired_x, desired_y)
+
+                #Update collision line coords
+                self.collision_line_x_coord = desired_x
 
                 if result == 'allowed' and self.status != 'standing': #If the player is airborne and there is no collision with the ground
                     self.status = 'airborne' #Update the player's status

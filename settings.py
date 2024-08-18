@@ -14,4 +14,4 @@ PLAYER_SPEED = 2 #The speed of the player in pixels per frame
 PLAYER_ANIMATION_SWITCHING_DELAY = 12  #After how many frames the animation of the player should progress
 BASE_JUMP_SPEED = -10 #Initial player jump speed in pixel per frame (negative value for jumping up)
 
-INITIAL_COORDS_PLAYER = [(50, 400)] #Initial coordinates the player should have in each level (midbottom)
+INITIAL_COORDS_PLAYER = [(50, 500)] #Initial coordinates the player should have in each level (midbottom)

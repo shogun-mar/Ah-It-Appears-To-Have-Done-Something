@@ -8,7 +8,7 @@ mouse_physics_entities = []
 def handle_start_menu_events(game, event):
     global mouse_physics_entity
 
-    game.player.handle_input_event_based(event) #Handle player input
+    #game.player.handle_input_event_based(event) #Handle player input
 
     if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
         if game.start_button_rect.collidepoint(pg.mouse.get_pos()):
@@ -16,7 +16,7 @@ def handle_start_menu_events(game, event):
             
 def update_start_menu(game):
 
-    #game.player.handle_input_tuple_based() #Handle player input
+    game.player.handle_input_tuple_based() #Handle player input
     game.player.move() #Move the player
     game.player.update_animation() #Update the player animation
 
@@ -33,3 +33,4 @@ def render_start_menu(game):
     screen.blit(game.player.sprite, game.player.rect) #Draw the player
     [screen.blit(entity.sprite, entity.rect) for entity in game.entities] #Draw all the entities
     screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor
+    pg.draw.line(screen, 'red', (game.player.collision_line_x_coord, 0), (game.player.collision_line_x_coord, SCREEN_HEIGHT), 2) #Draw collision line

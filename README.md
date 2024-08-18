@@ -22,7 +22,7 @@ All the necessary pip packages can be installed through this command in the wind
 pip3 install pygame numpy pillow
 ```
 
-After doing this the program can be launched from any IDE or CLI by starting game.py.
+After doing this the program can be launched from any IDE or CLI by starting game.py.  
 I plan to make an executable of this game at the end of development.
 
 ## Assets credits

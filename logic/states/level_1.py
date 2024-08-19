@@ -9,7 +9,14 @@ def handle_level_one_events(game, event):
             game.generic_pause_event_handler()
 
 def update_level_one(game):
-    pass
+    
+    #Player
+    game.player.handle_input() #Handle player input
+    game.player.move() #Move the player
+    game.player.update_animation() #Update the player animation
+
+    #Environment
+    game.update_portal_animation() #Update the portal animation
 
 def render_level_one(game):
     screen = game.screen

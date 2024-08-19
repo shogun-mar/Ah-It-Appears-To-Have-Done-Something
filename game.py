@@ -123,8 +123,8 @@ class Game:
     def advance_level(self):
         """Function that advances the level"""
         self.current_level_num += 1 #Advance the level counter
-        self.player.current_level_num = self.current_level_num #Update the player's current level
         self.game_state = GameState(self.current_level_num) #Update the game state
+        self.player.status = 'standing' #Reset the player status
         self.update_screen_dimensions() #Update the screen dimensions
         self.portal_rect = self.current_portal_sprite.get_rect(bottomright = self.portal_coords[self.current_level_num]) #Update the portal rect
 

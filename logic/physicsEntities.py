@@ -18,7 +18,6 @@ class PhysicsEntity:
     
         #Miscellaneous variables
         self.game = game
-        self.current_level_num: int = game.current_level_num #The current level number
 
     def move(self):
         self.apply_gravity()
@@ -57,13 +56,13 @@ class Player(PhysicsEntity):
         self.gravity_x_coord: int = 0 #Variable to keep track of the x coord of the player when falling to avoid side collisions
 
         #Variables to keep track of the player's physics
-        self.collision_manager: PlayerCollisionManager = PlayerCollisionManager(game.current_level_num) #Create a collision manager for the player
+        self.collision_manager: PlayerCollisionManager = PlayerCollisionManager(game) #Create a collision manager for the player
         self.gravity_delay_counter: int = PLAYER_GRAVITY_PULL_DELAY #Counter to delay the gravity pull
         self.status: str = 'standing' #Variable to keep track of the player's status (standing, left, right, airborne)
 
         #Variables to keep track of the player's graphical representation
         self.sprite: pg.Surface = self.frame_mapping.get(self.status)[self.current_animation_frame] #Initial sprite
-        self.rect: pg.Rect = self.sprite.get_rect(midbottom = INITIAL_COORDS_PLAYER[self.current_level_num]) #Rect of the player
+        self.rect: pg.Rect = self.sprite.get_rect(midbottom = INITIAL_COORDS_PLAYER[game.current_level_num]) #Rect of the player
 
     def handle_input(self): #Input handling based on the get pressed method (There is no way to know the order of keys pressed, and rapidly pushed keys can be completely unnoticed between two calls)
         """Function that manages player related input by altering player's velocity list based on the pressed keys at the moment of the call."""
@@ -109,6 +108,8 @@ class Player(PhysicsEntity):
                     case 'death': self.reset_position()
                     case 'changing level': self.advance_level()
                     case 'collision': self.velocity[0] = 0 #Stop the player's horizontal movement
+
+                print(f"result: {result} with status {self.status}") #FOR DEBUGGING
                 
             case 'right':
                 desired_x, desired_y = self.clamp_to_screen(self.rect.midright[0] + abs(self.velocity[0]), self.rect.midright[1])
@@ -119,6 +120,8 @@ class Player(PhysicsEntity):
                     case 'death': self.reset_position()
                     case 'changing level': self.advance_level()
                     case 'collision': self.velocity[0] = 0 #Stop the player's horizontal movement
+
+                print(f"result: {result} with status {self.status}") #FOR DEBUGGING
             
             case 'left airborne':
                 if self.is_moving_up:
@@ -148,6 +151,8 @@ class Player(PhysicsEntity):
 
                             self.velocity = [0, BASE_GRAVITY_PULL] #Reset the player's velocity
 
+                    print(f"results: {hor_result, ver_result} with status {self.status}") #FOR DEBUGGING
+
             case 'right airborne':
                 if self.is_moving_up:
                     desired_x, desired_y = self.clamp_to_screen(self.rect.topright[0] + abs(self.velocity[0]), self.rect.topright[1] - abs(self.velocity[1])) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards")
@@ -176,6 +181,8 @@ class Player(PhysicsEntity):
 
                             self.velocity = [0, BASE_GRAVITY_PULL] #Reset the player's velocity
 
+                    print(f"results: {hor_result, ver_result} with status {self.status}") #FOR DEBUGGING
+
             case 'airborne':
                 if self.is_moving_up:
                     desired_x, desired_y = self.clamp_to_screen(self.rect.midtop[0], self.rect.midtop[1] - abs(self.velocity[1])) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards
@@ -193,6 +200,8 @@ class Player(PhysicsEntity):
                                     break
 
                             self.velocity = [0, BASE_GRAVITY_PULL] #Reset the player's velocity
+
+                    print(f"result: {result} with status {self.status}") #FOR DEBUGGING
 
                     if self.velocity[1] == 0: #If the player has reached the apex of the jump
                         self.velocity[1] = BASE_GRAVITY_PULL #Reset the vertical velocity
@@ -354,10 +363,8 @@ class Player(PhysicsEntity):
         """Function that advances the player to the next level by increasing the current level number and resetting the player's position."""
         self.game.advance_level()
         self.reset_position()
-        #self.current_level_num += 1 #Advance the level
 
     def reset_position(self):
         """Function that resets the player's position to the initial position in the current level and resets the frame counter to make the player's animation start from the beginning.""" 
         self.current_animation_frame = -1 #Reset the animation frame counter
-        print(f"Current level num at reset position function {self.current_level_num} with coords {INITIAL_COORDS_PLAYER[self.current_level_num]}")
-        self.rect.midbottom = INITIAL_COORDS_PLAYER[self.current_level_num] #Reset the player's position to the initial values
+        self.rect.midbottom = INITIAL_COORDS_PLAYER[self.game.current_level_num] #Reset the player's position to the initial values

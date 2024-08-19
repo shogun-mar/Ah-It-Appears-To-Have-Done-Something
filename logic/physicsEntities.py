@@ -76,12 +76,12 @@ class Player(PhysicsEntity):
             self.velocity[0] = 0 #Reset the player's horizontal velocity
 
         elif keys[PLAYER_LEFT_KEY]:
-            if self.velocity[0] < -CURRENT_SPEED_VALUE: self.velocity[0] -= CURRENT_SPEED_VALUE #If the player was moving left add CURRENT_SPEED_VALUE to the player's velocity (this is done to keep eventual inertia)
-            else: self.velocity[0] = int(-CURRENT_SPEED_VALUE) #If the player was not moving left set the player's velocity to CURRENT_SPEED_VALUE
-        
+            if not self.is_in_air: self.velocity[0] = -CURRENT_SPEED_VALUE
+            elif not self.has_just_landed: self.velocity[0] -= CURRENT_SPEED_VALUE
+
         elif keys[PLAYER_RIGHT_KEY]:
-            if self.velocity[0] > CURRENT_SPEED_VALUE: self.velocity[0] += CURRENT_SPEED_VALUE #If the player was moving right add CURRENT_SPEED_VALUE to the player's velocity (this is done to keep eventual inertia)
-            else: self.velocity[0] = CURRENT_SPEED_VALUE #If the player was not moving right set the player's velocity to CURRENT_SPEED_VALUE
+            if not self.is_in_air: self.velocity[0] = CURRENT_SPEED_VALUE
+            elif not self.has_just_landed: self.velocity[0] += CURRENT_SPEED_VALUE
 
         if keys[PLAYER_JUMP_KEY] and not self.is_in_air and not self.has_just_landed: 
             self.velocity[1] = BASE_JUMP_SPEED

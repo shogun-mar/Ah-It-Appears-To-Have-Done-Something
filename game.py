@@ -109,7 +109,6 @@ class Game:
 
         #Pause menu
         self.previous_game_state: GameState = None #Variable to keep track of the previous game state used to return to the previous game state when unpausing
-        self.pause_menu_background: pg.Surface = None #Variable to keep track of the background of the pause menu
 
     def update_portal_animation(self): #Written here so that it can be reused in all game states
         """Function that updates the portal animation"""
@@ -126,13 +125,10 @@ class Game:
         self.game_state = GameState(self.current_level_num)
         self.portal_rect = self.current_portal_sprite.get_rect(bottomright = self.portal_coords[self.current_level_num])
 
-    def update_pause_menu_background(self):
-        """Function that returns the background of the pause menu"""
-        background: pg.Surface = self.screen.copy()
-        dark_surf: pg.Surface = pg.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pg.SRCALPHA)
-        dark_surf.fill((0, 0, 0, PAUSE_MENU_BACKGROUND_ALPHA))  # Fill with black and set alpha
-        background.blit(dark_surf, (0, 0))
-        self.pause_menu_background = background
+    def generic_pause_event_handler(self, event):
+        if not self.player.is_in_air: self.player.status = 'standing'
+        self.previous_game_state = self.game_state
+        self.game_state = GameState.PAUSE_MENU	
 
 if __name__ == "__main__":
     Game().run()

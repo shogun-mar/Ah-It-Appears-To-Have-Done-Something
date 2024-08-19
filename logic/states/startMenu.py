@@ -6,18 +6,15 @@ from logic.states.gameState import GameState
 def handle_start_menu_events(game, event):
     """Function that handles events for the start menu game state"""
     
-    if event.type == pg.KEYDOWN and event.key == PAUSE_KEY:
-        game.update_pause_menu_background()
-        game.previous_game_state = game.game_state
-        game.game_state = GameState.PAUSE_MENU
+    if event.type == pg.KEYDOWN:
+        if event.key == PAUSE_KEY:
+            game.generic_pause_event_handler()
             
-
     if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
         if game.start_button_rect.collidepoint(event.pos):
             create_start_physics_entity(game)
         elif game.level_button_rect.collidepoint(event.pos):
-            create_level_physics_entity(game)
-        
+            create_level_physics_entity(game) 
 
 def update_start_menu(game):
     """Function that updates the start menu game state"""

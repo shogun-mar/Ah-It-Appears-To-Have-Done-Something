@@ -383,6 +383,7 @@ class Player(PhysicsEntity):
 
     def clamp_velocity(self):
         """Function that clamps the player's velocity to a maximum value."""
+        #Could have used pygame built in clamp function but it this still in experimental phase
         #Formula: max(min_value, min(value, max_value))
 
         self.velocity[0] = max(-MAX_ENTITY_SPEED, min(self.velocity[0], MAX_ENTITY_SPEED))
@@ -411,8 +412,6 @@ class DeathEntity(PhysicsEntity):
         super().__init__(game, mass, sprite, rect)
 
         self.death_timer_amount = 1500 #After how many milliseconds the entity should die when in contact with a death portion of the collision map
-        self.death_contact_time = 0
-        self.should_die = False
 
     def move(self):
         self.apply_gravity()

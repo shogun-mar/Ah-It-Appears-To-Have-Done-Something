@@ -17,10 +17,12 @@ def update_level_one(game):
 
     #Environment
     game.update_portal_animation() #Update the portal animation
+    game.level_one_grav_disabler.update_animation() #Update the gravity disabler animation
 
 def render_level_one(game):
     screen = game.screen
 
     screen.blit(game.level_one_ground_surf, game.level_one_ground_rect) #Draw the ground
+    screen.blit(game.level_one_grav_disabler.sprite, game.level_one_grav_disabler.rect) #Draw the gravity disabler
     screen.blit(game.current_portal_sprite, game.portal_rect) #Draw the end of level portal
     screen.blit(game.player.sprite, game.player.rect) #Draw the player

@@ -7,6 +7,7 @@ from logic.states.startMenu import handle_start_menu_events, update_start_menu, 
 from logic.states.pauseMenu import handle_pause_menu_events, update_pause_menu, render_pause_menu
 from logic.states.level_1 import handle_level_one_events, update_level_one, render_level_one
 from logic.physicsEntities import Player
+from logic.interactibles import GravityDisabler
 
 from settings import *
 
@@ -15,11 +16,12 @@ class Game:
         pg.init()
 
         #Game variables
-        self.game_state: GameState = GameState.START_MENU
+        self.game_state: GameState = GameState.LEVEL_1
+        #self.game_state: GameState = GameState.START_MENU
         self.current_level_num: int = self.game_state.value
 
         #Screen settings
-        self.screen: pg.Surface = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.screen: pg.Surface = pg.display.set_mode((LEVEL_RESOLUTIONS[self.current_level_num]))
         pg.display.set_caption("Ah It Appears To Have Done Something")
         pg.display.set_icon(pg.image.load("graphics/loophole_icon.jpg"))
         pg.mouse.set_visible(False) #Hide the mouse cursor
@@ -74,7 +76,7 @@ class Game:
             case GameState.PAUSE_MENU: render_pause_menu(self)
 
         pg.display.flip()
-        self.clock.tick(MAX_FPS)
+        self.clock.tick(MAX_FPS) #Could also use tick_busy_loop() for more accurate timing but it would use more CPU and regular tick accuracy is fine for this game
 
     def init_assets(self):
         """Function that initializes all the assets for the game"""
@@ -107,7 +109,8 @@ class Game:
         #Level 1 assets
         self.level_one_ground_surf: pg.Surface = pg.image.load("graphics/assets/level 1/ground.png").convert_alpha()
         self.level_one_ground_rect: pg.Rect = self.level_one_ground_surf.get_rect(bottomleft = (0, LEVEL_RESOLUTIONS[1][1]))
-
+        self.level_one_grav_disabler: GravityDisabler = GravityDisabler(game = self, coords = (200, 150))
+        
         #Pause menu
         self.previous_game_state: GameState = None #Variable to keep track of the previous game state used to return to the previous game state when unpausing
 

@@ -31,4 +31,4 @@ Player spritesheet: https://dani-maccari.itch.io/player-animations-tim
 Font: https://poppyworks.itch.io/silver  
 Spike sprite: https://omniclause.itch.io/spikes  
 Portal sprite: https://pixelnauta.itch.io/pixel-dimensional-portal-32x32 
-UI Elements by SunGraphica: https://sungraphica.itch.io/flat-game-user-interface-free
+Smoke effects: https://bdragon1727.itch.io/free-smoke-fx-pixel-2 

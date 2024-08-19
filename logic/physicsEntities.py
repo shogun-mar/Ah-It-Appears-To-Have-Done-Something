@@ -13,7 +13,7 @@ class PhysicsEntity:
         #Physics variables
         self.mass: int = mass #The mass of the entity
         self.velocity: list[int] = [0, BASE_GRAVITY_PULL * mass] #The velocity of the entity in the x and y axis
-        self.screen_rect: pg.Rect = game.screen_rect
+        self.screen_rect: pg.Rect = game.screen.get_rect() #The screen rect
         self.collision_manager: CollisionManager = CollisionManager(game.game_state.value)
     
         #Miscellaneous variables
@@ -359,4 +359,5 @@ class Player(PhysicsEntity):
     def reset_position(self):
         """Function that resets the player's position to the initial position in the current level and resets the frame counter to make the player's animation start from the beginning.""" 
         self.current_animation_frame = -1 #Reset the animation frame counter
+        print(f"Current level num at reset position function {self.current_level_num} with coords {INITIAL_COORDS_PLAYER[self.current_level_num]}")
         self.rect.midbottom = INITIAL_COORDS_PLAYER[self.current_level_num] #Reset the player's position to the initial values

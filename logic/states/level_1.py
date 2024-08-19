@@ -12,4 +12,8 @@ def update_level_one(game):
     pass
 
 def render_level_one(game):
-    pass
+    screen = game.screen
+
+    screen.blit(game.level_one_ground_surf, game.level_one_ground_rect) #Draw the ground
+    screen.blit(game.current_portal_sprite, game.portal_rect) #Draw the end of level portal
+    screen.blit(game.player.sprite, game.player.rect) #Draw the player

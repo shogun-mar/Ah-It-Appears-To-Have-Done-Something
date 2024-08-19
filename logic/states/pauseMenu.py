@@ -1,9 +1,6 @@
 from logic.states.gameState import GameState
 from settings import *
 
-darkned_surf = pg.Surface((SCREEN_WIDTH, SCREEN_HEIGHT)) #Create a surface to darken the screen
-darkned_surf.set_alpha(PAUSE_MENU_BACKGROUND_ALPHA) #Fill the surface with black
-
 def handle_pause_menu_events(game, event):
     """Function that handles events for the pause menu game state"""
     if event.type == pg.KEYDOWN and event.key == PAUSE_KEY:
@@ -18,6 +15,9 @@ def update_pause_menu(game):
 
 def render_pause_menu(game):
     """Function that renders the pause menu game state"""
+    darkned_surf = pg.Surface((SCREEN_WIDTH, SCREEN_HEIGHT)) #Create a surface to darken the screen
+    darkned_surf.set_alpha(PAUSE_MENU_BACKGROUND_ALPHA) #Fill the surface with black
+
     screen = game.screen #Rename screen to make draw calls easier to read
     
     match game.previous_game_state:

@@ -5,6 +5,7 @@ del contextlib
 from logic.states.gameState import GameState
 from logic.states.startMenu import handle_start_menu_events, update_start_menu, render_start_menu
 from logic.states.pauseMenu import handle_pause_menu_events, update_pause_menu, render_pause_menu
+from logic.states.level_1 import handle_level_one_events, update_level_one, render_level_one
 from logic.physicsEntities import Player
 
 from settings import *
@@ -13,19 +14,18 @@ class Game:
     def __init__(self):
         pg.init()
 
+        #Game variables
+        self.game_state: GameState = GameState.START_MENU
+        self.current_level_num: int = self.game_state.value
+
         #Screen settings
         self.screen: pg.Surface = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pg.display.set_caption("Ah It Appears To Have Done Something")
         pg.display.set_icon(pg.image.load("graphics/loophole_icon.jpg"))
         pg.mouse.set_visible(False) #Hide the mouse cursor
-        
+
         #Clock and time objects
         self.clock: pg.Clock = pg.time.Clock()
-
-        #Game variables
-        self.game_state: GameState = GameState.START_MENU
-        self.current_level_num: int = self.game_state.value
-        self.screen_rect: pg.Rect = self.screen.get_rect()
 
         #Game objects
         self.player = Player(self)
@@ -49,10 +49,9 @@ class Game:
                 quit()
             
             match self.game_state:
-                case GameState.START_MENU:
-                    handle_start_menu_events(self, event)
-                case GameState.PAUSE_MENU:
-                    handle_pause_menu_events(self, event)
+                case GameState.START_MENU: handle_start_menu_events(self, event)
+                case GameState.LEVEL_1: handle_level_one_events(self, event)
+                case GameState.PAUSE_MENU: handle_pause_menu_events(self, event)
             
     def update(self):
         """Function that updates generic values not specific to any game state and calls the appropriate update function by consulting the current game state"""
@@ -60,10 +59,9 @@ class Game:
         pg.display.set_caption(f" Ah It Appears To Have Done Something - FPS: {int(self.clock.get_fps())}") #Update the window title to show the FPS
         
         match self.game_state:
-            case GameState.START_MENU:
-                update_start_menu(self)
-            case GameState.PAUSE_MENU:
-                update_pause_menu(self)
+            case GameState.START_MENU: update_start_menu(self)
+            case GameState.LEVEL_1: update_level_one(self)
+            case GameState.PAUSE_MENU: update_pause_menu(self)
 
     def render(self):
         """Function that renders the game by calling the appropriate render function by consulting the current game state""" 
@@ -71,10 +69,9 @@ class Game:
         self.screen.fill('white') #Clear the screen
         
         match self.game_state:
-            case GameState.START_MENU:
-                render_start_menu(self)
-            case GameState.PAUSE_MENU:
-                render_pause_menu(self)
+            case GameState.START_MENU: render_start_menu(self)
+            case GameState.LEVEL_1: render_level_one(self)
+            case GameState.PAUSE_MENU: render_pause_menu(self)
 
         pg.display.flip()
         self.clock.tick(MAX_FPS)
@@ -85,8 +82,8 @@ class Game:
         #Init general assets
         self.cursor_surf: pg.Surface = pg.image.load("graphics/assets/start menu/cursor.png").convert_alpha()
 
-        #Portal animation and sprites
-        self.portal_coords: list[tuple] = [(800, 499)] #Coordinates of the portal in each level (bottomright) (DO NOT CHANGE) (result may appear strange but its because the portal sprite have extra width to accomodate the particles)
+            #Portal animation and sprites
+        self.portal_coords: list[tuple] = [(800, 500), (1063, 339)] #Coordinates of the portal in each level (bottomright) (DO NOT CHANGE) (result may appear strange but its because the portal sprite have extra width to accomodate the particles)
         self.portal_animation_current_frame: int = 0 #Variable to keep track of the index of the current frame of the portal animation
         self.portal_animation_switching_delay: int = PORTAL_ANIMATION_SWITCHING_DELAY #Variable to keep track of when to progress the animation
         self.portal_animation: list[pg.Surface] = [pg.image.load(f"graphics/assets/portal/{i}.png").convert_alpha() for i in range(1, 7)]
@@ -105,7 +102,11 @@ class Game:
         self.start_button_rect: pg.Rect = self.start_button_surf.get_rect(topleft = (498, self.logo_rect.midbottom[1] + 50))
 
         self.start_menu_ground_surf: pg.Surface = pg.image.load("graphics/assets/start menu/ground.png").convert_alpha()
-        self.start_menu_ground_rect: pg.Rect = self.start_menu_ground_surf.get_rect(bottomleft = (0, SCREEN_HEIGHT))
+        self.start_menu_ground_rect: pg.Rect = self.start_menu_ground_surf.get_rect(bottomleft = (0, LEVEL_RESOLUTIONS[0][1]))
+
+        #Level 1 assets
+        self.level_one_ground_surf: pg.Surface = pg.image.load("graphics/assets/level 1/ground.png").convert_alpha()
+        self.level_one_ground_rect: pg.Rect = self.level_one_ground_surf.get_rect(bottomleft = (0, LEVEL_RESOLUTIONS[1][1]))
 
         #Pause menu
         self.previous_game_state: GameState = None #Variable to keep track of the previous game state used to return to the previous game state when unpausing
@@ -121,14 +122,20 @@ class Game:
 
     def advance_level(self):
         """Function that advances the level"""
-        self.current_level_num += 1
-        self.game_state = GameState(self.current_level_num)
-        self.portal_rect = self.current_portal_sprite.get_rect(bottomright = self.portal_coords[self.current_level_num])
+        self.current_level_num += 1 #Advance the level counter
+        self.player.current_level_num = self.current_level_num #Update the player's current level
+        self.game_state = GameState(self.current_level_num) #Update the game state
+        self.update_screen_dimensions() #Update the screen dimensions
+        self.portal_rect = self.current_portal_sprite.get_rect(bottomright = self.portal_coords[self.current_level_num]) #Update the portal rect
 
-    def generic_pause_event_handler(self, event):
+    def generic_pause_event_handler(self):
         if not self.player.is_in_air: self.player.status = 'standing'
         self.previous_game_state = self.game_state
-        self.game_state = GameState.PAUSE_MENU	
+        self.game_state = GameState.PAUSE_MENU
+
+    def update_screen_dimensions(self):
+        """Function that updates the screen dimensions"""
+        self.screen = pg.display.set_mode(LEVEL_RESOLUTIONS[self.current_level_num])	
 
 if __name__ == "__main__":
     Game().run()

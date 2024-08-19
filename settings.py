@@ -8,7 +8,7 @@ MAX_FPS = 60 #The maximum frames per second the game should run at (suggested: 6
 PORTAL_ANIMATION_SWITCHING_DELAY = 10 #After how many frames the portal animation should progress (suggested: 10)
 
 #Physics simulation settings
-MAX_ENTITY_SPEED = 4 #The maximum speed of any entity in pixels per frame (suggested: 10)
+MAX_ENTITY_SPEED = 5 #The maximum speed of any entity in pixels per frame (suggested: 10)
 FALLING_SPEED_INCR = 1 #The speed at which the player falls in pixels per frame (suggested: 1)
 PLAYER_GRAVITY_PULL_DELAY = 2 #The delay in frames between gravity pulls on the player (suggested: 2)
 BASE_GRAVITY_PULL = FALLING_SPEED_INCR #The base gravity pull any entity with simulated physics (suggested: FALLING_SPEED_INCR)

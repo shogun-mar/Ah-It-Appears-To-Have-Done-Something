@@ -4,7 +4,13 @@ from logic.physicsEntities import PhysicsEntity
 
 def handle_start_menu_events(game, event):
     """Function that handles events for the start menu game state"""
-    ...
+    
+    if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
+        if game.start_button_rect.collidepoint(event.pos):
+            create_start_physics_entity(game)
+        elif game.level_button_rect.collidepoint(event.pos):
+            create_level_physics_entity(game)
+        
 
 def update_start_menu(game):
     """Function that updates the start menu game state"""
@@ -33,5 +39,15 @@ def render_start_menu(game):
     
     screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor
 
-    pg.draw.line(screen, 'red', (game.player.gravity_x_coord, 0), (game.player.gravity_x_coord, SCREEN_HEIGHT), 2) #Draw the gravity line
-    pg.draw.rect(screen, 'green', game.player.rect, 2)  # Draw the player's rect with a red outline
+    #pg.draw.line(screen, 'red', (game.player.gravity_x_coord, 0), (game.player.gravity_x_coord, SCREEN_HEIGHT), 2) #Draw the gravity line
+    #pg.draw.rect(screen, 'green', game.player.rect, 2)  # Draw the player's rect with a red outline
+
+def create_start_physics_entity(game):
+    """Function that creates a physics entity at the player's position"""
+    game.entities.append(PhysicsEntity(game = game, mass = 5, sprite = game.start_button_surf, \
+                                        rect = game.start_button_rect.copy()))
+
+def create_level_physics_entity(game):
+    """Function that creates a physics entity at the level button's position"""
+    game.entities.append(PhysicsEntity(game = game, mass = 5, sprite = game.level_button_surf, \
+                                        rect = game.level_button_rect.copy()))

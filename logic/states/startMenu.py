@@ -13,12 +13,8 @@ def handle_start_menu_events(game, event):
             game.generic_pause_event_handler()
             
     if event.type == pg.MOUSEBUTTONDOWN and event.button == 1 and has_entity_colldown_finished():
-        if game.start_button_rect.collidepoint(event.pos):
-            print("Start button clicked")
-            create_start_physics_entity(game)
-        elif game.level_button_rect.collidepoint(event.pos):
-            print("Level button clicked")
-            create_level_physics_entity(game) 
+        if game.start_button_rect.collidepoint(event.pos): create_start_physics_entity(game)
+        elif game.level_button_rect.collidepoint(event.pos): create_level_physics_entity(game) 
 
 def update_start_menu(game):
     """Function that updates the start menu game state"""
@@ -55,19 +51,23 @@ def render_start_menu(game):
 
 def create_start_physics_entity(game):
     """Function that creates a physics entity at the player's position"""
+
     game.entities.append(PhysicsEntity(game = game, mass = 5, sprite = game.start_button_surf, \
                                         rect = game.start_button_rect.copy()))
 
 def create_level_physics_entity(game):
     """Function that creates a physics entity at the level button's position"""
+
     game.entities.append(PhysicsEntity(game = game, mass = 5, sprite = game.level_button_surf, \
                                         rect = game.level_button_rect.copy()))
     
 def has_entity_colldown_finished():
     """Function that returns whether the cooldown for creating a new entity has finished"""
+    
     global last_entity_spawn_time
+
     current_time = pg.time.get_ticks()
-    if current_time - last_entity_spawn_time >= entity_spawn_cooldown:
+    if current_time - last_entity_spawn_time >= entity_spawn_cooldown or last_entity_spawn_time == 0: #If the cooldown has finished or no entity has been spawned yet
         last_entity_spawn_time = current_time
         return True
     return False

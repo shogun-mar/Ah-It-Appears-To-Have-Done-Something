@@ -33,6 +33,9 @@ class PhysicsEntity:
             self.rect.midbottom = (desired_x, desired_y)
         elif result == 'collision':
             self.velocity[1] = BASE_GRAVITY_PULL
+        elif result == 'death':
+            self.game.entities.remove(self)
+            del self
 
     @property
     def collides_with_other_entities(self):
@@ -90,7 +93,10 @@ class Player(PhysicsEntity):
             elif not self.has_just_landed: self.velocity[0] += CURRENT_SPEED_VALUE
 
         if keys[PLAYER_JUMP_KEY] and not self.is_in_air and not self.has_just_landed: 
-            self.velocity[1] = BASE_JUMP_SPEED
+            self.velocity[1] = BASE_JUMP_SPEED #Set the player's vertical velocity to the jump speed
+
+        elif keys[QUICK_RESTART_KEY]:
+            self.reset_position()
 
         #Manage not pressed keys
         if not keys[PLAYER_LEFT_KEY]: #If the player was moving left remove CURRENT_SPEED_VALUE from the player's velocity (this is done to keep eventual inertia)
@@ -223,6 +229,7 @@ class Player(PhysicsEntity):
         self.update_status() #Update the player's status based on the player's velocity
 
     def apply_gravity(self):
+
         """Function that manages gravity based movement complete of sideways movement and collision detection."""
         
         self.gravity_delay_counter -= 1 #Decrease the delay
@@ -259,11 +266,19 @@ class Player(PhysicsEntity):
             match vert_result:
                 case 'allowed':
                     if not self.collides_with_other_entities(desired_x, desired_y): self.rect.midbottom = (desired_x, desired_y)
+                    elif self.is_in_air: #If the player is in air and does not collide with other entities
+                        self.velocity[1] = BASE_GRAVITY_PULL #Reset the player's vertical velocity
+                        self.status = 'standing' #Set the player's status to standing
+                        self.sprite = self.landing_sprite #Set the sprite to the landing frame
+                        self.current_animation_frame = 0 #Reset the animation frame
+                        self.animation_switching_delay = int(PLAYER_ANIMATION_SWITCHING_DELAY * (0.8 + (self.velocity[1] / 10))) #Dinamically set the delay to make so the landing seems heavy                 
+                    else: self.velocity[1] = BASE_GRAVITY_PULL #If if does not collide with other entities and is not in air reset the player's vertical velocity
+
                 case 'death': self.reset_position()
                 case 'changing level': self.advance_level()
                 case 'collision':
                         self.velocity[1] = BASE_GRAVITY_PULL #Reset the player's vertical velocity
-                        if self.status in ['airborne', 'left airborne', 'right airborne']:
+                        if self.is_in_air:
                             # Constants
                             initial_desired_y = desired_y
                             for i in range(self.velocity[1]): #Iterate over the player's vertical velocity to find the first position where the player can land (not doing this would make the player land N pixels above the ground with N being the player's vertical velocity) 

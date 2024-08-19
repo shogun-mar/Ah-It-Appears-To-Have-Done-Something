@@ -96,10 +96,10 @@ class Game:
         self.logo_rect = self.logo_surf.get_rect(midbottom = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4))
 
         self.level_button_surf: pg.Surface = pg.image.load("graphics/assets/start menu/level.png").convert_alpha()
-        self.level_button_rect: pg.Rect = self.level_button_surf.get_rect(topleft = (100, self.logo_rect.midbottom[1] + 50))
+        self.level_button_rect: pg.Rect = self.level_button_surf.get_rect(topleft = (102, self.logo_rect.midbottom[1] + 50))
 
         self.start_button_surf: pg.Surface = pg.image.load("graphics/assets/start menu/start.png").convert_alpha()
-        self.start_button_rect: pg.Rect = self.start_button_surf.get_rect(topleft = (500, self.logo_rect.midbottom[1] + 50))
+        self.start_button_rect: pg.Rect = self.start_button_surf.get_rect(topleft = (502, self.logo_rect.midbottom[1] + 50))
 
         self.start_menu_ground_surf: pg.Surface = pg.image.load("graphics/assets/start menu/ground.png").convert_alpha()
         self.start_menu_ground_rect: pg.Rect = self.start_menu_ground_surf.get_rect(bottomleft = (0, LEVEL_RESOLUTIONS[0][1]))

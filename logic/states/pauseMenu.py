@@ -22,7 +22,6 @@ def render_pause_menu(game):
     
     match game.previous_game_state:
         case GameState.START_MENU:
-            print("Rendering start menu while paused")
             #render_start_menu(game) #Could also do this but it would also draw the cursor (a fix could be moving the cursor drawing to the main render function in game.py)
             screen.blit(game.logo_surf, game.logo_rect) #Draw the logo
             screen.blit(game.start_menu_ground_surf, game.start_menu_ground_rect) #Draw the ground

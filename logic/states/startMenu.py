@@ -1,7 +1,9 @@
 import pygame as pg
 from settings import *
 from logic.physicsEntities import PhysicsEntity
-from logic.states.gameState import GameState
+
+entity_spawn_cooldown = 1000 #Cooldown for spawning entities in milliseconds
+last_entity_spawn_time = 0 #Time of the last entity spawn
 
 def handle_start_menu_events(game, event):
     """Function that handles events for the start menu game state"""
@@ -10,10 +12,12 @@ def handle_start_menu_events(game, event):
         if event.key == PAUSE_KEY:
             game.generic_pause_event_handler()
             
-    if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
+    if event.type == pg.MOUSEBUTTONDOWN and event.button == 1 and has_entity_colldown_finished():
         if game.start_button_rect.collidepoint(event.pos):
+            print("Start button clicked")
             create_start_physics_entity(game)
         elif game.level_button_rect.collidepoint(event.pos):
+            print("Level button clicked")
             create_level_physics_entity(game) 
 
 def update_start_menu(game):
@@ -36,7 +40,7 @@ def render_start_menu(game):
     screen.blit(game.start_menu_ground_surf, game.start_menu_ground_rect) #Draw the ground
     screen.blit(game.current_portal_sprite, game.portal_rect) #Draw the end of level portal
     screen.blit(game.player.sprite, game.player.rect) #Draw the player
-    
+
     screen.blit(game.logo_surf, game.logo_rect) #Draw the logo
     screen.blit(game.level_button_surf, game.level_button_rect) #Draw the level button
     screen.blit(game.start_button_surf, game.start_button_rect) #Draw the start button
@@ -45,6 +49,7 @@ def render_start_menu(game):
     
     screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor
 
+    [pg.draw.rect(screen, 'red', entity.rect, 2) for entity in game.entities] #Draw the entities' rects with a red outline
     #pg.draw.line(screen, 'red', (game.player.gravity_x_coord, 0), (game.player.gravity_x_coord, SCREEN_HEIGHT), 2) #Draw the gravity line
     #pg.draw.rect(screen, 'green', game.player.rect, 2)  # Draw the player's rect with a red outline
 
@@ -57,3 +62,13 @@ def create_level_physics_entity(game):
     """Function that creates a physics entity at the level button's position"""
     game.entities.append(PhysicsEntity(game = game, mass = 5, sprite = game.level_button_surf, \
                                         rect = game.level_button_rect.copy()))
+    
+def has_entity_colldown_finished():
+    """Function that returns whether the cooldown for creating a new entity has finished"""
+    global last_entity_spawn_time
+    current_time = pg.time.get_ticks()
+    if current_time - last_entity_spawn_time >= entity_spawn_cooldown:
+        last_entity_spawn_time = current_time
+        return True
+    return False
+

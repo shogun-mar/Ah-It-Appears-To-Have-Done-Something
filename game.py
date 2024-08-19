@@ -99,7 +99,7 @@ class Game:
         self.level_button_rect: pg.Rect = self.level_button_surf.get_rect(topleft = (100, self.logo_rect.midbottom[1] + 50))
 
         self.start_button_surf: pg.Surface = pg.image.load("graphics/assets/start menu/start.png").convert_alpha()
-        self.start_button_rect: pg.Rect = self.start_button_surf.get_rect(topleft = (498, self.logo_rect.midbottom[1] + 50))
+        self.start_button_rect: pg.Rect = self.start_button_surf.get_rect(topleft = (500, self.logo_rect.midbottom[1] + 50))
 
         self.start_menu_ground_surf: pg.Surface = pg.image.load("graphics/assets/start menu/ground.png").convert_alpha()
         self.start_menu_ground_rect: pg.Rect = self.start_menu_ground_surf.get_rect(bottomleft = (0, LEVEL_RESOLUTIONS[0][1]))

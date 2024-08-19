@@ -21,7 +21,7 @@ PLAYER_SPEED = 2 #The speed of the player in pixels per frame while on the groun
 PLAYER_SPEED_MID_AIR = PLAYER_SPEED // 2  #The speed of the player in pixels per frame while in mid air (suggested: PLAYER_SPEED / 2)
 PLAYER_ANIMATION_SWITCHING_DELAY = 12  #After how many frames the animation of the player should progress (suggested: 12)
 BASE_JUMP_SPEED = -10 #Initial player jump speed in pixel per frame (negative value for jumping up) (suggested: -10 --> value should be negative)
-INITIAL_COORDS_PLAYER = [(700, 501), (50, 339)] #Initial coordinates the player should have in each level (midbottom) (DO NOT CHANGE)
+INITIAL_COORDS_PLAYER = [(50, 501), (50, 339)] #Initial coordinates the player should have in each level (midbottom) (DO NOT CHANGE)
 
 #Key bindings (see below for key constants)
 PLAYER_LEFT_KEY = pg.K_a #The key to move the player left (suggested: pg.K_a)
@@ -31,7 +31,7 @@ PAUSE_KEY = pg.K_ESCAPE #The key to pause the game (suggested: pg.K_ESCAPE)
 QUICK_RESTART_KEY = pg.K_r #The key to quickly restart the level (suggested: pg.K_r)
 QUCK_EXIT_KEY = pg.K_p #The key to quickly exit the game (suggested: pg.K_p)
 
-"""
+r""" r stands for raw string inserted to avoid a syntax warning every time the program is begin run
 Pygame key constants
 Constant      ASCII   Description
 ---------------------------------

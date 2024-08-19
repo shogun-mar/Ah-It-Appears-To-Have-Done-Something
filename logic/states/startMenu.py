@@ -1,6 +1,6 @@
 import pygame as pg
 from settings import *
-from logic.physicsEntities import PhysicsEntity
+from logic.physicsEntities import DeathEntity
 
 entity_spawn_cooldown = 1000 #Cooldown for spawning entities in milliseconds
 last_entity_spawn_time = 0 #Time of the last entity spawn
@@ -42,28 +42,26 @@ def render_start_menu(game):
     screen.blit(game.start_button_surf, game.start_button_rect) #Draw the start button
     [screen.blit(entity.sprite, entity.rect) for entity in game.entities] #Draw all the entities
 
-    
     screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor
 
-    [pg.draw.rect(screen, 'red', entity.rect, 2) for entity in game.entities] #Draw the entities' rects with a red outline
     #pg.draw.line(screen, 'red', (game.player.gravity_x_coord, 0), (game.player.gravity_x_coord, SCREEN_HEIGHT), 2) #Draw the gravity line
     #pg.draw.rect(screen, 'green', game.player.rect, 2)  # Draw the player's rect with a red outline
 
 def create_start_physics_entity(game):
     """Function that creates a physics entity at the player's position"""
 
-    game.entities.append(PhysicsEntity(game = game, mass = 5, sprite = game.start_button_surf, \
+    game.entities.append(DeathEntity(game = game, mass = 5, sprite = game.start_button_surf, \
                                         rect = game.start_button_rect.copy()))
 
 def create_level_physics_entity(game):
     """Function that creates a physics entity at the level button's position"""
 
-    game.entities.append(PhysicsEntity(game = game, mass = 5, sprite = game.level_button_surf, \
+    game.entities.append(DeathEntity(game = game, mass = 5, sprite = game.level_button_surf, \
                                         rect = game.level_button_rect.copy()))
     
 def has_entity_colldown_finished():
     """Function that returns whether the cooldown for creating a new entity has finished"""
-    
+
     global last_entity_spawn_time
 
     current_time = pg.time.get_ticks()

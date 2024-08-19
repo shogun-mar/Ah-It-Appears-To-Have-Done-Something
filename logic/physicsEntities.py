@@ -15,7 +15,7 @@ class PhysicsEntity:
         self.velocity: list[int] = [0, BASE_GRAVITY_PULL * mass] #The velocity of the entity in the x and y axis
         self.screen_rect: pg.Rect = game.screen.get_rect() #The screen rect
         self.collision_manager: CollisionManager = CollisionManager(game)
-    
+       
         #Miscellaneous variables
         self.game = game
 
@@ -29,13 +29,10 @@ class PhysicsEntity:
         desired_x, desired_y = self.rect.midbottom[0], self.rect.midbottom[1] + self.velocity[1]
         result = self.collision_manager.allow_movement(desired_x, desired_y)
 
-        if result == 'allowed' and self.collides_with_other_entities == False:
-            self.rect.midbottom = (desired_x, desired_y)
-        elif result == 'collision':
-            self.velocity[1] = BASE_GRAVITY_PULL
-        elif result == 'death':
-            self.game.entities.remove(self)
-            del self
+        match result:
+            case 'allowed': 
+                if not self.collides_with_other_entities: self.rect.midbottom = (desired_x, desired_y)
+            case 'collision': self.velocity[1] = BASE_GRAVITY_PULL
 
     @property
     def collides_with_other_entities(self):
@@ -228,6 +225,8 @@ class Player(PhysicsEntity):
 
         self.update_status() #Update the player's status based on the player's velocity
 
+        #Clamping the player's rect in place is not necessary because the boundaries checks are already done in the calculation of the desired position
+
     def apply_gravity(self):
 
         """Function that manages gravity based movement complete of sideways movement and collision detection."""
@@ -405,4 +404,43 @@ class Player(PhysicsEntity):
         for entity in self.game.entities:
             if entity != self and entity.rect.collidepoint(point):
                 return True
+        return False
+
+class DeathEntity(PhysicsEntity):
+    def __init__(self, game, mass, sprite = None, rect = None):
+        super().__init__(game, mass, sprite, rect)
+
+        self.death_timer_amount = 1500 #After how many milliseconds the entity should die when in contact with a death portion of the collision map
+        self.death_contact_time = 0
+        self.should_die = False
+
+    def move(self):
+        self.apply_gravity()
+
+        #Clamp the player rect to the screen rect to ensure that the player doesn't go off screen
+        self.rect.clamp_ip(self.screen_rect)
+
+        if self.should_die and self.is_death_timer_finished():
+            self.game.entities.remove(self)
+            del self
+        
+    def apply_gravity(self):
+        desired_x, desired_y = self.rect.midbottom[0], self.rect.midbottom[1] + self.velocity[1]
+        result = self.collision_manager.allow_movement(desired_x, desired_y)
+
+        match result:
+            case 'allowed': 
+                if not self.collides_with_other_entities: self.rect.midbottom = (desired_x, desired_y)
+            case 'collision': self.velocity[1] = BASE_GRAVITY_PULL
+            case 'death': 
+                if not self.should_die: self.init_death_sequence() #If the entity has not started the death sequence yet, start it
+
+    def init_death_sequence(self):
+        self.should_die = True
+        self.death_contact_time = pg.time.get_ticks()
+
+    def is_death_timer_finished(self):
+        current_time = pg.time.get_ticks()
+        if current_time - self.death_contact_time >= self.death_timer_amount:
+            return True
         return False

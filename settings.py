@@ -3,6 +3,7 @@ import pygame as pg
 #Graphical representation settings
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 640 #The width and height of the screen in pixels (DO NOT CHANGE)
 MAX_FPS = 60 #The maximum frames per second the game should run at (suggested: 60)
+PAUSE_MENU_BACKGROUND_ALPHA = 128 #The alpha value of the background of the pause menu (suggested: 128)
 
 #Miscellaneous graphical representation settings
 PORTAL_ANIMATION_SWITCHING_DELAY = 10 #After how many frames the portal animation should progress (suggested: 10)
@@ -22,9 +23,12 @@ BASE_JUMP_SPEED = -10 #Initial player jump speed in pixel per frame (negative va
 INITIAL_COORDS_PLAYER = [(50, 500)] #Initial coordinates the player should have in each level (midbottom) (DO NOT CHANGE)
 
 #Key bindings (see below for key constants)
-PLAYER_RIGHT_KEY = pg.K_d #The key to move the player right (suggested: pg.K_d)
 PLAYER_LEFT_KEY = pg.K_a #The key to move the player left (suggested: pg.K_a)
+PLAYER_RIGHT_KEY = pg.K_d #The key to move the player right (suggested: pg.K_d)
 PLAYER_JUMP_KEY = pg.K_SPACE #The key to make the player jump (suggested: pg.K_SPACE)
+PAUSE_KEY = pg.K_ESCAPE #The key to pause the game (suggested: pg.K_ESCAPE)
+QUICK_RESTART_KEY = pg.K_r #The key to quickly restart the level (suggested: pg.K_r)
+QUCK_EXIT_KEY = pg.K_p #The key to quickly exit the game (suggested: pg.K_p)
 
 """
 Pygame key constants

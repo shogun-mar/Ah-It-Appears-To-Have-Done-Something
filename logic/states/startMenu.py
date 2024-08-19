@@ -1,10 +1,17 @@
 import pygame as pg
 from settings import *
 from logic.physicsEntities import PhysicsEntity
+from logic.states.gameState import GameState
 
 def handle_start_menu_events(game, event):
     """Function that handles events for the start menu game state"""
     
+    if event.type == pg.KEYDOWN and event.key == PAUSE_KEY:
+        game.update_pause_menu_background()
+        game.previous_game_state = game.game_state
+        game.game_state = GameState.PAUSE_MENU
+            
+
     if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
         if game.start_button_rect.collidepoint(event.pos):
             create_start_physics_entity(game)

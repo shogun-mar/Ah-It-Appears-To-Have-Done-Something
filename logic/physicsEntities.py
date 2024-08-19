@@ -14,7 +14,7 @@ class PhysicsEntity:
         self.mass: int = mass #The mass of the entity
         self.velocity: list[int] = [0, BASE_GRAVITY_PULL * mass] #The velocity of the entity in the x and y axis
         self.screen_rect: pg.Rect = game.screen_rect
-        self.collision_manager: CollisionManager = CollisionManager(game.gameState.value)
+        self.collision_manager: CollisionManager = CollisionManager(game.game_state.value)
     
         #Miscellaneous variables
         self.game = game
@@ -352,9 +352,9 @@ class Player(PhysicsEntity):
     
     def advance_level(self):
         """Function that advances the player to the next level by increasing the current level number and resetting the player's position."""
-        print("Level completed!")
+        self.game.advance_level()
+        self.reset_position()
         #self.current_level_num += 1 #Advance the level
-        #self.reset_position()
 
     def reset_position(self):
         """Function that resets the player's position to the initial position in the current level and resets the frame counter to make the player's animation start from the beginning.""" 

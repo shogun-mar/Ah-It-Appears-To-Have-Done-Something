@@ -9,7 +9,7 @@ A loophole is an ambiguity or inadequacy in a system, such as a law or security,
 which can be used to circumvent or otherwise avoid the purpose,
 implied or explicitly stated, of the system.
 ```
-Knowing this I structured my game in a plethora of levels with varying mechanics and controls, which will be visible on each level, in such levels the player will have to find out a way to reach the end of the level by alternative means, often breaking the boundaries of the game.
+Knowing this I structured my game in a plethora of levels with varying mechanics and controls, which will be visible on each level, in such levels the player will have to find out a way to reach the end of the level by alternative means, often breaking the boundaries of the game and interacting with the hardware and operating system itself.
 
 
 Solutions will be available in a separate file to avoid spoilers.

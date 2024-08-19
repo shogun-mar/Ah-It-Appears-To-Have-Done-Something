@@ -4,6 +4,7 @@ with contextlib.redirect_stdout(None): #Suppress pygame welcome message
 del contextlib
 from logic.states.gameState import GameState
 from logic.states.startMenu import handle_start_menu_events, update_start_menu, render_start_menu
+from logic.states.pauseMenu import handle_pause_menu_events, update_pause_menu, render_pause_menu
 from logic.physicsEntities import Player
 
 from settings import *
@@ -22,8 +23,8 @@ class Game:
         self.clock: pg.Clock = pg.time.Clock()
 
         #Game variables
-        self.gameState: GameState = GameState.START_MENU
-        self.current_level_num: int = self.gameState.value
+        self.game_state: GameState = GameState.START_MENU
+        self.current_level_num: int = self.game_state.value
         self.screen_rect: pg.Rect = self.screen.get_rect()
 
         #Game objects
@@ -43,28 +44,37 @@ class Game:
     def handle_events(self):
         """Function that handles generic events for the game which are not specific to any game state and by consulting the current game state, calls the appropriate event handling function"""
         for event in pg.event.get():
-            if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
+            if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == QUCK_EXIT_KEY):
                 pg.quit()
                 quit()
             
-            if self.gameState == GameState.START_MENU:
-                handle_start_menu_events(self, event)
+            match self.game_state:
+                case GameState.START_MENU:
+                    handle_start_menu_events(self, event)
+                case GameState.PAUSE_MENU:
+                    handle_pause_menu_events(self, event)
             
     def update(self):
         """Function that updates generic values not specific to any game state and calls the appropriate update function by consulting the current game state"""
 
         pg.display.set_caption(f" Ah It Appears To Have Done Something - FPS: {int(self.clock.get_fps())}") #Update the window title to show the FPS
         
-        if self.gameState == GameState.START_MENU:
-            update_start_menu(self)
+        match self.game_state:
+            case GameState.START_MENU:
+                update_start_menu(self)
+            case GameState.PAUSE_MENU:
+                update_pause_menu(self)
 
     def render(self):
         """Function that renders the game by calling the appropriate render function by consulting the current game state""" 
 
         self.screen.fill('white') #Clear the screen
         
-        if self.gameState == GameState.START_MENU:
-            render_start_menu(self)
+        match self.game_state:
+            case GameState.START_MENU:
+                render_start_menu(self)
+            case GameState.PAUSE_MENU:
+                render_pause_menu(self)
 
         pg.display.flip()
         self.clock.tick(MAX_FPS)
@@ -73,6 +83,7 @@ class Game:
         """Function that initializes all the assets for the game"""
 
         #Init general assets
+        self.cursor_surf: pg.Surface = pg.image.load("graphics/assets/start menu/cursor.png").convert_alpha()
 
         #Portal animation and sprites
         self.portal_coords: list[tuple] = [(800, 499)] #Coordinates of the portal in each level (bottomright) (DO NOT CHANGE) (result may appear strange but its because the portal sprite have extra width to accomodate the particles)
@@ -96,7 +107,9 @@ class Game:
         self.start_menu_ground_surf: pg.Surface = pg.image.load("graphics/assets/start menu/ground.png").convert_alpha()
         self.start_menu_ground_rect: pg.Rect = self.start_menu_ground_surf.get_rect(bottomleft = (0, SCREEN_HEIGHT))
 
-        self.cursor_surf: pg.Surface = pg.image.load("graphics/assets/start menu/cursor.png").convert_alpha()
+        #Pause menu
+        self.previous_game_state: GameState = None #Variable to keep track of the previous game state used to return to the previous game state when unpausing
+        self.pause_menu_background: pg.Surface = None #Variable to keep track of the background of the pause menu
 
     def update_portal_animation(self): #Written here so that it can be reused in all game states
         """Function that updates the portal animation"""
@@ -106,6 +119,20 @@ class Game:
             self.portal_animation_current_frame += 1 #Progress the frame index
             if self.portal_animation_current_frame == len(self.portal_animation): self.portal_animation_current_frame = 0 #Reset the frame index if it exceeds the length of the animation
             self.current_portal_sprite = self.portal_animation[self.portal_animation_current_frame] #Update the current sprite
+
+    def advance_level(self):
+        """Function that advances the level"""
+        self.current_level_num += 1
+        self.game_state = GameState(self.current_level_num)
+        self.portal_rect = self.current_portal_sprite.get_rect(bottomright = self.portal_coords[self.current_level_num])
+
+    def update_pause_menu_background(self):
+        """Function that returns the background of the pause menu"""
+        background: pg.Surface = self.screen.copy()
+        dark_surf: pg.Surface = pg.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pg.SRCALPHA)
+        dark_surf.fill((0, 0, 0, PAUSE_MENU_BACKGROUND_ALPHA))  # Fill with black and set alpha
+        background.blit(dark_surf, (0, 0))
+        self.pause_menu_background = background
 
 if __name__ == "__main__":
     Game().run()

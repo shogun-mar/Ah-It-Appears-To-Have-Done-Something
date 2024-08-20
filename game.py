@@ -6,6 +6,7 @@ from logic.states.gameState import GameState
 from logic.states.startMenu import handle_start_menu_events, update_start_menu, render_start_menu
 from logic.states.pauseMenu import handle_pause_menu_events, update_pause_menu, render_pause_menu
 from logic.states.level_1 import handle_level_one_events, update_level_one, render_level_one
+from logic.states.level_2 import handle_level_two_events, update_level_two, render_level_two
 from logic.physicsEntities import Player
 from logic.interactibles import GravityController
 
@@ -23,7 +24,8 @@ class Game:
         pg.init()
 
     	#Game variables
-        self.game_state: GameState = GameState.START_MENU
+        self.game_state: GameState = GameState.LEVEL_2
+        #self.game_state: GameState = GameState.START_MENU
         self.current_level_num: int = self.game_state.value
         self.should_draw_cursor: bool = True
 
@@ -38,6 +40,7 @@ class Game:
 
         #Game objects
         self.player = Player(self)
+        self.player.controls_enabled = True #FOR DEBUGGING PURPOSES ONLY
         self.entities = []
 
         #Init assets
@@ -69,6 +72,7 @@ class Game:
             match self.game_state:
                 case GameState.START_MENU: handle_start_menu_events(self, event)
                 case GameState.LEVEL_1: handle_level_one_events(self, event)
+                case GameState.LEVEL_2: handle_level_two_events(self, event)
                 case GameState.PAUSE_MENU: handle_pause_menu_events(self, event)
             
     def update(self):
@@ -79,6 +83,7 @@ class Game:
         match self.game_state:
             case GameState.START_MENU: update_start_menu(self)
             case GameState.LEVEL_1: update_level_one(self)
+            case GameState.LEVEL_2: update_level_two(self)
             case GameState.PAUSE_MENU: update_pause_menu(self)
 
     def render(self):
@@ -89,6 +94,7 @@ class Game:
         match self.game_state:
             case GameState.START_MENU: render_start_menu(self)
             case GameState.LEVEL_1: render_level_one(self)
+            case GameState.LEVEL_2: render_level_two(self)
             case GameState.PAUSE_MENU: render_pause_menu(self)
 
         pg.display.flip()
@@ -101,7 +107,7 @@ class Game:
         self.cursor_surf: pg.Surface = pg.image.load("graphics/assets/cursor.png").convert_alpha()
 
             #Portal animation and sprites
-        self.portal_coords: list[tuple] = [(800, 500), (950, 339)] #Coordinates of the portal in each level (bottomright) (DO NOT CHANGE) (result may appear strange but its because the portal sprite have extra width to accomodate the particles)
+        self.portal_coords: list[tuple] = [(800, 500), (950, 339), (949, 139)] #Coordinates of the portal in each level (bottomright) (DO NOT CHANGE) (result may appear strange but its because the portal sprite have extra width to accomodate the particles)
         self.portal_animation_current_frame: int = 0 #Variable to keep track of the index of the current frame of the portal animation
         self.portal_animation_switching_delay: int = PORTAL_ANIMATION_SWITCHING_DELAY #Variable to keep track of when to progress the animation
         self.portal_animation: list[pg.Surface] = [pg.image.load(f"graphics/assets/portal/{i}.png").convert_alpha() for i in range(1, 7)]
@@ -125,9 +131,16 @@ class Game:
         #Level 1 assets
         self.level_one_ground_surf: pg.Surface = pg.image.load("graphics/assets/level 1/ground.png").convert_alpha()
         self.level_one_ground_rect: pg.Rect = self.level_one_ground_surf.get_rect(bottomleft = (0, LEVEL_RESOLUTIONS[1][1]))
-        self.level_one_grav_controller_y = 150
+        self.level_one_grav_controller_y: int = 150
         self.level_one_grav_controllers: list[GravityController] = (GravityController(game = self, coords = (175, self.level_one_grav_controller_y), direction='left'),
                                                                     GravityController(game = self, coords = (743, self.level_one_grav_controller_y), direction='right'))
+        
+        #Level 2 assets
+        self.level_two_ground_surf: pg.Surface = pg.image.load("graphics/assets/level 2/ground.png").convert_alpha()
+        self.level_two_ground_rect: pg.Rect = self.level_two_ground_surf.get_rect(bottomleft = (0, LEVEL_RESOLUTIONS[2][1]))
+
+        self.level_two_env_mask = pg.Surface(LEVEL_RESOLUTIONS[2]) #Surface to obscure the screen in level 2
+        self.level_two_player_mask: pg.Surface = pg.image.load("graphics/assets/level 2/mask.png").convert_alpha() #Half transparent black circle used to show the player in the dark
         
         #Pause menu
         self.previous_game_state: GameState = self.game_state #Variable to keep track of the previous game state used to return to the previous game state when unpausing

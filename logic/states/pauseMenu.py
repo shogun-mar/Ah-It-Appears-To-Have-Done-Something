@@ -37,5 +37,10 @@ def render_pause_menu(game):
             screen.blit(game.current_portal_sprite, game.portal_rect) #Draw the end of level portal
             screen.blit(game.player.sprite, game.player.rect) #Draw the player
 
+        case GameState.LEVEL_2:
+            screen.blit(game.level_two_ground_surf, game.level_two_ground_rect) #Draw the ground
+            screen.blit(game.current_portal_sprite, game.portal_rect) #Draw the end of level portal
+            screen.blit(game.player.sprite, game.player.rect) #Draw the player
+
     screen.blit(darkned_surf, (0, 0)) #Darken the screen
     if game.should_draw_cursor: screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor

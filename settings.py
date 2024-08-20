@@ -21,7 +21,7 @@ PLAYER_SPEED = 2 #The speed of the player in pixels per frame while on the groun
 PLAYER_SPEED_MID_AIR = PLAYER_SPEED // 2  #The speed of the player in pixels per frame while in mid air (suggested: PLAYER_SPEED / 2)
 PLAYER_ANIMATION_SWITCHING_DELAY = 12  #After how many frames the animation of the player should progress (suggested: 12)
 BASE_JUMP_SPEED = -8 #Initial player jump speed in pixel per frame (negative value for jumping up) (suggested: -8 --> value has to be negative)
-INITIAL_COORDS_PLAYER = [(50, 501), (50, 339)] #Initial coordinates the player should have in each level (midbottom) (DO NOT CHANGE)
+INITIAL_COORDS_PLAYER = [(50, 501), (50, 339), (887, 489)] #Initial coordinates the player should have in each level (midbottom) (DO NOT CHANGE)
 
 #Key bindings (see below for key constants)
 PLAYER_LEFT_KEY = pg.K_a #The key to move the player left (suggested: pg.K_a)

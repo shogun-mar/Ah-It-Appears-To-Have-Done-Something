@@ -22,7 +22,7 @@ class Game:
     def __init__(self):
         pg.init()
 
-        #Game variables
+    	#Game variables
         self.game_state: GameState = GameState.LEVEL_1
         #self.game_state: GameState = GameState.START_MENU
         self.current_level_num: int = self.game_state.value
@@ -45,9 +45,9 @@ class Game:
 
         # Get the window handle on Windows
         self.window_handle = pg.display.get_wm_info()['window']
-
-        # Get the window position
         self.hardware_window_rect = RECT()
+        self.current_window_position = self.get_window_position()
+        self.last_window_position = None
 
     def run(self):
         """Main game loop"""	

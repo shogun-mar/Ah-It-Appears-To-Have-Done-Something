@@ -42,7 +42,7 @@ def render_start_menu(game):
     screen.blit(game.start_button_surf, game.start_button_rect) #Draw the start button
     [screen.blit(entity.sprite, entity.rect) for entity in game.entities] #Draw all the entities
 
-    screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor
+    if game.should_draw_cursor: screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor
 
     #pg.draw.line(screen, 'red', (game.player.gravity_x_coord, 0), (game.player.gravity_x_coord, SCREEN_HEIGHT), 2) #Draw the gravity line
     #pg.draw.rect(screen, 'green', game.player.rect, 2)  # Draw the player's rect with a red outline

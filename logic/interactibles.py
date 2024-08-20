@@ -19,7 +19,7 @@ class GravityController(Interactibles):
         #Logic
         self.rect = self.sprite.get_rect(topleft = coords)
         self.direction = direction
-        self.action = """game.player.should_float = not game.player.should_float; game.player.controls_enabled = not game.player.controls_enabled""" #Exec strings have to be written through the perspective of the name space in which they will be executed (in this case level_1.py)
+        self.action = "game.player.should_float = not game.player.should_float; game.player.controls_enabled = not game.player.controls_enabled" #Exec strings have to be written through the perspective of the name space in which they will be executed (in this case level_1.py)
         self.last_activation_time = 0
 
     def update_animation(self):

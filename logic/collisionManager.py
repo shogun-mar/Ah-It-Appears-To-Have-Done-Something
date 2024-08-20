@@ -52,6 +52,8 @@ class PlayerCollisionManager(CollisionManager):
         except IndexError:
             return 'collision'
         
+       # print(pixel_color, "at", x, y)
+
         if pixel_color[-1] == 0: #Transparent pixel
             return 'allowed'
         elif pixel_color == [0, 0, 0, 255]: #Fully opaque black

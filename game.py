@@ -26,6 +26,7 @@ class Game:
         self.game_state: GameState = GameState.LEVEL_1
         #self.game_state: GameState = GameState.START_MENU
         self.current_level_num: int = self.game_state.value
+        self.should_draw_cursor: bool = True
 
         #Screen settings
         self.screen: pg.Surface = pg.display.set_mode((LEVEL_RESOLUTIONS[self.current_level_num]))
@@ -62,6 +63,9 @@ class Game:
             if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == QUCK_EXIT_KEY):
                 pg.quit()
                 quit()
+
+            elif event.type == pg.WINDOWLEAVE: self.handle_mouse_exit_event()
+            elif event.type == pg.WINDOWENTER: self.handle_mouse_enter_event()
             
             match self.game_state:
                 case GameState.START_MENU: handle_start_menu_events(self, event)
@@ -95,7 +99,7 @@ class Game:
         """Function that initializes all the assets for the game"""
 
         #Init general assets
-        self.cursor_surf: pg.Surface = pg.image.load("graphics/assets/start menu/cursor.png").convert_alpha()
+        self.cursor_surf: pg.Surface = pg.image.load("graphics/assets/cursor.png").convert_alpha()
 
             #Portal animation and sprites
         self.portal_coords: list[tuple] = [(800, 500), (950, 339)] #Coordinates of the portal in each level (bottomright) (DO NOT CHANGE) (result may appear strange but its because the portal sprite have extra width to accomodate the particles)
@@ -123,7 +127,7 @@ class Game:
         self.level_one_ground_surf: pg.Surface = pg.image.load("graphics/assets/level 1/ground.png").convert_alpha()
         self.level_one_ground_rect: pg.Rect = self.level_one_ground_surf.get_rect(bottomleft = (0, LEVEL_RESOLUTIONS[1][1]))
         self.level_one_grav_controller_y = 150
-        self.level_one_grav_controllers: list[GravityController] = (GravityController(game = self, coords = (175, self.level_one_grav_controller_y), direction='left'), 
+        self.level_one_grav_controllers: list[GravityController] = (GravityController(game = self, coords = (175, self.level_one_grav_controller_y), direction='left'),
                                                                     GravityController(game = self, coords = (743, self.level_one_grav_controller_y), direction='right'))
         
         #Pause menu
@@ -159,6 +163,17 @@ class Game:
         """Function that gets the topleft window position"""
         ctypes.windll.user32.GetWindowRect(self.window_handle, ctypes.byref(self.hardware_window_rect))
         return (self.hardware_window_rect.left, self.hardware_window_rect.top)
+
+    def handle_mouse_exit_event(self):
+        """Function that handles the focus lost event"""
+        self.should_draw_cursor = False
+        if not self.game_state == GameState.LEVEL_1: # If the game state is not level 1 pause the game
+            self.generic_pause_event_handler()
+
+    def handle_mouse_enter_event(self):
+        """Function that handles the focus gained event"""
+        self.should_draw_cursor = True
+        self.game_state = self.previous_game_state
 
 if __name__ == "__main__":
     Game().run()

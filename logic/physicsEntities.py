@@ -243,7 +243,7 @@ class Player(PhysicsEntity):
             #Horizontal mid air movement
             match self.status:
                 case 'left airborne': #The checks need to be separated to avoid the situation where a side collision could stop the player's vertical movement
-                    desired_x, desired_y = self.rect.midleft[0] - abs(self.velocity[0]), self.rect.midleft[1]# + (self.velocity[1] * FALLING_SPEED_INCR)
+                    desired_x, desired_y = self.clamp_to_screen(self.rect.midleft[0] - abs(self.velocity[0]), self.rect.midleft[1])
                     hor_result = self.collision_manager.allow_movement(desired_x, self.rect.midleft[1])
                     match hor_result:
                         case 'allowed': 
@@ -253,7 +253,7 @@ class Player(PhysicsEntity):
                         case 'collision': self.velocity[0] = 0 #Stop the player's horizontal movement
 
                 case 'right airborne':
-                    desired_x, desired_y = self.rect.midright[0] + abs(self.velocity[0]), self.rect.midright[1]# + (self.velocity[1] * FALLING_SPEED_INCR)
+                    desired_x, desired_y = self.clamp_to_screen(self.rect.midright[0] + abs(self.velocity[0]), self.rect.midright[1])
                     hor_result = self.collision_manager.allow_movement(desired_x, desired_y)
                     match hor_result:
                         case 'allowed':
@@ -263,7 +263,7 @@ class Player(PhysicsEntity):
                         case 'collision': self.velocity[0] = 0 #Stop the player's horizontal movement
 
             #Vertical movement
-            desired_x, desired_y = self.rect.midbottom[0], self.rect.midbottom[1] + (self.velocity[1] * FALLING_SPEED_INCR)
+            desired_x, desired_y = self.clamp_to_screen(self.rect.midbottom[0], self.rect.midbottom[1] + (self.velocity[1] * FALLING_SPEED_INCR))
             vert_result = self.collision_manager.allow_movement(desired_x, desired_y)
             match vert_result:
                 case 'allowed':
@@ -364,9 +364,12 @@ class Player(PhysicsEntity):
     
     def clamp_to_screen(self, x, y):
         """Function that clamps the desired x and y values to the screen dimensions to avoid IndexErrors and to keep the player on screen."""
+        
+        SCREEN_WIDTH, SCREEN_HEIGHT = LEVEL_RESOLUTIONS[self.game.current_level_num]
 
         clamped_x = max(0, min(x, SCREEN_WIDTH - 1))
         clamped_y = max(0, min(y, SCREEN_HEIGHT - 1))
+
         return clamped_x, clamped_y
 
     @property

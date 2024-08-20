@@ -1,4 +1,4 @@
-import contextlib
+import contextlib, ctypes
 with contextlib.redirect_stdout(None): #Suppress pygame welcome message
     import pygame as pg
 del contextlib
@@ -7,9 +7,16 @@ from logic.states.startMenu import handle_start_menu_events, update_start_menu, 
 from logic.states.pauseMenu import handle_pause_menu_events, update_pause_menu, render_pause_menu
 from logic.states.level_1 import handle_level_one_events, update_level_one, render_level_one
 from logic.physicsEntities import Player
-from logic.interactibles import GravityDisabler
+from logic.interactibles import GravityController
 
 from settings import *
+
+# Define the RECT structure
+class RECT(ctypes.Structure):
+    _fields_ = [("left", ctypes.c_long),
+                ("top", ctypes.c_long),
+                ("right", ctypes.c_long),
+                ("bottom", ctypes.c_long)]
 
 class Game:
     def __init__(self):
@@ -35,6 +42,12 @@ class Game:
 
         #Init assets
         self.init_assets()
+
+        # Get the window handle on Windows
+        self.window_handle = pg.display.get_wm_info()['window']
+
+        # Get the window position
+        self.hardware_window_rect = RECT()
 
     def run(self):
         """Main game loop"""	
@@ -109,7 +122,7 @@ class Game:
         #Level 1 assets
         self.level_one_ground_surf: pg.Surface = pg.image.load("graphics/assets/level 1/ground.png").convert_alpha()
         self.level_one_ground_rect: pg.Rect = self.level_one_ground_surf.get_rect(bottomleft = (0, LEVEL_RESOLUTIONS[1][1]))
-        self.level_one_grav_disabler: GravityDisabler = GravityDisabler(game = self, coords = (200, 150))
+        self.level_one_grav_controllers: list[GravityController] = (GravityController(game = self, coords = (275, 150), direction='left'), GravityController(game = self, coords = (750, 150), direction='right'))
         
         #Pause menu
         self.previous_game_state: GameState = None #Variable to keep track of the previous game state used to return to the previous game state when unpausing
@@ -139,6 +152,11 @@ class Game:
     def update_screen_dimensions(self):
         """Function that updates the screen dimensions"""
         self.screen = pg.display.set_mode(LEVEL_RESOLUTIONS[self.current_level_num])	
+
+    def get_window_position(self):
+        """Function that gets the topleft window position"""
+        ctypes.windll.user32.GetWindowRect(self.window_handle, ctypes.byref(self.hardware_window_rect))
+        return (self.hardware_window_rect.left, self.hardware_window_rect.top)
 
 if __name__ == "__main__":
     Game().run()

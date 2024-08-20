@@ -1,7 +1,7 @@
 import pygame as pg
 
 #Graphical representation settings
-LEVEL_RESOLUTIONS = [(800, 640), (950, 480)] 
+LEVEL_RESOLUTIONS = [(800, 640), (950, 480), (950, 640)] 
 SCREEN_WIDTH, SCREEN_HEIGHT = LEVEL_RESOLUTIONS[0] #The width and height of the screen in pixels (DO NOT CHANGE)
 MAX_FPS = 60 #The maximum frames per second the game should run at (suggested: 60)
 PAUSE_MENU_BACKGROUND_ALPHA = 128 #The alpha value of the background of the pause menu (suggested: 128)

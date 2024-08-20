@@ -23,8 +23,7 @@ class Game:
         pg.init()
 
     	#Game variables
-        self.game_state: GameState = GameState.LEVEL_1
-        #self.game_state: GameState = GameState.START_MENU
+        self.game_state: GameState = GameState.START_MENU
         self.current_level_num: int = self.game_state.value
         self.should_draw_cursor: bool = True
 
@@ -131,7 +130,7 @@ class Game:
                                                                     GravityController(game = self, coords = (743, self.level_one_grav_controller_y), direction='right'))
         
         #Pause menu
-        self.previous_game_state: GameState = None #Variable to keep track of the previous game state used to return to the previous game state when unpausing
+        self.previous_game_state: GameState = self.game_state #Variable to keep track of the previous game state used to return to the previous game state when unpausing
 
     def update_portal_animation(self): #Written here so that it can be reused in all game states
         """Function that updates the portal animation"""
@@ -163,6 +162,16 @@ class Game:
         """Function that gets the topleft window position"""
         ctypes.windll.user32.GetWindowRect(self.window_handle, ctypes.byref(self.hardware_window_rect))
         return (self.hardware_window_rect.left, self.hardware_window_rect.top)
+
+    def clamp_to_screen(self, x, y):
+        """Function that clamps the desired x and y values to the screen dimensions to avoid IndexErrors and to keep the player on screen."""
+        
+        SCREEN_WIDTH, SCREEN_HEIGHT = LEVEL_RESOLUTIONS[self.current_level_num]
+
+        clamped_x = max(0, min(x, SCREEN_WIDTH - 1))
+        clamped_y = max(0, min(y, SCREEN_HEIGHT - 1))
+
+        return clamped_x, clamped_y
 
     def handle_mouse_exit_event(self):
         """Function that handles the focus lost event"""

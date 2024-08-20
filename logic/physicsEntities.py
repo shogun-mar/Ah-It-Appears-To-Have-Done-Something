@@ -67,7 +67,7 @@ class Player(PhysicsEntity):
         self.gravity_delay_counter: int = PLAYER_GRAVITY_PULL_DELAY #Counter to delay the gravity pull
         self.status: str = 'standing' #Variable to keep track of the player's status (standing, left, right, airborne)
         self.should_float: bool = False #Variable to keep track of whether the player's should float or not
-        self.controls_enabled: bool = True #Variable to keep track of whether the player's controls are enabled or not
+        self.controls_enabled: bool = False #Variable to keep track of whether the player's controls are enabled or not (initially false because in the level disguised as a start menu the player should be able to move only after spawning at least one physics entity)
 
         #Variables to keep track of the player's graphical representation
         self.sprite: pg.Surface = self.frame_mapping.get(self.status)[self.current_animation_frame] #Initial sprite
@@ -110,12 +110,16 @@ class Player(PhysicsEntity):
     def move(self): 
         """Function that manages the player's movement complete of gravity based movement, inertia and collision detection."""
 
-        if self.should_float: return #If the player should float end the function
+        if self.should_float:
+            print(f"velocity: {self.velocity}, status: {self.status}")
+            return #If the player should float end the function
+
+        clamp_to_screen = self.game.clamp_to_screen #Reference to the clamp_to_screen function in game to make code more readable
 
         #Check if desired movement is possible
         match self.status:
             case 'left':
-                desired_x, desired_y = self.clamp_to_screen(self.rect.midleft[0] - abs(self.velocity[0]), self.rect.midleft[1])
+                desired_x, desired_y = clamp_to_screen(self.rect.midleft[0] - abs(self.velocity[0]), self.rect.midleft[1])
                 result = self.collision_manager.allow_movement(desired_x, desired_y)
                 match result:
                     case 'allowed': 
@@ -126,7 +130,7 @@ class Player(PhysicsEntity):
                     case 'collision': self.velocity[0] = 0 #Stop the player's horizontal movement
                 
             case 'right':
-                desired_x, desired_y = self.clamp_to_screen(self.rect.midright[0] + abs(self.velocity[0]), self.rect.midright[1])
+                desired_x, desired_y = clamp_to_screen(self.rect.midright[0] + abs(self.velocity[0]), self.rect.midright[1])
                 result = self.collision_manager.allow_movement(desired_x, desired_y)
                 match result:
                     case 'allowed': 
@@ -139,7 +143,7 @@ class Player(PhysicsEntity):
             case 'left airborne':
                 if self.is_moving_up:
                     #Check if horizontal component of the movement is possible
-                    desired_x, desired_y = self.clamp_to_screen(self.rect.topleft[0] - abs(self.velocity[0]), self.rect.topleft[1] - abs(self.velocity[1])) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards
+                    desired_x, desired_y = clamp_to_screen(self.rect.topleft[0] - abs(self.velocity[0]), self.rect.topleft[1] - abs(self.velocity[1])) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards
                     hor_result = self.collision_manager.allow_movement(desired_x, self.rect.topleft[1])
                     match hor_result:
                         case 'allowed': 
@@ -170,7 +174,7 @@ class Player(PhysicsEntity):
 
             case 'right airborne':
                 if self.is_moving_up:
-                    desired_x, desired_y = self.clamp_to_screen(self.rect.topright[0] + abs(self.velocity[0]), self.rect.topright[1] - abs(self.velocity[1])) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards")
+                    desired_x, desired_y = clamp_to_screen(self.rect.topright[0] + abs(self.velocity[0]), self.rect.topright[1] - abs(self.velocity[1])) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards")
                     #Check if horizontal component of the movement is possible
                     hor_result = self.collision_manager.allow_movement(desired_x, self.rect.topright[1])
                     match hor_result:
@@ -202,7 +206,7 @@ class Player(PhysicsEntity):
 
             case 'airborne':
                 if self.is_moving_up:
-                    desired_x, desired_y = self.clamp_to_screen(self.rect.midtop[0], self.rect.midtop[1] - abs(self.velocity[1])) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards
+                    desired_x, desired_y = clamp_to_screen(self.rect.midtop[0], self.rect.midtop[1] - abs(self.velocity[1])) #Has to be absolute value because in the settings values for moving updwards are negative so by subtracting a negative value the player would move downwards
                     result = self.collision_manager.allow_movement(desired_x, desired_y)
                     match result:
                         case 'allowed': 
@@ -234,6 +238,8 @@ class Player(PhysicsEntity):
 
         """Function that manages gravity based movement complete of sideways movement and collision detection."""
         
+        clamp_to_screen = self.game.clamp_to_screen #Reference to the clamp_to_screen function in game to make code more readable
+
         self.gravity_delay_counter -= 1 #Decrease the delay
         if self.gravity_delay_counter == 0: #If the delay has passed
             self.gravity_delay_counter = PLAYER_GRAVITY_PULL_DELAY #Reset the delay
@@ -243,7 +249,7 @@ class Player(PhysicsEntity):
             #Horizontal mid air movement
             match self.status:
                 case 'left airborne': #The checks need to be separated to avoid the situation where a side collision could stop the player's vertical movement
-                    desired_x, desired_y = self.clamp_to_screen(self.rect.midleft[0] - abs(self.velocity[0]), self.rect.midleft[1])
+                    desired_x, desired_y = clamp_to_screen(self.rect.midleft[0] - abs(self.velocity[0]), self.rect.midleft[1])
                     hor_result = self.collision_manager.allow_movement(desired_x, self.rect.midleft[1])
                     match hor_result:
                         case 'allowed': 
@@ -253,7 +259,7 @@ class Player(PhysicsEntity):
                         case 'collision': self.velocity[0] = 0 #Stop the player's horizontal movement
 
                 case 'right airborne':
-                    desired_x, desired_y = self.clamp_to_screen(self.rect.midright[0] + abs(self.velocity[0]), self.rect.midright[1])
+                    desired_x, desired_y = clamp_to_screen(self.rect.midright[0] + abs(self.velocity[0]), self.rect.midright[1])
                     hor_result = self.collision_manager.allow_movement(desired_x, desired_y)
                     match hor_result:
                         case 'allowed':
@@ -263,7 +269,7 @@ class Player(PhysicsEntity):
                         case 'collision': self.velocity[0] = 0 #Stop the player's horizontal movement
 
             #Vertical movement
-            desired_x, desired_y = self.clamp_to_screen(self.rect.midbottom[0], self.rect.midbottom[1] + (self.velocity[1] * FALLING_SPEED_INCR))
+            desired_x, desired_y = clamp_to_screen(self.rect.midbottom[0], self.rect.midbottom[1] + (self.velocity[1] * FALLING_SPEED_INCR))
             vert_result = self.collision_manager.allow_movement(desired_x, desired_y)
             match vert_result:
                 case 'allowed':
@@ -295,7 +301,7 @@ class Player(PhysicsEntity):
                             self.current_animation_frame = 0 #Reset the animation frame
                             self.animation_switching_delay = MAX_FPS // 5                
 
-            self.gravity_x_coord = desired_x #Save the x coord to use it in the move function
+            self.gravity_x_coord = desired_x #Save the x coord to use it for debugging gravity
 
     def apply_inertia(self):
         # Clamp the velocity to a maximum value
@@ -361,16 +367,6 @@ class Player(PhysicsEntity):
             frames_surfs.append(pg.image.load(final_path).convert_alpha())
         
         return frames_surfs
-    
-    def clamp_to_screen(self, x, y):
-        """Function that clamps the desired x and y values to the screen dimensions to avoid IndexErrors and to keep the player on screen."""
-        
-        SCREEN_WIDTH, SCREEN_HEIGHT = LEVEL_RESOLUTIONS[self.game.current_level_num]
-
-        clamped_x = max(0, min(x, SCREEN_WIDTH - 1))
-        clamped_y = max(0, min(y, SCREEN_HEIGHT - 1))
-
-        return clamped_x, clamped_y
 
     @property
     def has_just_landed(self): 
@@ -420,6 +416,7 @@ class DeathEntity(PhysicsEntity):
     def __init__(self, game, mass, sprite = None, rect = None):
         super().__init__(game, mass, sprite, rect)
 
+        self.should_die = False #Whether the entity should die or not
         self.death_timer_amount = 1500 #After how many milliseconds the entity should die when in contact with a death portion of the collision map
 
     def move(self):

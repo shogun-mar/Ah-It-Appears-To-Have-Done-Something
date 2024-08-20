@@ -50,11 +50,15 @@ def render_start_menu(game):
 def create_start_physics_entity(game):
     """Function that creates a physics entity at the player's position"""
 
+    game.player.controls_enabled = True #Enable player controls
+
     game.entities.append(DeathEntity(game = game, mass = 5, sprite = game.start_button_surf, \
                                         rect = game.start_button_rect.copy()))
 
 def create_level_physics_entity(game):
     """Function that creates a physics entity at the level button's position"""
+    
+    game.player.controls_enabled = True #Enable player controls
 
     game.entities.append(DeathEntity(game = game, mass = 5, sprite = game.level_button_surf, \
                                         rect = game.level_button_rect.copy()))

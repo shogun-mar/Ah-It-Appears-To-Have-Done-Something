@@ -38,4 +38,4 @@ def render_pause_menu(game):
             screen.blit(game.player.sprite, game.player.rect) #Draw the player
 
     screen.blit(darkned_surf, (0, 0)) #Darken the screen
-    screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor
+    if game.should_draw_cursor: screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor

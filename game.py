@@ -98,7 +98,7 @@ class Game:
         self.cursor_surf: pg.Surface = pg.image.load("graphics/assets/start menu/cursor.png").convert_alpha()
 
             #Portal animation and sprites
-        self.portal_coords: list[tuple] = [(800, 500), (1063, 339)] #Coordinates of the portal in each level (bottomright) (DO NOT CHANGE) (result may appear strange but its because the portal sprite have extra width to accomodate the particles)
+        self.portal_coords: list[tuple] = [(800, 500), (950, 339)] #Coordinates of the portal in each level (bottomright) (DO NOT CHANGE) (result may appear strange but its because the portal sprite have extra width to accomodate the particles)
         self.portal_animation_current_frame: int = 0 #Variable to keep track of the index of the current frame of the portal animation
         self.portal_animation_switching_delay: int = PORTAL_ANIMATION_SWITCHING_DELAY #Variable to keep track of when to progress the animation
         self.portal_animation: list[pg.Surface] = [pg.image.load(f"graphics/assets/portal/{i}.png").convert_alpha() for i in range(1, 7)]
@@ -122,7 +122,9 @@ class Game:
         #Level 1 assets
         self.level_one_ground_surf: pg.Surface = pg.image.load("graphics/assets/level 1/ground.png").convert_alpha()
         self.level_one_ground_rect: pg.Rect = self.level_one_ground_surf.get_rect(bottomleft = (0, LEVEL_RESOLUTIONS[1][1]))
-        self.level_one_grav_controllers: list[GravityController] = (GravityController(game = self, coords = (275, 150), direction='left'), GravityController(game = self, coords = (750, 150), direction='right'))
+        self.level_one_grav_controller_y = 150
+        self.level_one_grav_controllers: list[GravityController] = (GravityController(game = self, coords = (175, self.level_one_grav_controller_y), direction='left'), 
+                                                                    GravityController(game = self, coords = (743, self.level_one_grav_controller_y), direction='right'))
         
         #Pause menu
         self.previous_game_state: GameState = None #Variable to keep track of the previous game state used to return to the previous game state when unpausing

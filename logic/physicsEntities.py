@@ -293,7 +293,7 @@ class Player(PhysicsEntity):
                             self.status = 'standing' #Set the player's status to standing
                             self.sprite = self.landing_sprite #Set the sprite to the landing frame
                             self.current_animation_frame = 0 #Reset the animation frame
-                            self.animation_switching_delay = int(PLAYER_ANIMATION_SWITCHING_DELAY * (0.8 + (self.velocity[1] / 10))) #Dinamically set the delay to make so the landing seems heavy                 
+                            self.animation_switching_delay = MAX_FPS // 5                
 
             self.gravity_x_coord = desired_x #Save the x coord to use it in the move function
 
@@ -398,10 +398,12 @@ class Player(PhysicsEntity):
         self.reset()
 
     def reset(self):
-        """Function that resets the player's position to the initial position in the current level and resets the frame counter to make the player's animation start from the beginning.""" 
+        """Function that resets the player's value to default.""" 
         self.current_animation_frame = -1 #Reset the animation frame counter
         self.rect.midbottom = INITIAL_COORDS_PLAYER[self.game.current_level_num] #Reset the player's position to the initial values
         self.velocity = [0, BASE_GRAVITY_PULL] #Reset the player's velocity
+        self.controls_enabled = True #Enable the player's controls
+        self.should_float = False #Disable the player's floating
 
     def collides_with_other_entities(self, x, y):
         """Function that checks if the player collides with any other entity in the game."""

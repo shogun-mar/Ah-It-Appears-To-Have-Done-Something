@@ -1,7 +1,7 @@
 import pygame as pg
 
 #Graphical representation settings
-LEVEL_RESOLUTIONS = [(800, 640), (950, 480), (950, 640)] 
+LEVEL_RESOLUTIONS = [(800, 640), (950, 480), (950, 600)] 
 SCREEN_WIDTH, SCREEN_HEIGHT = LEVEL_RESOLUTIONS[0] #The width and height of the screen in pixels (DO NOT CHANGE)
 MAX_FPS = 60 #The maximum frames per second the game should run at (suggested: 60)
 PAUSE_MENU_BACKGROUND_ALPHA = 128 #The alpha value of the background of the pause menu (suggested: 128)
@@ -21,7 +21,7 @@ MAX_UP_VELOCITY = -30 #The maximum speed the player can jump at in pixels per fr
 #Player movement settings
 PLAYER_SPEED = 2 #The speed of the player in pixels per frame while on the ground (suggested: 2)
 PLAYER_SPEED_MID_AIR = PLAYER_SPEED // 2  #The speed of the player in pixels per frame while in mid air (suggested: PLAYER_SPEED / 2)
-PLAYER_ANIMATION_SWITCHING_DELAY = 12  #After how many frames the animation of the player should progress (suggested: 12)
+PLAYER_ANIMATION_SWITCHING_DELAY = 15  #After how many frames the animation of the player should progress (suggested: 12)
 BASE_JUMP_SPEED = -8 #Initial player jump speed in pixel per frame (negative value for jumping up) (suggested: -8 --> value has to be negative)
 INITIAL_COORDS_PLAYER = [(50, 501), (50, 339), (887, 489)] #Initial coordinates the player should have in each level (midbottom) (DO NOT CHANGE)
 

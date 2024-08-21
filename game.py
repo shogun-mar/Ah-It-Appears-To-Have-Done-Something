@@ -20,8 +20,7 @@ class Game:
         pg.init()
 
     	#Game variables
-        self.game_state: GameState = GameState.LEVEL_2
-        #self.game_state: GameState = GameState.START_MENU
+        self.game_state: GameState = GameState.START_MENU
         self.current_level_num: int = self.game_state.value
         self.should_draw_cursor: bool = True
 
@@ -49,8 +48,6 @@ class Game:
 
         #Init assets
         self.init_assets()
-
-        init_level_two(self) #FOR DEBUGGING PURPOSES ONLY
 
     def run(self):
         """Main game loop"""	
@@ -89,7 +86,7 @@ class Game:
     def render(self):
         """Function that renders the game by calling the appropriate render function by consulting the current game state""" 
 
-       # self.screen.fill('white') #Clear the screen
+        self.screen.fill('white') #Clear the screen
         
         match self.game_state:
             case GameState.START_MENU: render_start_menu(self)
@@ -107,7 +104,7 @@ class Game:
         self.cursor_surf: pg.Surface = pg.image.load("graphics/assets/cursor.png").convert_alpha()
 
             #Portal animation and sprites
-        self.portal_coords: list[tuple] = [(800, 500), (950, 339), (949, 139)] #Coordinates of the portal in each level (bottomright) (DO NOT CHANGE) (result may appear strange but its because the portal sprite have extra width to accomodate the particles)
+        self.portal_coords: list[tuple] = [(800, 494), (950, 334), (949, 94)] #Coordinates of the portal in each level (bottomright) (DO NOT CHANGE) (result may appear strange but its because the portal sprite have extra width to accomodate the particles)
         self.portal_animation_current_frame: int = 0 #Variable to keep track of the index of the current frame of the portal animation
         self.portal_animation_switching_delay: int = PORTAL_ANIMATION_SWITCHING_DELAY #Variable to keep track of when to progress the animation
         self.portal_animation: list[pg.Surface] = [pg.image.load(f"graphics/assets/portal/{i}.png").convert_alpha() for i in range(1, 7)]
@@ -115,9 +112,7 @@ class Game:
         self.portal_rect: pg.Rect = self.current_portal_sprite.get_rect(bottomright = self.portal_coords[self.current_level_num]) 
 
         #Init start menu
-        self.logo_font: pg.Font = pg.font.Font("graphics/font/silver.ttf", 58)
-        self.logo_surf: pg.Surface = self.logo_font.render("Ah It Appears To Have Done Something", True, 'black')
-        self.logo_rect = self.logo_surf.get_rect(midbottom = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4))
+        midbottom = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4)
 
         self.level_button_surf: pg.Surface = pg.image.load("graphics/assets/start menu/level.png").convert_alpha()
         self.level_button_rect: pg.Rect = self.level_button_surf.get_rect(topleft = (102, self.logo_rect.midbottom[1] + 50))

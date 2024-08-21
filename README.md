@@ -47,7 +47,8 @@ I plan to make an executable of this game at the end of development.
 ## Assets credits
 
 Player spritesheet: https://dani-maccari.itch.io/player-animations-tim  
-Font: https://poppyworks.itch.io/silver  
-Spike sprite: https://omniclause.itch.io/spikes  
+Font: https://poppyworks.itch.io/silver
+Enviroment: https://octoshrimpy.itch.io/tranquil-tunnels 
 Portal sprite: https://pixelnauta.itch.io/pixel-dimensional-portal-32x32 
+Logo font in first level: https://joebrogers.itch.io/bitpotion
 Smoke effects: https://bdragon1727.itch.io/free-smoke-fx-pixel-2 

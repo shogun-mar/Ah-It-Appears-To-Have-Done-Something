@@ -285,11 +285,11 @@ class Player(PhysicsEntity):
                         if self.is_in_air:
                             # Constants
                             initial_desired_y = desired_y
-                            for i in range(self.velocity[1]): #Iterate over the player's vertical velocity to find the first position where the player can land (not doing this would make the player land N pixels above the ground with N being the player's vertical velocity) 
+                            for i in range(MAX_DOWN_VELOCITY): #Iterate over the player's possible y positions to find the first position where the player can land (not doing this would make the player land N pixels above the ground with N being the player's vertical velocity) 
                                 desired_y = initial_desired_y - i
                                 result = self.collision_manager.allow_movement(desired_x, desired_y)
                                 if result == 'allowed' and not self.collides_with_other_entities(desired_x, desired_y): # If the player can move to the desired position
-                                    self.rect.midbottom = (desired_x, desired_y)  # Update the player's position
+                                    self.rect.midbottom = (desired_x, desired_y + 1)  # Update the player's position to the desired position (+ 1 to account for the loop decreasing the y position by 1)
                                     break
                             
                             self.status = 'standing' #Set the player's status to standing

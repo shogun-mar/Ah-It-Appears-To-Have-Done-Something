@@ -135,7 +135,7 @@ def render_level_two(game):
     screen.blit(game.level_two_ground_surf, game.level_two_ground_rect) #Draw the ground
     screen.blit(game.current_portal_sprite, game.portal_rect) #Draw the end of level portal
     screen.blit(game.player.sprite, game.player.rect) #Draw the player
-    screen.blit(game.level_two_jump_pad.sprite, game.level_two_jump_pad.rect) #Draw jump pad
+    screen.blit(game.level_two_jump_pad.sprite, game.level_two_jump_pad.rect) #Draw the jump pad
 
     if game.should_draw_cursor and game.player.status != 'asleep': screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor
     if game.player.status == 'asleep': screen.blit(game.level_two_env_mask, (0, 0)) #Draw the environment mask

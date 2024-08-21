@@ -1,4 +1,5 @@
 import pygame as pg
+from random import randint
 
 class Interactibles:
     def __init__(self, game, sprite = None, rect = None):
@@ -11,7 +12,7 @@ class GravityController(Interactibles):
         super().__init__(game)
 
         #Animation
-        self.frames = [pg.image.load(f"graphics/assets/smoke circle/version 2/{direction}/{i}.png").convert_alpha() for i in range(1, 12)]
+        self.frames = [pg.image.load(f"graphics/assets/interactibles/smoke circle/version {randint(1,2)}/{direction}/{i}.png").convert_alpha() for i in range(1, 12)]
         self.current_frame = 0
         self.switching_delay = 10 #Variable to keep track of when to progress the animation (with 6 the delay is 96 ms at 60 fps, with 10 the delay is 160 ms at 60 fps)
         self.sprite = self.frames[self.current_frame]

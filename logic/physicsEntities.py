@@ -408,6 +408,10 @@ class Player(PhysicsEntity):
                 return True
         return False
 
+    def wake_up(self):
+        self.status = 'standing' #Set the player status to standing
+        self.controls_enabled = True #Enable player controls
+
 class DeathEntity(PhysicsEntity):
     def __init__(self, game, mass, sprite = None, rect = None):
         super().__init__(game, mass, sprite, rect)

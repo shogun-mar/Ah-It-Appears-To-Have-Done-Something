@@ -1,11 +1,7 @@
 import ctypes, time
 from ctypes import wintypes
 from threading import Thread
-from settings import PAUSE_KEY, pg #Import the pause key and the pygame module
-
-
-# Define necessary constants
-_MONITOR_DEFAULTTONEAREST = 2
+from settings import PAUSE_KEY, BRIGHTNESS_CONTROL_INTERVAL, pg #Import the pause key and the pygame module
 
 # Define necessary structures
 class MONITORINFOEXW(ctypes.Structure):
@@ -45,8 +41,7 @@ dxva2.SetMonitorBrightness.restype = wintypes.BOOL
 dxva2.SetMonitorBrightness.argtypes = [wintypes.HANDLE, wintypes.DWORD]
 
 # Function to get monitor brightness
-def get_monitor_brightness(hwnd):
-    hmonitor = user32.MonitorFromWindow(hwnd, _MONITOR_DEFAULTTONEAREST)
+def get_monitor_brightness(hmonitor):
     
     # Get number of physical monitors
     num_monitors = wintypes.DWORD()
@@ -68,9 +63,8 @@ def get_monitor_brightness(hwnd):
     return current_brightness.value
 
 # Function to set monitor brightness
-def set_monitor_brightness(hwnd, brightness):
-    hmonitor = user32.MonitorFromWindow(hwnd, _MONITOR_DEFAULTTONEAREST)
-    
+def set_monitor_brightness(hmonitor, brightness):
+   
     # Get number of physical monitors
     num_monitors = wintypes.DWORD()
     dxva2.GetNumberOfPhysicalMonitorsFromHMONITOR(hmonitor, ctypes.byref(num_monitors))
@@ -86,20 +80,25 @@ def set_monitor_brightness(hwnd, brightness):
     dxva2.DestroyPhysicalMonitor(physical_monitors[0].hPhysicalMonitor)
 
 # Function to monitor brightness changes
-def monitor_brightness_changes(callback, interval=7):
-    hwnd = user32.GetForegroundWindow()  # Get handle of the current window
-    previous_brightness = get_monitor_brightness(hwnd)
+def monitor_brightness_changes(callback, game_instance, interval=BRIGHTNESS_CONTROL_INTERVAL):
+    hmonitor = game_instance.hardware_monitor # Get the hardware monitor handle
+    previous_brightness = get_monitor_brightness(hmonitor) # Get the initial brightness
     
     while True:
-        time.sleep(interval)
-        current_brightness = get_monitor_brightness(hwnd)
-        if current_brightness != previous_brightness:
-            callback(current_brightness)
-            previous_brightness = current_brightness
+
+        time.sleep(interval) # Wait for the interval
+        current_brightness = get_monitor_brightness(hmonitor) # Get the current brightness
+        if current_brightness != previous_brightness: # If the brightness has changed
+
+            if current_brightness - previous_brightness >= 50: # If the brightness has increased by 50 or more
+                callback(game_instance, current_brightness) # Call the callback function
+
+            previous_brightness = current_brightness # Update the previous brightness
 
 # Callback function
-def brightness_changed(new_brightness):
+def brightness_changed(game_instance, new_brightness):
     print(f"Brightness changed to: {new_brightness}")
+    game_instance.player.wake_up() #Wake up the player
 
 def handle_level_two_events(game, event):
         
@@ -127,47 +126,15 @@ def render_level_two(game):
     screen.blit(game.current_portal_sprite, game.portal_rect) #Draw the end of level portal
     screen.blit(game.player.sprite, game.player.rect) #Draw the player
 
-    screen.blit(game.level_two_env_mask, (0, 0)) #Draw the environment mask
-
-    if game.should_draw_cursor: screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor
+    if game.should_draw_cursor and game.player.status != 'asleep': screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor
+    if game.player.status == 'asleep': screen.blit(game.level_two_env_mask, (0, 0)) #Draw the environment mask
 
 def init_level_two(game):
-    game.player.status = 'asleep' #Set the player status to asleep in level 2
-    game.player.controls_enabled = False #Disable player controls
-    set_monitor_brightness(game.window_handle, 0) #Set the monitor brightness to 0
-    update_player_mask(game, brightness=0) #Update the playter mask with a brightness of 0
+    #game.player.status = 'asleep' #Set the player status to asleep in level 2
+    #game.player.controls_enabled = False #Disable player controls
+    #set_monitor_brightness(game.hardware_monitor, 0) #Set the monitor brightness to 0
 
     # Start monitoring brightness changes in a separate thread
-    monitor_thread = Thread(target=monitor_brightness_changes, args=(brightness_changed,)) # Create a thread to monitor brightness changes
+    monitor_thread = Thread(target=monitor_brightness_changes, args=(brightness_changed, game)) # Create a thread to monitor brightness changes
     monitor_thread.daemon = True # Make the thread a daemon so it stops when the main thread stops
     monitor_thread.start() # Start the thread
-
-def update_player_mask(game, brightness):
-    
-    alpha_cannel = interpolate_alpha(brightness)
-    relative_color = (0, 0, 0, alpha_cannel)  # Calculate the relative color based on the brightness (RGBA)
-
-    # Lock the surface to modify pixel data
-    game.level_two_env_mask.lock()
-
-    game.level_two_env_mask.fill(relative_color)  # Fill the mask with black
-
-    cutout_origin_x: int = game.player.rect.centerx - 32
-    cutout_origin_y: int = game.player.rect.centery - 32
-    width, height = 64, 64
-
-    for x in range(cutout_origin_x, cutout_origin_x + width):
-        for y in range(cutout_origin_y, cutout_origin_y + height):
-            game.level_two_env_mask.set_at((x, y), (0, 0, 0, 0))  # Set pixel to fully transparent
-
-    # Unlock the surface after modification
-    game.level_two_env_mask.unlock()
-    
-    game.level_two_env_mask.blit(game.level_two_player_mask, (cutout_origin_x, cutout_origin_y)) #Blit the player mask onto the final mask
-
-def interpolate_alpha(brightness):
-    return int(pg.math.lerp(255, 128, brightness / 100))
-
-def wake_up_player(player):
-    player.status = 'standing' #Set the player status to standing
-    player.controls_enabled = True #Enable player controls

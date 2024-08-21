@@ -24,9 +24,6 @@ class Game:
         #self.game_state: GameState = GameState.START_MENU
         self.current_level_num: int = self.game_state.value
         self.should_draw_cursor: bool = True
-        # Load necessary DLLs
-        self.user32 = ctypes.WinDLL('user32')
-        self.dxva2 = ctypes.WinDLL('dxva2')
 
         #Screen settings
         self.screen: pg.Surface = pg.display.set_mode((LEVEL_RESOLUTIONS[self.current_level_num]))
@@ -41,7 +38,14 @@ class Game:
         self.player = Player(self)
         self.player.controls_enabled = True #FOR DEBUGGING PURPOSES ONLY
         self.entities = []
-        self.window_handle = pg.display.get_wm_info()['window']
+                
+        # Load necessary DLLs
+        self.user32 = ctypes.WinDLL('user32')
+        self.dxva2 = ctypes.WinDLL('dxva2')
+
+        # Get necessary window and monitor handles
+        self.window_handle = pg.display.get_wm_info()['window'] # Get handle of the current window
+        self.hardware_monitor = self.user32.MonitorFromWindow(self.window_handle, _MONITOR_DEFAULTTONEAREST) # Get handle of the monitor the game is running on
 
         #Init assets
         self.init_assets()
@@ -135,8 +139,7 @@ class Game:
         self.level_two_ground_surf: pg.Surface = pg.image.load("graphics/assets/level 2/ground.png").convert_alpha()
         self.level_two_ground_rect: pg.Rect = self.level_two_ground_surf.get_rect(bottomleft = (0, LEVEL_RESOLUTIONS[2][1]))
 
-        self.level_two_env_mask = pg.Surface(LEVEL_RESOLUTIONS[2], pg.SRCALPHA) #Surface to obscure the screen in level 2
-        self.level_two_player_mask: pg.Surface = pg.image.load("graphics/assets/level 2/mask.png").convert_alpha() #Half transparent black circle used to show the player in the dark
+        self.level_two_env_mask: pg.Surface = pg.image.load("graphics/assets/level 2/mask.png").convert_alpha() #Half transparent black circle used to show the player in the dark
         
         #Pause menu
         self.previous_game_state: GameState = self.game_state #Variable to keep track of the previous game state used to return to the previous game state when unpausing

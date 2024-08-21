@@ -8,6 +8,7 @@ PAUSE_MENU_BACKGROUND_ALPHA = 128 #The alpha value of the background of the paus
 
 #Miscellaneous graphical representation settings
 PORTAL_ANIMATION_SWITCHING_DELAY = 10 #After how many frames the portal animation should progress (suggested: 10)
+BRIGHTNESS_CONTROL_INTERVAL = 7 #The interval in seconds at which the monitor brightness should be checked (suggested: 7)
 
 #Physics simulation settings
 MAX_ENTITY_SPEED = 4 #The maximum speed of any entity in pixels per frame (suggested: 4)

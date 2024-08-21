@@ -5,19 +5,13 @@ del contextlib
 from logic.states.gameState import GameState
 from logic.states.startMenu import handle_start_menu_events, update_start_menu, render_start_menu
 from logic.states.pauseMenu import handle_pause_menu_events, update_pause_menu, render_pause_menu
-from logic.states.level_1 import handle_level_one_events, update_level_one, render_level_one
-from logic.states.level_2 import handle_level_two_events, update_level_two, render_level_two
+from logic.states.level_1 import handle_level_one_events, update_level_one, render_level_one, init_level_one
+from logic.states.level_2 import handle_level_two_events, update_level_two, render_level_two, init_level_two
 from logic.physicsEntities import Player
 from logic.interactibles import GravityController
 
 from settings import *
 
-# Define the RECT structure
-class RECT(ctypes.Structure):
-    _fields_ = [("left", ctypes.c_long),
-                ("top", ctypes.c_long),
-                ("right", ctypes.c_long),
-                ("bottom", ctypes.c_long)]
 
 class Game:
     def __init__(self):
@@ -46,11 +40,7 @@ class Game:
         #Init assets
         self.init_assets()
 
-        # Get the window handle on Windows
-        self.window_handle = pg.display.get_wm_info()['window']
-        self.hardware_window_rect = RECT()
-        self.current_window_position = self.get_window_position()
-        self.last_window_position = None
+        init_level_two(self) #FOR DEBUGGING PURPOSES ONLY
 
     def run(self):
         """Main game loop"""	
@@ -139,7 +129,7 @@ class Game:
         self.level_two_ground_surf: pg.Surface = pg.image.load("graphics/assets/level 2/ground.png").convert_alpha()
         self.level_two_ground_rect: pg.Rect = self.level_two_ground_surf.get_rect(bottomleft = (0, LEVEL_RESOLUTIONS[2][1]))
 
-        self.level_two_env_mask = pg.Surface(LEVEL_RESOLUTIONS[2]) #Surface to obscure the screen in level 2
+        self.level_two_env_mask = pg.Surface(LEVEL_RESOLUTIONS[2], pg.SRCALPHA) #Surface to obscure the screen in level 2
         self.level_two_player_mask: pg.Surface = pg.image.load("graphics/assets/level 2/mask.png").convert_alpha() #Half transparent black circle used to show the player in the dark
         
         #Pause menu
@@ -156,9 +146,16 @@ class Game:
 
     def advance_level(self):
         """Function that advances the level"""
+        self.player.status = 'standing' #Reset the player status
         self.current_level_num += 1 #Advance the level counter
         self.game_state = GameState(self.current_level_num) #Update the game state
-        self.player.status = 'standing' #Reset the player status
+
+        match self.game_state: #Level specific entry settings
+            case GameState.LEVEL_1:
+                init_level_one(self)
+            case GameState.LEVEL_2: 
+                init_level_two(self)
+
         self.update_screen_dimensions() #Update the screen dimensions
         self.portal_rect = self.current_portal_sprite.get_rect(bottomright = self.portal_coords[self.current_level_num]) #Update the portal rect
 

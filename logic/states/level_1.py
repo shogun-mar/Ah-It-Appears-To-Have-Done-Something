@@ -1,3 +1,4 @@
+import ctypes
 from settings import *
 
 start_point = (0,0)
@@ -43,6 +44,14 @@ def render_level_one(game):
 
     pg.draw.line(screen, 'red', start_point, end_point, 2)
 
+def init_level_one(game):
+    # Get the window handle on Windows
+    game.window_handle = pg.display.get_wm_info()['window']
+    game.hardware_window_rect = RECT()
+    game.current_window_position = game.get_window_position()
+    game.last_window_position = None
+
+
 def move_player_relative_to_window(game):
     """Function that moves the player of a relative amount of the difference between the last and current window position"""
     global start_point, end_point
@@ -73,3 +82,10 @@ def move_player_relative_to_window(game):
 
     else:  # Move the player if not in the y range of the gravity controller
         player.rect.center = (player.rect.centerx - x_diff, player.rect.centery - y_diff)
+
+# Define the RECT structure
+class RECT(ctypes.Structure):
+    _fields_ = [("left", ctypes.c_long),
+                ("top", ctypes.c_long),
+                ("right", ctypes.c_long),
+                ("bottom", ctypes.c_long)]

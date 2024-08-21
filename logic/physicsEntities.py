@@ -57,7 +57,8 @@ class Player(PhysicsEntity):
         'right': right_running_frames,
         'right airborne': right_running_frames,
         'airborne': self.load_animation_frames('graphics/assets/player/airborne'),
-        'standing': self.load_animation_frames('graphics/assets/player/standing')
+        'standing': self.load_animation_frames('graphics/assets/player/standing'),
+        'asleep': self.load_animation_frames('graphics/assets/player/asleep')
         }
         
         self.gravity_x_coord: int = 0 #Variable to keep track of the x coord of the player when falling to avoid side collisions
@@ -76,7 +77,7 @@ class Player(PhysicsEntity):
     def handle_input(self): #Input handling based on the get pressed method (There is no way to know the order of keys pressed, and rapidly pushed keys can be completely unnoticed between two calls)
         """Function that manages player related input by altering player's velocity list based on the pressed keys at the moment of the call."""
 
-        if self.controls_enabled:
+        if self.controls_enabled and not self.status == 'asleep': #If the player's controls are enabled and the player is not asleep
             keys: tuple[bool] = pg.key.get_pressed()
             CURRENT_SPEED_VALUE: int = PLAYER_SPEED_MID_AIR if self.is_in_air else PLAYER_SPEED #Set the speed value based on the player's vertical velocity
 
@@ -110,8 +111,7 @@ class Player(PhysicsEntity):
     def move(self): 
         """Function that manages the player's movement complete of gravity based movement, inertia and collision detection."""
 
-        if self.should_float:
-            print(f"velocity: {self.velocity}, status: {self.status}")
+        if self.should_float or self.status == 'asleep': #If the player should float and is not asleep
             return #If the player should float end the function
 
         clamp_to_screen = self.game.clamp_to_screen #Reference to the clamp_to_screen function in game to make code more readable

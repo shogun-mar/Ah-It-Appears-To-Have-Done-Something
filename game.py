@@ -112,13 +112,12 @@ class Game:
         self.portal_rect: pg.Rect = self.current_portal_sprite.get_rect(bottomright = self.portal_coords[self.current_level_num]) 
 
         #Init start menu
-        midbottom = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4)
 
         self.level_button_surf: pg.Surface = pg.image.load("graphics/assets/start menu/level.png").convert_alpha()
-        self.level_button_rect: pg.Rect = self.level_button_surf.get_rect(topleft = (102, self.logo_rect.midbottom[1] + 50))
+        self.level_button_rect: pg.Rect = self.level_button_surf.get_rect(topleft = (102, (SCREEN_HEIGHT // 4) + 100))
 
         self.start_button_surf: pg.Surface = pg.image.load("graphics/assets/start menu/start.png").convert_alpha()
-        self.start_button_rect: pg.Rect = self.start_button_surf.get_rect(topleft = (502, self.logo_rect.midbottom[1] + 50))
+        self.start_button_rect: pg.Rect = self.start_button_surf.get_rect(topleft = (502, (SCREEN_HEIGHT // 4) + 100))
 
         self.start_menu_ground_surf: pg.Surface = pg.image.load("graphics/assets/start menu/ground.png").convert_alpha()
         self.start_menu_ground_rect: pg.Rect = self.start_menu_ground_surf.get_rect(bottomleft = (0, LEVEL_RESOLUTIONS[0][1]))
@@ -138,6 +137,18 @@ class Game:
         
         #Pause menu
         self.paused_game_state: GameState = self.game_state #Variable to keep track of the previous game state used to return to the previous game state when unpausing
+        self.darken_surf: pg.Surface = pg.Surface(LEVEL_RESOLUTIONS[0]) #Create a surface to darken the screen
+        self.darken_surf.set_alpha(PAUSE_MENU_BACKGROUND_ALPHA) #Set the alpha value of the darken surface
+
+        screen_center_x = LEVEL_RESOLUTIONS[0][0] // 2
+        self.pause_menu_pause_text: pg.Surface = pg.image.load("graphics/assets/pause menu/pause.png").convert_alpha()
+        self.pause_menu_pause_rect: pg.Rect = self.pause_menu_pause_text.get_rect(midtop = (screen_center_x, LEVEL_RESOLUTIONS[0][1] // 4))
+
+        self.pause_menu_resume_text: pg.Surface = pg.image.load("graphics/assets/pause menu/resume.png").convert_alpha()
+        self.pause_menu_resume_rect: pg.Rect = self.pause_menu_resume_text.get_rect(midtop = (screen_center_x, LEVEL_RESOLUTIONS[0][1] // 2))
+
+        self.pause_menu_quit_text: pg.Surface = pg.image.load("graphics/assets/pause menu/quit.png").convert_alpha()
+        self.pause_menu_quit_rect: pg.Rect = self.pause_menu_quit_text.get_rect(midtop = (screen_center_x, (LEVEL_RESOLUTIONS[0][1] // 4) * 3))
 
     def update_portal_animation(self): #Written here so that it can be reused in all game states
         """Function that updates the portal animation"""
@@ -161,6 +172,7 @@ class Game:
                 init_level_two(self)
 
         self.update_screen_dimensions() #Update the screen dimensions
+        self.darken_surf = pg.transform.scale(self.darken_surf, LEVEL_RESOLUTIONS[self.current_level_num]) #Update the darken surface
         self.portal_rect = self.current_portal_sprite.get_rect(bottomright = self.portal_coords[self.current_level_num]) #Update the portal rect
 
     def generic_pause_event_handler(self):

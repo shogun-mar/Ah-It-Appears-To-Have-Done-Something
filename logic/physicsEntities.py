@@ -58,7 +58,8 @@ class Player(PhysicsEntity):
         'right airborne': right_running_frames,
         'airborne': self.load_animation_frames('graphics/assets/player/airborne'),
         'standing': self.load_animation_frames('graphics/assets/player/standing'),
-        'asleep': self.load_animation_frames('graphics/assets/player/asleep')
+        'asleep': self.load_animation_frames('graphics/assets/player/asleep'),
+        'damaged': self.load_animation_frames('graphics/assets/player/damaged')
         }
 
         #Variables to keep track of the player's physics
@@ -114,7 +115,7 @@ class Player(PhysicsEntity):
 
         self.check_for_desired_movement()  #Check if desired movement is possible and then update the player's position accordingly
         self.apply_gravity() #Apply movement caused by gravit
-        self.update_status() #Update the player's status based on the player's velocity and previous status
+        if self.status != 'damaged': self.update_status() #Update the player's status based on the player's velocity and previous status
 
     def check_for_desired_movement(self):
         """Function that checks if the player can move to the desired position based on the player's status and velocity and then updates the player's position accordingly."""
@@ -127,7 +128,7 @@ class Player(PhysicsEntity):
                     case 'allowed': 
                         if not self.has_just_landed and not self.collides_with_other_entities(desired_x, desired_y): 
                             self.rect.midleft = desired_x, desired_y
-                    case 'death': self.reset()
+                    case 'death': self.init_death_sequence()
                     case 'changing level': self.advance_level()
                     case 'collision': self.velocity[0] = 0 #Stop the player's horizontal movement
                 
@@ -138,7 +139,7 @@ class Player(PhysicsEntity):
                     case 'allowed': 
                         if not self.has_just_landed and not self.collides_with_other_entities(desired_x, desired_y): 
                             self.rect.midright = desired_x, desired_y
-                    case 'death': self.reset()
+                    case 'death': self.init_death_sequence()
                     case 'changing level': self.advance_level()
                     case 'collision': self.velocity[0] = 0 #Stop the player's horizontal movement
             
@@ -151,7 +152,7 @@ class Player(PhysicsEntity):
                         case 'allowed': 
                             if not self.collides_with_other_entities(desired_x, self.rect.topleft[1]): 
                                 self.rect.topleft = desired_x, self.rect.topleft[1]
-                        case 'death': self.reset()
+                        case 'death': self.init_death_sequence()
                         case 'changing level': self.advance_level()
                         case 'collision': self.velocity[0] = 0
 
@@ -161,7 +162,7 @@ class Player(PhysicsEntity):
                         case 'allowed': 
                             if self.collides_with_other_entities(self.rect.topleft[0], desired_y): self.velocity[1] = BASE_GRAVITY_PULL
                             else: self.rect.topleft = self.rect.topleft[0], desired_y
-                        case 'death': self.reset()
+                        case 'death': self.init_death_sequence()
                         case 'changing level': self.advance_level()
                         case 'collision':
                             initial_desired_y = desired_y
@@ -183,7 +184,7 @@ class Player(PhysicsEntity):
                         case 'allowed': 
                             if self.collides_with_other_entities(desired_x, self.rect.topright[1]): self.velocity[1] = BASE_GRAVITY_PULL
                             else: self.rect.topright = desired_x, self.rect.topright[1]
-                        case 'death': self.reset()
+                        case 'death': self.init_death_sequence()
                         case 'changing level': self.advance_level()
                         case 'collision': self.velocity[0] = 0
 
@@ -193,7 +194,7 @@ class Player(PhysicsEntity):
                         case 'allowed':
                             if self.collides_with_other_entities(self.rect.topright[0], desired_y): self.velocity[1] = BASE_GRAVITY_PULL
                             else: self.rect.topright = self.rect.topright[0], desired_y
-                        case 'death': self.reset()
+                        case 'death': self.init_death_sequence()
                         case 'changing level': self.advance_level()
                         case 'collision':
                             initial_desired_y = desired_y
@@ -214,7 +215,7 @@ class Player(PhysicsEntity):
                         case 'allowed': 
                             if self.collides_with_other_entities(desired_x, desired_y): self.velocity[1] = BASE_GRAVITY_PULL
                             else: self.rect.midtop = desired_x, desired_y
-                        case 'death': self.reset()
+                        case 'death': self.init_death_sequence()
                         case 'changing level': self.advance_level()
                         case 'collision':
                             initial_desired_y = desired_y
@@ -250,7 +251,7 @@ class Player(PhysicsEntity):
                     match hor_result:
                         case 'allowed': 
                             if not self.collides_with_other_entities(desired_x, desired_y): self.rect.midleft = (desired_x, desired_y)
-                        case 'death': self.reset()
+                        case 'death': self.init_death_sequence()
                         case 'changing level': self.advance_level()
                         case 'collision': self.velocity[0] = 0 #Stop the player's horizontal movement
 
@@ -260,7 +261,7 @@ class Player(PhysicsEntity):
                     match hor_result:
                         case 'allowed':
                             if not self.collides_with_other_entities(desired_x, desired_y): self.rect.midright = (desired_x, desired_y)
-                        case 'death': self.reset()
+                        case 'death': self.init_death_sequence()
                         case 'changing level': self.advance_level()
                         case 'collision': self.velocity[0] = 0 #Stop the player's horizontal movement
 
@@ -278,7 +279,7 @@ class Player(PhysicsEntity):
                         self.animation_switching_delay = int(PLAYER_ANIMATION_SWITCHING_DELAY * (0.8 + (self.velocity[1] / 10))) #Dinamically set the delay to make so the landing seems heavy                 
                     else: self.velocity[1] = BASE_GRAVITY_PULL #If if does not collide with other entities and is not in air reset the player's vertical velocity
 
-                case 'death': self.reset()
+                case 'death': self.init_death_sequence()
                 case 'changing level': self.advance_level()
                 case 'collision':
                         self.velocity[1] = BASE_GRAVITY_PULL #Reset the player's vertical velocity
@@ -335,6 +336,9 @@ class Player(PhysicsEntity):
         
         elif self.velocity[0] == 0 and self.velocity[1] == BASE_GRAVITY_PULL and not self.is_in_air: self.status = 'standing'
 
+        elif self.status == 'damaged' and self.current_animation_frame == 3: #If the player has just finished the damaged animation
+            self.reset() #Reset the player
+
     def update_animation(self):
         """"Function that takes care of updating the player's sprite to follow an animation loop based on the player's status."""
         
@@ -389,6 +393,21 @@ class Player(PhysicsEntity):
         """Function that advances the player to the next level by increasing the current level number and resetting the player's position."""
         self.game.advance_level()
         self.reset()
+
+    def init_death_sequence(self):
+        """Function that initializes the player's death sequence."""
+
+        print('Player has died')
+
+        self.status = 'damaged' #Set the player's status to damaged
+        self.controls_enabled = False #Disable the player's controls
+        self.should_float = True #Enable the player's floating to permit the effect of knockback
+        self.current_animation_frame = -1 #Reset the animation frame counter
+         #Set the player's velocity to simulate knockback
+        if self.status in ['right', 'right airborne']: self.velocity = [-HOR_KNOCKBACK_STRENGTH, 0]
+        elif self.status in ['left', 'left airborne']: self.velocity = [HOR_KNOCKBACK_STRENGTH, 0]
+        elif self.status in ['standing', 'airborne'] and self.velocity[1] >= 0: self.velocity = [0, -VERT_KNOCKBACK_STRENGTH]
+        elif self.status in ['standing', 'airborne'] and self.velocity[1] < 0: self.velocity = [0, VERT_KNOCKBACK_STRENGTH]
 
     def reset(self):
         """Function that resets the player's value to default.""" 

@@ -15,15 +15,11 @@ def update_pause_menu(game):
 
 def render_pause_menu(game):
     """Function that renders the pause menu game state"""
-    darkned_surf = pg.Surface(LEVEL_RESOLUTIONS[game.current_level_num]) #Create a surface to darken the screen
-    darkned_surf.set_alpha(PAUSE_MENU_BACKGROUND_ALPHA) #Fill the surface with black
-
     screen = game.screen #Rename screen to make draw calls easier to read
     
     match game.paused_game_state:
         case GameState.START_MENU:
             #render_start_menu(game) #Could also do this but it would also draw the cursor (a fix could be moving the cursor drawing to the main render function in game.py)
-            screen.blit(game.logo_surf, game.logo_rect) #Draw the logo
             screen.blit(game.start_menu_ground_surf, game.start_menu_ground_rect) #Draw the ground
             screen.blit(game.level_button_surf, game.level_button_rect) #Draw the level button
             screen.blit(game.start_button_surf, game.start_button_rect) #Draw the start button
@@ -45,5 +41,8 @@ def render_pause_menu(game):
 
             if game.player.status == 'asleep': screen.blit(game.level_two_env_mask, (0, 0)) #Draw the environment mask if the player is still asleep
 
-    screen.blit(darkned_surf, (0, 0)) #Darken the screen
+    screen.blit(game.darken_surf, (0, 0)) #Darken the screen
+    screen.blit(game.pause_menu_pause_text, game.pause_menu_pause_rect) #Draw the pause text
+    screen.blit(game.pause_menu_resume_text, game.pause_menu_resume_rect) #Draw the resume text
+    screen.blit(game.pause_menu_quit_text, game.pause_menu_quit_rect) #Draw the restart text
     if game.should_draw_cursor: screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor

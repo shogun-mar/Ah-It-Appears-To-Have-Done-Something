@@ -6,14 +6,14 @@ from logic.states.gameState import GameState
 from logic.states.startMenu import handle_start_menu_events, update_start_menu, render_start_menu
 from logic.states.pauseMenu import handle_pause_menu_events, update_pause_menu, render_pause_menu
 from logic.states.level_1 import handle_level_one_events, update_level_one, render_level_one, init_level_one
-from logic.states.level_2 import handle_level_two_events, update_level_two, render_level_two, init_level_two, set_brightness
+from logic.states.level_2 import handle_level_two_events, update_level_two, render_level_two, init_level_two
 from logic.physicsEntities import Player
 from logic.interactibles import GravityController
 
 from settings import *
 
-# Constants
-_MONITOR_DEFAULTTOPRIMARY = 1
+#Constants
+_MONITOR_DEFAULTTONEAREST = 2
 
 class Game:
     def __init__(self):
@@ -24,7 +24,9 @@ class Game:
         #self.game_state: GameState = GameState.START_MENU
         self.current_level_num: int = self.game_state.value
         self.should_draw_cursor: bool = True
-        self.user32 = ctypes.windll.user32
+        # Load necessary DLLs
+        self.user32 = ctypes.WinDLL('user32')
+        self.dxva2 = ctypes.WinDLL('dxva2')
 
         #Screen settings
         self.screen: pg.Surface = pg.display.set_mode((LEVEL_RESOLUTIONS[self.current_level_num]))
@@ -39,6 +41,7 @@ class Game:
         self.player = Player(self)
         self.player.controls_enabled = True #FOR DEBUGGING PURPOSES ONLY
         self.entities = []
+        self.window_handle = pg.display.get_wm_info()['window']
 
         #Init assets
         self.init_assets()
@@ -198,11 +201,8 @@ class Game:
         self.game_state = self.previous_game_state
 
     def get_monitor_handle(self):
-        hwnd = pg.display.get_wm_info()['window']
-        hmonitor = self.user32.MonitorFromWindow(hwnd, _MONITOR_DEFAULTTOPRIMARY)
-        if not hmonitor:
-            raise ctypes.WinError(ctypes.get_last_error())
-        return hmonitor
+        """Function that gets the handle of the monitor the game is running on"""
+        return self.user32.MonitorFromWindow(self.window_handle, 0)
 
 if __name__ == "__main__":
     Game().run()

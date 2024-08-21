@@ -60,8 +60,6 @@ class Player(PhysicsEntity):
         'standing': self.load_animation_frames('graphics/assets/player/standing'),
         'asleep': self.load_animation_frames('graphics/assets/player/asleep')
         }
-        
-        self.gravity_x_coord: int = 0 #Variable to keep track of the x coord of the player when falling to avoid side collisions
 
         #Variables to keep track of the player's physics
         self.collision_manager: PlayerCollisionManager = PlayerCollisionManager(game) #Create a collision manager for the player
@@ -299,9 +297,7 @@ class Player(PhysicsEntity):
                             self.status = 'standing' #Set the player's status to standing
                             self.sprite = self.landing_sprite #Set the sprite to the landing frame
                             self.current_animation_frame = 0 #Reset the animation frame
-                            self.animation_switching_delay = MAX_FPS // 5                
-
-            self.gravity_x_coord = desired_x #Save the x coord to use it for debugging gravity
+                            self.animation_switching_delay = MAX_FPS // 5
 
     def apply_inertia(self):
         # Clamp the velocity to a maximum value

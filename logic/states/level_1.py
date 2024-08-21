@@ -1,5 +1,5 @@
 import ctypes
-from settings import *
+from settings import PAUSE_KEY, pg
 
 start_point = (0,0)
 end_point = (0,0)

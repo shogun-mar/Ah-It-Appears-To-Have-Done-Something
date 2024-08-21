@@ -1,5 +1,4 @@
-import pygame as pg
-from settings import *
+from settings import PAUSE_KEY, pg
 from logic.physicsEntities import DeathEntity
 
 entity_spawn_cooldown = 1000 #Cooldown for spawning entities in milliseconds
@@ -43,9 +42,6 @@ def render_start_menu(game):
     [screen.blit(entity.sprite, entity.rect) for entity in game.entities] #Draw all the entities
 
     if game.should_draw_cursor: screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor
-
-    #pg.draw.line(screen, 'red', (game.player.gravity_x_coord, 0), (game.player.gravity_x_coord, SCREEN_HEIGHT), 2) #Draw the gravity line
-    #pg.draw.rect(screen, 'green', game.player.rect, 2)  # Draw the player's rect with a red outline
 
 def create_start_physics_entity(game):
     """Function that creates a physics entity at the player's position"""

@@ -1,55 +1,113 @@
-import pygame as pg
-import ctypes
+import ctypes, time
 from ctypes import wintypes
-from settings import *
+from threading import Thread
+from settings import PAUSE_KEY, pg #Import the pause key and the pygame module
 
-import ctypes
-from ctypes import wintypes
 
-# Constants
-dxva2 = ctypes.windll.dxva2
+# Define necessary constants
+_MONITOR_DEFAULTTONEAREST = 2
 
-def get_brightness_value(game):
-    hmonitor = game.get_monitor_handle()
+# Define necessary structures
+class MONITORINFOEXW(ctypes.Structure):
+    _fields_ = [
+        ("cbSize", wintypes.DWORD),
+        ("rcMonitor", wintypes.RECT),
+        ("rcWork", wintypes.RECT),
+        ("dwFlags", wintypes.DWORD),
+        ("szDevice", wintypes.WCHAR * 32)
+    ]
+
+class PHYSICAL_MONITOR(ctypes.Structure):
+    _fields_ = [("hPhysicalMonitor", wintypes.HANDLE),
+                ("szPhysicalMonitorDescription", wintypes.WCHAR * 128)]
+
+# Load necessary DLLs
+user32 = ctypes.WinDLL('user32')
+dxva2 = ctypes.WinDLL('dxva2')
+
+# Define function prototypes
+user32.MonitorFromWindow.restype = wintypes.HMONITOR
+user32.MonitorFromWindow.argtypes = [wintypes.HWND, wintypes.DWORD]
+
+user32.GetMonitorInfoW.restype = wintypes.BOOL
+user32.GetMonitorInfoW.argtypes = [wintypes.HMONITOR, ctypes.POINTER(MONITORINFOEXW)]
+
+dxva2.GetNumberOfPhysicalMonitorsFromHMONITOR.restype = wintypes.BOOL
+dxva2.GetNumberOfPhysicalMonitorsFromHMONITOR.argtypes = [wintypes.HMONITOR, ctypes.POINTER(wintypes.DWORD)]
+
+dxva2.GetPhysicalMonitorsFromHMONITOR.restype = wintypes.BOOL
+dxva2.GetPhysicalMonitorsFromHMONITOR.argtypes = [wintypes.HMONITOR, wintypes.DWORD, ctypes.POINTER(PHYSICAL_MONITOR)]
+
+dxva2.GetMonitorBrightness.restype = wintypes.BOOL
+dxva2.GetMonitorBrightness.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD), ctypes.POINTER(wintypes.DWORD), ctypes.POINTER(wintypes.DWORD)]
+
+dxva2.SetMonitorBrightness.restype = wintypes.BOOL
+dxva2.SetMonitorBrightness.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+
+# Function to get monitor brightness
+def get_monitor_brightness(hwnd):
+    hmonitor = user32.MonitorFromWindow(hwnd, _MONITOR_DEFAULTTONEAREST)
+    
+    # Get number of physical monitors
+    num_monitors = wintypes.DWORD()
+    dxva2.GetNumberOfPhysicalMonitorsFromHMONITOR(hmonitor, ctypes.byref(num_monitors))
+    
+    # Get physical monitor handles
+    physical_monitors = (PHYSICAL_MONITOR * num_monitors.value)()
+    dxva2.GetPhysicalMonitorsFromHMONITOR(hmonitor, num_monitors.value, physical_monitors)
+    
+    # Get brightness of the first monitor
+    min_brightness = wintypes.DWORD()
     current_brightness = wintypes.DWORD()
+    max_brightness = wintypes.DWORD()
+    dxva2.GetMonitorBrightness(physical_monitors[0].hPhysicalMonitor, ctypes.byref(min_brightness), ctypes.byref(current_brightness), ctypes.byref(max_brightness))
+    
+    # Clean up
+    dxva2.DestroyPhysicalMonitor(physical_monitors[0].hPhysicalMonitor)
+    
+    return current_brightness.value
 
-    if dxva2.GetMonitorBrightness(hmonitor, ctypes.byref(current_brightness)):
-        return current_brightness.value
-    else:
-        raise ctypes.WinError(ctypes.get_last_error())
+# Function to set monitor brightness
+def set_monitor_brightness(hwnd, brightness):
+    hmonitor = user32.MonitorFromWindow(hwnd, _MONITOR_DEFAULTTONEAREST)
+    
+    # Get number of physical monitors
+    num_monitors = wintypes.DWORD()
+    dxva2.GetNumberOfPhysicalMonitorsFromHMONITOR(hmonitor, ctypes.byref(num_monitors))
+    
+    # Get physical monitor handles
+    physical_monitors = (PHYSICAL_MONITOR * num_monitors.value)()
+    dxva2.GetPhysicalMonitorsFromHMONITOR(hmonitor, num_monitors.value, physical_monitors)
+    
+    # Set brightness of the first monitor
+    dxva2.SetMonitorBrightness(physical_monitors[0].hPhysicalMonitor, brightness)
+    
+    # Clean up
+    dxva2.DestroyPhysicalMonitor(physical_monitors[0].hPhysicalMonitor)
 
-def set_brightness(game, level):
-    hmonitor = game.get_monitor_handle()
-    if not dxva2.SetMonitorBrightness(hmonitor, wintypes.DWORD(level)):
-        raise ctypes.WinError(ctypes.get_last_error())
+# Function to monitor brightness changes
+def monitor_brightness_changes(callback, interval=7):
+    hwnd = user32.GetForegroundWindow()  # Get handle of the current window
+    previous_brightness = get_monitor_brightness(hwnd)
+    
+    while True:
+        time.sleep(interval)
+        current_brightness = get_monitor_brightness(hwnd)
+        if current_brightness != previous_brightness:
+            callback(current_brightness)
+            previous_brightness = current_brightness
 
-def monitor_brightness(game):
-    global previous_brightness
-
-    if previous_brightness is None:
-        previous_brightness = get_brightness_value(game)
-
-    current_brightness = get_brightness_value(game)
-
-    if previous_brightness != current_brightness:
-        previous_brightness = current_brightness
-        print(f"Brightness levels changed: {current_brightness} from {previous_brightness}")
-        #update_player_mask(game, brightness=current_brightness)
-
-# Brightness controls variables
-previous_brightness = None
-brightness_monitor_delay = 5
+# Callback function
+def brightness_changed(new_brightness):
+    print(f"Brightness changed to: {new_brightness}")
 
 def handle_level_two_events(game, event):
         
     if event.type == pg.KEYDOWN:
         if event.key == PAUSE_KEY:
             game.generic_pause_event_handler()
-        if event.key == pg.K_0:
-            set_brightness(100)
 
 def update_level_two(game):
-    global brightness_monitor_delay
     
     player = game.player #Rename player to make code easier to read
 
@@ -60,10 +118,6 @@ def update_level_two(game):
 
     #Environment
     game.update_portal_animation() #Update the portal animation
-    brightness_monitor_delay -= 1 #Decrease the brightness monitor delay
-    if brightness_monitor_delay == 0:
-        brightness_monitor_delay = 10
-        monitor_brightness(game) #Update the monitor brightness
 
 def render_level_two(game):
     
@@ -80,11 +134,13 @@ def render_level_two(game):
 def init_level_two(game):
     game.player.status = 'asleep' #Set the player status to asleep in level 2
     game.player.controls_enabled = False #Disable player controls
-    try:
-        set_brightness(0)  # Set the monitor brightness to 0
-    except Exception as e:
-        print(f"Failed to set brightness: {e}")
+    set_monitor_brightness(game.window_handle, 0) #Set the monitor brightness to 0
     update_player_mask(game, brightness=0) #Update the playter mask with a brightness of 0
+
+    # Start monitoring brightness changes in a separate thread
+    monitor_thread = Thread(target=monitor_brightness_changes, args=(brightness_changed,)) # Create a thread to monitor brightness changes
+    monitor_thread.daemon = True # Make the thread a daemon so it stops when the main thread stops
+    monitor_thread.start() # Start the thread
 
 def update_player_mask(game, brightness):
     

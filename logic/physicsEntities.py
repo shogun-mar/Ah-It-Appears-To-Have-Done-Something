@@ -110,11 +110,15 @@ class Player(PhysicsEntity):
         """Function that manages the player's movement complete of gravity based movement, inertia and collision detection."""
 
         if self.should_float or self.status == 'asleep': #If the player should float and is not asleep
-            return #If the player should float end the function
+            return #If the player should float end the function here
 
+        self.check_for_desired_movement()  #Check if desired movement is possible and then update the player's position accordingly
+        self.apply_gravity() #Apply movement caused by gravit
+        self.update_status() #Update the player's status based on the player's velocity and previous status
+
+    def check_for_desired_movement(self):
+        """Function that checks if the player can move to the desired position based on the player's status and velocity and then updates the player's position accordingly."""
         clamp_to_screen = self.game.clamp_to_screen #Reference to the clamp_to_screen function in game to make code more readable
-
-        #Check if desired movement is possible
         match self.status:
             case 'left':
                 desired_x, desired_y = clamp_to_screen(self.rect.midleft[0] - abs(self.velocity[0]), self.rect.midleft[1])
@@ -197,7 +201,7 @@ class Player(PhysicsEntity):
                                 desired_y = initial_desired_y + i
                                 ver_result = self.collision_manager.allow_movement(desired_x, desired_y)
                                 if ver_result == 'allowed' and not self.collides_with_other_entities(desired_x, desired_y): 
-                                    self.rect.right = desired_x, desired_y
+                                    self.rect.topright = desired_x, desired_y
                                     break
 
                             self.velocity = [0, BASE_GRAVITY_PULL] #Reset the player's velocity
@@ -225,12 +229,6 @@ class Player(PhysicsEntity):
 
                     if self.velocity[1] == 0: #If the player has reached the apex of the jump
                         self.velocity[1] = BASE_GRAVITY_PULL #Reset the vertical velocity
-        
-        self.apply_gravity() #Apply movement caused by gravity
-
-        self.update_status() #Update the player's status based on the player's velocity
-
-        #Clamping the player's rect in place is not necessary because the boundaries checks are already done in the calculation of the desired position
 
     def apply_gravity(self):
 
@@ -385,7 +383,7 @@ class Player(PhysicsEntity):
         #Formula: max(min_value, min(value, max_value))
 
         self.velocity[0] = max(-MAX_ENTITY_SPEED, min(self.velocity[0], MAX_ENTITY_SPEED))
-        self.velocity[1] = max(BASE_JUMP_SPEED, min(self.velocity[1], MAX_DOWN_VELOCITY))
+        self.velocity[1] = max(MAX_UP_VELOCITY, min(self.velocity[1], MAX_DOWN_VELOCITY))
     
     def advance_level(self):
         """Function that advances the player to the next level by increasing the current level number and resetting the player's position."""

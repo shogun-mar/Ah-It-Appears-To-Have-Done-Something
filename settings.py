@@ -16,6 +16,7 @@ FALLING_SPEED_INCR = 1 #The speed at which the player falls in pixels per frame 
 PLAYER_GRAVITY_PULL_DELAY = 2 #The delay in frames between gravity pulls on the player (suggested: 2)
 BASE_GRAVITY_PULL = FALLING_SPEED_INCR #The base gravity pull any entity with simulated physics (suggested: FALLING_SPEED_INCR)
 MAX_DOWN_VELOCITY = 16 #The maximum speed the player can fall at in pixels per frame (should be multiple of FALLING_SPEED_INCR) (suggested: 16)
+MAX_UP_VELOCITY = -30 #The maximum speed the player can jump at in pixels per frame (should be multiple of FALLING_SPEED_INCR) (suggested: -30)
 
 #Player movement settings
 PLAYER_SPEED = 2 #The speed of the player in pixels per frame while on the ground (suggested: 2)

@@ -8,7 +8,7 @@ from logic.states.pauseMenu import handle_pause_menu_events, update_pause_menu, 
 from logic.states.level_1 import handle_level_one_events, update_level_one, render_level_one, init_level_one
 from logic.states.level_2 import handle_level_two_events, update_level_two, render_level_two, init_level_two
 from logic.physicsEntities import Player
-from logic.interactibles import GravityController
+from logic.interactibles import GravityController, JumpPad
 
 from settings import *
 
@@ -138,11 +138,11 @@ class Game:
         #Level 2 assets
         self.level_two_ground_surf: pg.Surface = pg.image.load("graphics/assets/level 2/ground.png").convert_alpha()
         self.level_two_ground_rect: pg.Rect = self.level_two_ground_surf.get_rect(bottomleft = (0, LEVEL_RESOLUTIONS[2][1]))
-
         self.level_two_env_mask: pg.Surface = pg.image.load("graphics/assets/level 2/mask.png").convert_alpha() #Half transparent black circle used to show the player in the dark
+        self.level_two_jump_pad: JumpPad = JumpPad(game = self, bottom_left_coords = (0, LEVEL_RESOLUTIONS[2][1]))
         
         #Pause menu
-        self.previous_game_state: GameState = self.game_state #Variable to keep track of the previous game state used to return to the previous game state when unpausing
+        self.paused_game_state: GameState = self.game_state #Variable to keep track of the previous game state used to return to the previous game state when unpausing
 
     def update_portal_animation(self): #Written here so that it can be reused in all game states
         """Function that updates the portal animation"""
@@ -170,7 +170,7 @@ class Game:
 
     def generic_pause_event_handler(self):
         if not self.player.is_in_air: self.player.status = 'standing'
-        self.previous_game_state = self.game_state
+        self.paused_game_state = self.game_state
         self.game_state = GameState.PAUSE_MENU
 
     def update_screen_dimensions(self):
@@ -195,13 +195,13 @@ class Game:
     def handle_mouse_exit_event(self):
         """Function that handles the focus lost event"""
         self.should_draw_cursor = False
-        if not self.game_state == GameState.LEVEL_1: # If the game state is not level 1 pause the game
+        if not self.game_state == GameState.LEVEL_1 and not self.game_state == GameState.LEVEL_2: # If the game state is not level 1 pause the game
             self.generic_pause_event_handler()
 
     def handle_mouse_enter_event(self):
         """Function that handles the focus gained event"""
         self.should_draw_cursor = True
-        self.game_state = self.previous_game_state
+        self.game_state = self.paused_game_state
 
     def get_monitor_handle(self):
         """Function that gets the handle of the monitor the game is running on"""

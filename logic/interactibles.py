@@ -2,16 +2,28 @@ import pygame as pg
 from random import randint
 
 class Interactibles:
-    def __init__(self, game, sprite = None, rect = None):
+    def __init__(self, game, sprite = None, rect = None, action = None):
         self.game = game
         self.sprite = sprite
         self.rect = rect
+        self.action = action
+
+class JumpPad(Interactibles):
+    def __init__(self, game, bottom_left_coords):
+        super().__init__(game)
+
+        #Graphical representation
+        self.sprite = pg.image.load("graphics/assets/interactibles/jump pad/jump pad.png").convert_alpha()
+
+        #Logic
+        self.rect = self.sprite.get_rect(bottomleft = bottom_left_coords)
+        self.action = "game.player.velocity[1] = -16" #Exec strings have to be written through the perspective of the name space in which they will be executed (in this case level_1.py)
 
 class GravityController(Interactibles):
     def __init__(self, game, coords, direction):
         super().__init__(game)
 
-        #Animation
+        #Graphical representation
         self.frames = [pg.image.load(f"graphics/assets/interactibles/smoke circle/version {randint(1,2)}/{direction}/{i}.png").convert_alpha() for i in range(1, 12)]
         self.current_frame = 0
         self.switching_delay = 10 #Variable to keep track of when to progress the animation (with 6 the delay is 96 ms at 60 fps, with 10 the delay is 160 ms at 60 fps)

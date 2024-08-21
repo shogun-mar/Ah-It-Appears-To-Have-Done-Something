@@ -1,9 +1,6 @@
 import ctypes
 from settings import PAUSE_KEY, pg
 
-start_point = (0,0)
-end_point = (0,0)
-
 def handle_level_one_events(game, event):
     """Function that handles events for the level one game state"""
     
@@ -42,9 +39,10 @@ def render_level_one(game):
 
     if game.should_draw_cursor: screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor
 
-    pg.draw.line(screen, 'red', start_point, end_point, 2)
-
 def init_level_one(game):
+    game.player.reset() #Reset the player
+    game.should_draw_cursor = False #Set the cursor to be drawn
+
     # Get the window handle on Windows
     game.window_handle = pg.display.get_wm_info()['window']
     game.hardware_window_rect = RECT()
@@ -54,16 +52,12 @@ def init_level_one(game):
 
 def move_player_relative_to_window(game):
     """Function that moves the player of a relative amount of the difference between the last and current window position"""
-    global start_point, end_point
 
     player = game.player
 
     if game.last_window_position is not None:
-        x_diff = (game.current_window_position[0] - game.last_window_position[0])
-        y_diff = (game.current_window_position[1] - game.last_window_position[1])
-
-    start_point = player.rect.center
-    end_point = (player.rect.centerx - x_diff, player.rect.centery - y_diff)
+        x_diff = int((game.current_window_position[0] - game.last_window_position[0]) * 1.25) #Multiply by 1.25 to make the player move faster than the window
+        y_diff = int((game.current_window_position[1] - game.last_window_position[1]) * 1.25) #Multiply by 1.25 to make the player move faster than the window
 
     if game.level_one_grav_controller_y <= game.player.rect.centery - y_diff <= game.level_one_grav_controller_y + 128:  #If the player is in the y range of the gravity controller
     

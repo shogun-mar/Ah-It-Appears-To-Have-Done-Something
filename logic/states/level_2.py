@@ -1,16 +1,55 @@
 import pygame as pg
-import ctypes, time
+import ctypes
 from ctypes import wintypes
 from settings import *
+
+import ctypes
+from ctypes import wintypes
+
+# Constants
+dxva2 = ctypes.windll.dxva2
+
+def get_brightness_value(game):
+    hmonitor = game.get_monitor_handle()
+    current_brightness = wintypes.DWORD()
+
+    if dxva2.GetMonitorBrightness(hmonitor, ctypes.byref(current_brightness)):
+        return current_brightness.value
+    else:
+        raise ctypes.WinError(ctypes.get_last_error())
+
+def set_brightness(game, level):
+    hmonitor = game.get_monitor_handle()
+    if not dxva2.SetMonitorBrightness(hmonitor, wintypes.DWORD(level)):
+        raise ctypes.WinError(ctypes.get_last_error())
+
+def monitor_brightness(game):
+    global previous_brightness
+
+    if previous_brightness is None:
+        previous_brightness = get_brightness_value(game)
+
+    current_brightness = get_brightness_value(game)
+
+    if previous_brightness != current_brightness:
+        previous_brightness = current_brightness
+        print(f"Brightness levels changed: {current_brightness} from {previous_brightness}")
+        #update_player_mask(game, brightness=current_brightness)
+
+# Brightness controls variables
+previous_brightness = None
+brightness_monitor_delay = 5
 
 def handle_level_two_events(game, event):
         
     if event.type == pg.KEYDOWN:
         if event.key == PAUSE_KEY:
             game.generic_pause_event_handler()
+        if event.key == pg.K_0:
+            set_brightness(100)
 
 def update_level_two(game):
-    global previous_player_coords
+    global brightness_monitor_delay
     
     player = game.player #Rename player to make code easier to read
 
@@ -21,6 +60,10 @@ def update_level_two(game):
 
     #Environment
     game.update_portal_animation() #Update the portal animation
+    brightness_monitor_delay -= 1 #Decrease the brightness monitor delay
+    if brightness_monitor_delay == 0:
+        brightness_monitor_delay = 10
+        monitor_brightness(game) #Update the monitor brightness
 
 def render_level_two(game):
     
@@ -37,12 +80,16 @@ def render_level_two(game):
 def init_level_two(game):
     game.player.status = 'asleep' #Set the player status to asleep in level 2
     game.player.controls_enabled = False #Disable player controls
-    set_brightness(0) #Set the monitor brightness to 0
+    try:
+        set_brightness(0)  # Set the monitor brightness to 0
+    except Exception as e:
+        print(f"Failed to set brightness: {e}")
     update_player_mask(game, brightness=0) #Update the playter mask with a brightness of 0
 
 def update_player_mask(game, brightness):
     
-    relative_color =  # Calculate the relative color based on the brightness (RGBA)
+    alpha_cannel = interpolate_alpha(brightness)
+    relative_color = (0, 0, 0, alpha_cannel)  # Calculate the relative color based on the brightness (RGBA)
 
     # Lock the surface to modify pixel data
     game.level_two_env_mask.lock()
@@ -62,91 +109,8 @@ def update_player_mask(game, brightness):
     
     game.level_two_env_mask.blit(game.level_two_player_mask, (cutout_origin_x, cutout_origin_y)) #Blit the player mask onto the final mask
 
-def get_monitor_handles():
-    # Define necessary structures and constants
-    class PHYSICAL_MONITOR(ctypes.Structure):
-        _fields_ = [("hPhysicalMonitor", wintypes.HANDLE),
-                    ("szPhysicalMonitorDescription", wintypes.WCHAR * 128)]
-
-    # Load necessary DLLs
-    user32 = ctypes.windll.user32
-    dxva2 = ctypes.windll.dxva2
-
-    # Get the number of monitors
-    monitor_enum_proc = ctypes.WINFUNCTYPE(ctypes.c_int, wintypes.HMONITOR, wintypes.HDC, ctypes.POINTER(wintypes.RECT), wintypes.LPARAM)
-    monitors = []
-
-    def callback(hmonitor, hdc, lprect, lparam):
-        monitors.append(hmonitor)
-        return 1
-
-    user32.EnumDisplayMonitors(None, None, monitor_enum_proc(callback), 0)
-
-    physical_monitors = []
-
-    for hmonitor in monitors:
-        monitor_count = wintypes.DWORD()
-        if not dxva2.GetNumberOfPhysicalMonitorsFromHMONITOR(hmonitor, ctypes.byref(monitor_count)):
-            continue
-
-        physical_monitor_array = (PHYSICAL_MONITOR * monitor_count.value)()
-        if not dxva2.GetPhysicalMonitorsFromHMONITOR(hmonitor, monitor_count, physical_monitor_array):
-            continue
-
-        for physical_monitor in physical_monitor_array:
-            physical_monitors.append(physical_monitor.hPhysicalMonitor)
-
-    return physical_monitors
-
-def set_brightness(brightness):
-    dxva2 = ctypes.windll.dxva2
-    monitors = get_monitor_handles()
-
-    for monitor in monitors:
-        dxva2.SetMonitorBrightness(monitor, brightness)
-        dxva2.DestroyPhysicalMonitor(monitor)
-
-def get_brightness_levels():
-
-    # Define necessary structures and constants
-    class PHYSICAL_MONITOR(ctypes.Structure):
-        _fields_ = [("hPhysicalMonitor", wintypes.HANDLE),
-                    ("szPhysicalMonitorDescription", wintypes.WCHAR * 128)]
-
-    # Load necessary DLLs
-    user32 = ctypes.windll.user32
-    dxva2 = ctypes.windll.dxva2
-
-    # Get the number of monitors
-    monitor_enum_proc = ctypes.WINFUNCTYPE(ctypes.c_int, wintypes.HMONITOR, wintypes.HDC, ctypes.POINTER(wintypes.RECT), wintypes.LPARAM)
-    monitors = []
-
-    def callback(hmonitor, hdc, lprect, lparam):
-        monitors.append(hmonitor)
-        return 1
-
-    user32.EnumDisplayMonitors(None, None, monitor_enum_proc(callback), 0)
-
-    brightness_levels = []
-
-    for hmonitor in monitors:
-        monitor_count = wintypes.DWORD()
-        if not dxva2.GetNumberOfPhysicalMonitorsFromHMONITOR(hmonitor, ctypes.byref(monitor_count)):
-            continue
-
-        physical_monitors = (PHYSICAL_MONITOR * monitor_count.value)()
-        if not dxva2.GetPhysicalMonitorsFromHMONITOR(hmonitor, monitor_count, physical_monitors):
-            continue
-
-        for physical_monitor in physical_monitors:
-            min_brightness = wintypes.DWORD()
-            current_brightness = wintypes.DWORD()
-            max_brightness = wintypes.DWORD()
-            if dxva2.GetMonitorBrightness(physical_monitor.hPhysicalMonitor, ctypes.byref(min_brightness), ctypes.byref(current_brightness), ctypes.byref(max_brightness)):
-                brightness_levels.append(current_brightness.value)
-            dxva2.DestroyPhysicalMonitor(physical_monitor.hPhysicalMonitor)
-
-    return brightness_levels
+def interpolate_alpha(brightness):
+    return int(pg.math.lerp(255, 128, brightness / 100))
 
 def wake_up_player(player):
     player.status = 'standing' #Set the player status to standing

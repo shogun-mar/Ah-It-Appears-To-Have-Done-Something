@@ -6,6 +6,10 @@ def handle_pause_menu_events(game, event):
     if event.type == pg.KEYDOWN and event.key == PAUSE_KEY:
         game.game_state = game.paused_game_state
 
+    if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
+        if game.pause_menu_resume_rect.collidepoint(event.pos): game.game_state = game.paused_game_state
+        elif game.pause_menu_quit_rect.collidepoint(event.pos): game.quit_game()
+
 def update_pause_menu(game):
     """Function that updates the pause menu game state"""
     match game.paused_game_state:

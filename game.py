@@ -60,8 +60,7 @@ class Game:
         """Function that handles generic events for the game which are not specific to any game state and by consulting the current game state, calls the appropriate event handling function"""
         for event in pg.event.get():
             if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == QUCK_EXIT_KEY):
-                pg.quit()
-                quit()
+                self.quit_game()
 
             elif event.type == pg.WINDOWLEAVE: self.handle_mouse_exit_event()
             elif event.type == pg.WINDOWENTER: self.handle_mouse_enter_event()
@@ -76,6 +75,9 @@ class Game:
         """Function that updates generic values not specific to any game state and calls the appropriate update function by consulting the current game state"""
 
         pg.display.set_caption(f" Ah It Appears To Have Done Something - FPS: {int(self.clock.get_fps())}") #Update the window title to show the FPS
+
+        #If the player has just finished the damaged animation reset the player
+        if self.player.status == 'damaged' and self.player.current_animation_frame == 3: self.player.reset()
         
         match self.game_state:
             case GameState.START_MENU: update_start_menu(self)
@@ -145,10 +147,10 @@ class Game:
         self.pause_menu_pause_rect: pg.Rect = self.pause_menu_pause_text.get_rect(midtop = (screen_center_x, LEVEL_RESOLUTIONS[0][1] // 4))
 
         self.pause_menu_resume_text: pg.Surface = pg.image.load("graphics/assets/pause menu/resume.png").convert_alpha()
-        self.pause_menu_resume_rect: pg.Rect = self.pause_menu_resume_text.get_rect(midtop = (screen_center_x, LEVEL_RESOLUTIONS[0][1] // 2))
+        self.pause_menu_resume_rect: pg.Rect = self.pause_menu_resume_text.get_rect(midtop = (screen_center_x, LEVEL_RESOLUTIONS[0][1] // 2 - 50))
 
         self.pause_menu_quit_text: pg.Surface = pg.image.load("graphics/assets/pause menu/quit.png").convert_alpha()
-        self.pause_menu_quit_rect: pg.Rect = self.pause_menu_quit_text.get_rect(midtop = (screen_center_x, (LEVEL_RESOLUTIONS[0][1] // 4) * 3))
+        self.pause_menu_quit_rect: pg.Rect = self.pause_menu_quit_text.get_rect(midtop = (screen_center_x, (LEVEL_RESOLUTIONS[0][1] // 4) * 3 - 100))
 
     def update_portal_animation(self): #Written here so that it can be reused in all game states
         """Function that updates the portal animation"""
@@ -213,6 +215,11 @@ class Game:
     def get_monitor_handle(self):
         """Function that gets the handle of the monitor the game is running on"""
         return self.user32.MonitorFromWindow(self.window_handle, 0)
+
+    def quit_game(self):
+        pg.quit()
+        exit()
+        quit()
 
 if __name__ == "__main__":
     Game().run()

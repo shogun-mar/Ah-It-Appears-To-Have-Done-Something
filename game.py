@@ -89,7 +89,7 @@ class Game:
     def render(self):
         """Function that renders the game by calling the appropriate render function by consulting the current game state""" 
 
-        self.screen.fill('white') #Clear the screen
+       # self.screen.fill('white') #Clear the screen
         
         match self.game_state:
             case GameState.START_MENU: render_start_menu(self)

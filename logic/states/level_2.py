@@ -2,7 +2,7 @@ import ctypes, time
 from ctypes import wintypes
 from threading import Thread
 from logic.states.gameState import GameState
-from settings import PAUSE_KEY, BRIGHTNESS_CONTROL_INTERVAL, pg #Import the pause key and the pygame module
+from settings import PAUSE_KEY, BRIGHTNESS_CONTROL_INTERVAL, pg
 
 # Define necessary structures
 class MONITORINFOEXW(ctypes.Structure):
@@ -141,7 +141,6 @@ def render_level_two(game):
     if game.player.status == 'asleep': screen.blit(game.level_two_env_mask, (0, 0)) #Draw the environment mask
 
 def init_level_two(game):
-    game.player.reset() #Reset the player
     game.player.status = 'asleep' #Set the player status to asleep in level 2
     game.player.controls_enabled = False #Disable player controls
     game.should_draw_cursor = False #Disable cursor drawing

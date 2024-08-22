@@ -1,5 +1,5 @@
 from logic.states.gameState import GameState
-from settings import *
+from settings import PAUSE_KEY, pg
 
 def handle_pause_menu_events(game, event):
     """Function that handles events for the pause menu game state"""

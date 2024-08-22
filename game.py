@@ -1,16 +1,15 @@
+
 import contextlib, ctypes
 with contextlib.redirect_stdout(None): #Suppress pygame welcome message
-    import pygame as pg
+    from settings import LEVEL_RESOLUTIONS, PORTAL_ANIMATION_SWITCHING_DELAY, MAX_FPS, SCREEN_HEIGHT, PAUSE_MENU_BACKGROUND_ALPHA, QUICK_EXIT_KEY, pg
 del contextlib
 from logic.states.gameState import GameState
 from logic.states.startMenu import handle_start_menu_events, update_start_menu, render_start_menu
-from logic.states.pauseMenu import handle_pause_menu_events, update_pause_menu, render_pause_menu
 from logic.states.level_1 import handle_level_one_events, update_level_one, render_level_one, init_level_one
 from logic.states.level_2 import handle_level_two_events, update_level_two, render_level_two, init_level_two
+from logic.states.pauseMenu import handle_pause_menu_events, update_pause_menu, render_pause_menu
 from logic.physicsEntities import Player
 from logic.interactibles import GravityController, JumpPad
-
-from settings import *
 
 #Constants
 _MONITOR_DEFAULTTONEAREST = 2
@@ -20,7 +19,8 @@ class Game:
         pg.init()
 
     	#Game variables
-        self.game_state: GameState = GameState.START_MENU
+        self.game_state: GameState = GameState.LEVEL_1
+        #self.game_state: GameState = GameState.START_MENU
         self.current_level_num: int = self.game_state.value
         self.should_draw_cursor: bool = True
 
@@ -49,6 +49,8 @@ class Game:
         #Init assets
         self.init_assets()
 
+        init_level_one(self)
+
     def run(self):
         """Main game loop"""	
         while True:
@@ -59,7 +61,7 @@ class Game:
     def handle_events(self):
         """Function that handles generic events for the game which are not specific to any game state and by consulting the current game state, calls the appropriate event handling function"""
         for event in pg.event.get():
-            if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == QUCK_EXIT_KEY):
+            if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == QUICK_EXIT_KEY):
                 self.quit_game()
 
             elif event.type == pg.WINDOWLEAVE: self.handle_mouse_exit_event()
@@ -163,7 +165,7 @@ class Game:
 
     def advance_level(self):
         """Function that advances the level"""
-        self.player.status = 'standing' #Reset the player status
+        self.player.reset() #Reset the player
         self.current_level_num += 1 #Advance the level counter
         self.game_state = GameState(self.current_level_num) #Update the game state
 

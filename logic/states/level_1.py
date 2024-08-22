@@ -40,7 +40,6 @@ def render_level_one(game):
     if game.should_draw_cursor: screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor
 
 def init_level_one(game):
-    game.player.reset() #Reset the player
     game.should_draw_cursor = False #Set the cursor to be drawn
 
     # Get the window handle on Windows

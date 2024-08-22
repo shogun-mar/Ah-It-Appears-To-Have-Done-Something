@@ -16,7 +16,7 @@ Ah It Appears To Have Done Something is a 2D puzzle platformer structured in a p
 
 Solutions will be available in a separate files to avoid spoilers.
 
-Any kind of review is deeply appreciated, but please keep in mind that this is my first platformer game made for my first game jam in rudimentary framework such as Pygame, in case feel free to send an email to:   marinipietro456@gmail.com 
+Feel free to contact me at pmarini72107@gmail.com or message me on slack (name: Marini) if you want to report a bug or leave a review, but please keep in mind that this is my first platformer game made for my first game jam in rudimentary framework such as Pygame (i did the best I could in less than two weeks T-T).
 
 ## Keybinds and controls
 
@@ -31,26 +31,26 @@ Default keybinds:
 * R &rarr; Reset the player's position and values
 * P &rarr; Exit the game
 
-
 ## Requirements
 Windows 10 or 11 (written and tested on Windows 10 22H2).
 
 ## Installation and execution
-Python 3 required, the specific version of python used to write this project is Python 3.12 64 bit.  
+Python 3 required, the specific version of python used to write this project is Python 3.12 64 bit.
 All the necessary pip packages can be installed through this command in the windows command prompt or any other equivalent command line tool.
 
 ```
 pip3 install pygame numpy pillow
 ```
 
+Written with Pygame 2.6.0, Numpy 2.0.1 and Pillow 10.4.0
 After doing this the program can be launched from any IDE or CLI by starting game.py.  
 I plan to make an executable of this game at the end of development.
 
 ## Assets credits
 
 Player spritesheet: https://dani-maccari.itch.io/player-animations-tim  
-Font: https://poppyworks.itch.io/silver
+Font in lower left of first level: https://poppyworks.itch.io/silver
 Enviroment: https://octoshrimpy.itch.io/tranquil-tunnels 
 Portal sprite: https://pixelnauta.itch.io/pixel-dimensional-portal-32x32 
-Logo font in first level: https://joebrogers.itch.io/bitpotion
+Font in pause menu and first level: https://joebrogers.itch.io/bitpotion
 Smoke effects: https://bdragon1727.itch.io/free-smoke-fx-pixel-2 

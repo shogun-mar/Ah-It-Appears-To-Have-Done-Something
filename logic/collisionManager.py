@@ -51,8 +51,6 @@ class PlayerCollisionManager(CollisionManager):
             pixel_color: list[int] = maps[self.level_num][y][x]
         except IndexError:
             return 'collision'
-        
-       # print(pixel_color, "at", x, y)
 
         if pixel_color[-1] == 0: #Transparent pixel
             return 'allowed'

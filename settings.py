@@ -28,12 +28,12 @@ BASE_JUMP_SPEED = -8 #Initial player jump speed in pixel per frame (negative val
 INITIAL_COORDS_PLAYER = [(50, 501), (50, 339), (887, 489)] #Initial coordinates the player should have in each level (midbottom) (DO NOT CHANGE)
 
 #Key bindings (see below for key constants)
-PLAYER_LEFT_KEY = pg.K_a #The key to move the player left (suggested: pg.K_a)
-PLAYER_RIGHT_KEY = pg.K_d #The key to move the player right (suggested: pg.K_d)
-PLAYER_JUMP_KEY = pg.K_SPACE #The key to make the player jump (suggested: pg.K_SPACE)
-PAUSE_KEY = pg.K_ESCAPE #The key to pause the game (suggested: pg.K_ESCAPE)
-QUICK_RESTART_KEY = pg.K_r #The key to quickly restart the level (suggested: pg.K_r)
-QUCK_EXIT_KEY = pg.K_p #The key to quickly exit the game (suggested: pg.K_p)
+PLAYER_LEFT_KEY = pg.K_a #The key to move the player left (suggested: pygame.K_a)
+PLAYER_RIGHT_KEY = pg.K_d #The key to move the player right (suggested: pygame.K_d)
+PLAYER_JUMP_KEY = pg.K_SPACE #The key to make the player jump (suggested: pygame.K_SPACE)
+PAUSE_KEY = pg.K_ESCAPE #The key to pause the game (suggested: pygame.K_ESCAPE)
+QUICK_RESTART_KEY = pg.K_r #The key to quickly restart the level (suggested: pygame.K_r)
+QUICK_EXIT_KEY = pg.K_p #The key to quickly exit the game (suggested: pygame.K_p)
 
 r""" r stands for raw string inserted to avoid a syntax warning every time the program is begin run
 Pygame key constants

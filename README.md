@@ -58,3 +58,4 @@ Font in pause menu and first level: https://joebrogers.itch.io/bitpotion
 Bouncing blob in level 2: https://cactusturtle.itch.io/bouncing-blue-blob  (resized)
 Smoke effects: https://bdragon1727.itch.io/free-smoke-fx-pixel-2 
 UI Menu Sounds: https://souptonic.itch.io/souptonic-sfx-pack-1-ui-sounds 
+World sounds (player jump, death and portal entry): https://brackeysgames.itch.io/brackeys-platformer-bundle 

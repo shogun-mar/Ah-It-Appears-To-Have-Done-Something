@@ -140,6 +140,7 @@ class Player(PhysicsEntity):
             if keys[PLAYER_JUMP_KEY] and not self.is_in_air and not self.has_just_landed: 
                 self.velocity[1] = BASE_JUMP_SPEED #Set the player's vertical velocity to the jump speed
                 self.spawn_jumping_smoke_effect() #Spawn a smoke effect when the player jumps
+                self.game.jump_sound.play() #Play the jump sound
 
             elif keys[QUICK_RESTART_KEY]:
                 self.reset()
@@ -493,7 +494,8 @@ class Player(PhysicsEntity):
             if effect.maker == self and effect.type == 'landing':
                 return
             
-        self.game.effects.append(SmokeEffect(type='landing', coords=self.rect.midbottom, game=self.game, maker=self))
+        spawn_coords = self.rect.midbottom[0], self.rect.midbottom[1] + 5 #Spawn the effect slightly below the player's feet
+        self.game.effects.append(SmokeEffect(type='landing', coords=spawn_coords, game=self.game, maker=self))
 
     def spawn_jumping_smoke_effect(self):
         """Function that spawns a landing effect when the player jumps."""
@@ -514,6 +516,7 @@ class Player(PhysicsEntity):
 
         if self.status != 'damaged': #If the player is not already in damaged state
         
+            self.game.death_sound.play() #Play the death sound
             self.controls_enabled = False #Disable the player's controls
             self.current_animation_frame = -1 #Reset the animation frame counter
             

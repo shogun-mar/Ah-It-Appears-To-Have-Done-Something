@@ -19,7 +19,7 @@ class Game:
         pg.init()
 
     	#Game variables
-        self.game_state: GameState = GameState.LEVEL_2
+        self.game_state: GameState = GameState.LEVEL_1
         #self.game_state: GameState = GameState.START_MENU
         self.current_level_num: int = self.game_state.value
         self.should_draw_cursor: bool = True
@@ -108,7 +108,21 @@ class Game:
         #Init general assets
         self.cursor_surf: pg.Surface = pg.image.load("graphics/assets/cursor.png").convert_alpha()
 
-            #Portal animation and sprites
+            # World sounds
+        self.death_sound: pg.mixer.Sound = pg.mixer.Sound("audio/sounds/world/death.wav")
+        self.death_sound.set_volume(0.1) #Set the volume of the death sound to 10%
+        self.jump_sound: pg.mixer.Sound = pg.mixer.Sound("audio/sounds/world/jump.wav")
+        self.jump_sound.set_volume(0.1) #Set the volume of the jump sound to 10%
+        self.portal_sound: pg.mixer.Sound = pg.mixer.Sound("audio/sounds/world/portal entry.wav")
+        self.portal_sound.set_volume(0.1) #Set the volume of the portal sound to 10%
+
+            # UI sounds
+        self.pause_sound: pg.mixer.Sound = pg.mixer.Sound("audio/sounds/ui/pause.wav")
+        self.resume_sound: pg.mixer.Sound = pg.mixer.Sound("audio/sounds/ui/resume.wav")
+        self.exit_sound: pg.mixer.Sound = pg.mixer.Sound("audio/sounds/ui/exit.wav")
+        self.ui_hover_over_sound: pg.mixer.Sound = pg.mixer.Sound("audio/sounds/ui/hover over.wav")
+
+            # Portal animation and sprites
         self.portal_coords: list[tuple] = [(800, 494), (950, 334), (949, 94)] #Coordinates of the portal in each level (bottomright) (DO NOT CHANGE) (result may appear strange but its because the portal sprite have extra width to accomodate the particles)
         self.portal_animation_current_frame: int = 0 #Variable to keep track of the index of the current frame of the portal animation
         self.portal_animation_switching_delay: int = PORTAL_ANIMATION_SWITCHING_DELAY #Variable to keep track of when to progress the animation
@@ -181,6 +195,9 @@ class Game:
         self.portal_rect = self.current_portal_sprite.get_rect(bottomright = self.portal_coords[self.current_level_num]) #Update the portal rect
 
     def generic_pause_event_handler(self):
+        """Function that handles the pause event"""
+
+        self.pause_sound.play() #Play the pause sound
         if not self.player.is_in_air: self.player.status = 'standing'
         self.paused_game_state = self.game_state
         self.game_state = GameState.PAUSE_MENU

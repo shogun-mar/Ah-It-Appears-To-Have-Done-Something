@@ -105,6 +105,7 @@ def brightness_changed(game_instance, new_brightness):
 def pause_event_handler(game):
     if not game.player.is_in_air and game.player.status != 'asleep': #If the player is not in the air and not asleep
         game.player.status = 'standing'
+    game.pause_sound.play() #Play the pause sound
     game.paused_game_state = game.game_state
     game.game_state = GameState.PAUSE_MENU
 
@@ -112,7 +113,7 @@ def handle_level_two_events(game, event):
         
     if event.type == pg.KEYDOWN:
         if event.key == PAUSE_KEY:
-            pause_event_handler()
+            pause_event_handler(game)
 
 def update_level_two(game):
     

@@ -139,6 +139,7 @@ class Player(PhysicsEntity):
 
             if keys[PLAYER_JUMP_KEY] and not self.is_in_air and not self.has_just_landed: 
                 self.velocity[1] = BASE_JUMP_SPEED #Set the player's vertical velocity to the jump speed
+                self.spawn_jumping_smoke_effect() #Spawn a smoke effect when the player jumps
 
             elif keys[QUICK_RESTART_KEY]:
                 self.reset()
@@ -413,7 +414,7 @@ class Player(PhysicsEntity):
                             #         break
                             
                             self.status = 'standing' #Set the player's status to standing
-                            self.spawn_landing_effect() #Spawn a landing effect
+                            self.spawn_landing_smoke_effect() #Spawn a landing effect
                             self.sprite = self.landing_sprite #Set the sprite to the landing frame
                             self.velocity = [0, BASE_GRAVITY_PULL] #Reset the player's velocity
                             self.current_animation_frame = 0 #Reset the animation frame
@@ -486,9 +487,15 @@ class Player(PhysicsEntity):
         self.velocity[0] = max(-MAX_ENTITY_SPEED, min(self.velocity[0], MAX_ENTITY_SPEED))
         self.velocity[1] = max(MAX_UP_VELOCITY, min(self.velocity[1], MAX_DOWN_VELOCITY))
     
-    def spawn_landing_effect(self):
+    def spawn_landing_smoke_effect(self):
         """Function that spawns a landing effect when the player lands."""
+        print("Spawn landing effect")
         self.game.effects.append(SmokeEffect(type='landing', coords=self.rect.midbottom, game=self.game))
+
+    def spawn_jumping_smoke_effect(self):
+        """Function that spawns a landing effect when the player jumps."""
+        print("Spawn smoke effect")
+        self.game.effects.append(SmokeEffect(type='jumping', coords=self.rect.midbottom, game=self.game))
 
     def advance_level(self):
         """Function that advances the player to the next level by increasing the current level number and resetting the player's position."""

@@ -55,8 +55,8 @@ def move_player_relative_to_window(game):
     player = game.player
 
     if game.last_window_position is not None:
-        x_diff = int((game.current_window_position[0] - game.last_window_position[0]) * 1.25) #Multiply by 1.25 to make the player move faster than the window
-        y_diff = int((game.current_window_position[1] - game.last_window_position[1]) * 1.25) #Multiply by 1.25 to make the player move faster than the window
+        x_diff = int((game.current_window_position[0] - game.last_window_position[0]) * 1.15) #Multiply by 1.15 to make the player move slightly faster than the window
+        y_diff = int((game.current_window_position[1] - game.last_window_position[1]) * 1.15) #Multiply by 1.15 to make the player move slightly faster than the window
 
     if game.level_one_grav_controller_y <= game.player.rect.centery - y_diff <= game.level_one_grav_controller_y + 128:  #If the player is in the y range of the gravity controller
     

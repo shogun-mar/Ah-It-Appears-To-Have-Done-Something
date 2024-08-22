@@ -37,6 +37,7 @@ class Game:
         self.player = Player(self)
         self.player.controls_enabled = True #FOR DEBUGGING PURPOSES ONLY
         self.entities = []
+        self.effects = []
                 
         # Load necessary DLLs
         self.user32 = ctypes.WinDLL('user32')

@@ -33,8 +33,9 @@ def render_start_menu(game):
     screen = game.screen #Rename screen to make draw calls easier to read
 
     screen.blit(game.start_menu_ground_surf, game.start_menu_ground_rect) #Draw the ground
-    screen.blit(game.current_portal_sprite, game.portal_rect) #Draw the end of level portal
     screen.blit(game.player.sprite, game.player.rect) #Draw the player
+    [screen.blit(effect.sprite, effect.rect) for effect in game.effects] #Draw all the effects
+    screen.blit(game.current_portal_sprite, game.portal_rect) #Draw the end of level portal
 
     screen.blit(game.level_button_surf, game.level_button_rect) #Draw the level button
     screen.blit(game.start_button_surf, game.start_button_rect) #Draw the start button

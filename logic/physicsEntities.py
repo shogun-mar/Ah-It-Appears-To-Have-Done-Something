@@ -3,6 +3,7 @@ import pygame as pg
 from settings import BASE_GRAVITY_PULL, BASE_JUMP_SPEED, FALLING_SPEED_INCR, MAX_DOWN_VELOCITY, MAX_ENTITY_SPEED, PLAYER_ANIMATION_SWITCHING_DELAY, PLAYER_GRAVITY_PULL_DELAY, \
                      PLAYER_LEFT_KEY, PLAYER_RIGHT_KEY, PLAYER_SPEED, PLAYER_SPEED_MID_AIR, QUICK_RESTART_KEY, INITIAL_COORDS_PLAYER, PLAYER_JUMP_KEY, MAX_FPS, HOR_KNOCKBACK_STRENGTH, VERT_KNOCKBACK_STRENGTH, MAX_UP_VELOCITY
 from logic.collisionManager import CollisionManager, PlayerCollisionManager
+from logic.effects import SmokeEffect
 
 class PhysicsEntity:
     def __init__(self, game, mass, sprite = None, rect = None):
@@ -412,6 +413,7 @@ class Player(PhysicsEntity):
                             #         break
                             
                             self.status = 'standing' #Set the player's status to standing
+                            self.spawn_landing_effect() #Spawn a landing effect
                             self.sprite = self.landing_sprite #Set the sprite to the landing frame
                             self.velocity = [0, BASE_GRAVITY_PULL] #Reset the player's velocity
                             self.current_animation_frame = 0 #Reset the animation frame
@@ -484,6 +486,10 @@ class Player(PhysicsEntity):
         self.velocity[0] = max(-MAX_ENTITY_SPEED, min(self.velocity[0], MAX_ENTITY_SPEED))
         self.velocity[1] = max(MAX_UP_VELOCITY, min(self.velocity[1], MAX_DOWN_VELOCITY))
     
+    def spawn_landing_effect(self):
+        """Function that spawns a landing effect when the player lands."""
+        self.game.effects.append(SmokeEffect(type='landing', coords=self.rect.midbottom, game=self.game))
+
     def advance_level(self):
         """Function that advances the player to the next level by increasing the current level number and resetting the player's position."""
         self.game.advance_level()

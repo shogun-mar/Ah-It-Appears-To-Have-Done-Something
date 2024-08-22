@@ -1,6 +1,6 @@
 # Ah-It-Appears-To-Have-Done-Something
 
-Made for Hack Club Jam hosted in 2024, the theme is loopholes, which as stated on [Wikipedia](https://en.wikipedia.org/wiki/Loophole) are:
+Made for Hack Club Jam of summer 2024, the theme is loopholes, which as stated on [Wikipedia](https://en.wikipedia.org/wiki/Loophole) are:
 
 ```
 A loophole is an ambiguity or inadequacy in a system, such as a law or security, 
@@ -8,11 +8,11 @@ which can be used to circumvent or otherwise avoid the purpose,
 implied or explicitly stated, of the system.
 ```
 
-Title inspired by the meme of the same name (https://youtu.be/bzmIitaLMfA).
+Name inspired by the meme of the same name (https://youtu.be/bzmIitaLMfA).
 
 ## Description
 
-The game is structured in a plethora of levels with varying mechanics, in which the player will have to find out a way to reach the end of the level by alternative means, often breaking the boundaries of the game and interacting with the hardware and operating system itself.
+Ah It Appears To Have Done Something is a 2D puzzle platformer structured in a plethora of levels with varying mechanics, in which the player will have to find out a way to reach the end of the level by alternative means, often breaking the boundaries of the game and interacting with the hardware and operating system itself.
 
 Solutions will be available in a separate files to avoid spoilers.
 

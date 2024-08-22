@@ -1,4 +1,4 @@
-# Ah-It-Appears-To-Have-Done-Something
+# Ah It Appears To Have Done Something
 
 Made for Hack Club Jam of summer 2024, the theme is loopholes, which as stated on [Wikipedia](https://en.wikipedia.org/wiki/Loophole) are:
 

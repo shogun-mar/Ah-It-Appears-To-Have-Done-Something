@@ -30,8 +30,8 @@ INITIAL_COORDS_PLAYER = [(50, 501), (50, 339), (887, 449)] #Initial coordinates 
 
 #Audio settings
 MUSIC_VOLUME = 0.1 #The volume of the music (suggested: 0.5)
-WORLD_SOUNDS_VOLUME = 0.2 #The volume of the world sounds (suggested: 0.5)
-UI_SOUNDS_VOLUME = 0.2 #The volume of the UI sounds (suggested: 0.5)
+WORLD_SOUNDS_VOLUME = 0.3 #The volume of the world sounds (suggested: 0.5)
+UI_SOUNDS_VOLUME = 0.3 #The volume of the UI sounds (suggested: 0.5)
 
 #Key bindings (see below for key constants)
 PLAYER_LEFT_KEY = pg.K_a #The key to move the player left (suggested: pygame.K_a)

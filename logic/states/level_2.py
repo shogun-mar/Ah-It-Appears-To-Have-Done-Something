@@ -5,7 +5,6 @@ from logic.states.gameState import GameState
 from settings import PAUSE_KEY, BRIGHTNESS_CONTROL_INTERVAL, pg
 
 windows_api_exception = False
-monitoring_brightness_event = Event()  # Event to control the brightness monitoring thread
 
 # Define necessary structures
 class MONITORINFOEXW(ctypes.Structure):
@@ -104,26 +103,23 @@ def set_monitor_brightness(hmonitor, brightness):
 
 # Function to monitor brightness changes
 def monitor_brightness_changes(callback, game_instance, interval=BRIGHTNESS_CONTROL_INTERVAL):
-    global monitoring_brightness_event
     hmonitor = game_instance.hardware_monitor # Get the hardware monitor handle
     previous_brightness = get_monitor_brightness(hmonitor) # Get the initial brightness
     
-    while not monitoring_brightness_event.is_set():
+    while not game_instance.monitoring_brightness_event.is_set():
 
         time.sleep(interval) # Wait for the interval
         current_brightness = get_monitor_brightness(hmonitor) # Get the current brightness
         if current_brightness != previous_brightness: # If the brightness has changed
 
             if current_brightness - previous_brightness >= 50: # If the brightness has increased by 50 or more
-                callback(game_instance, current_brightness) # Call the callback function
+                callback(game_instance) # Call the callback function
 
             previous_brightness = current_brightness # Update the previous brightness
 
 # Callback function
-def brightness_changed(game_instance, new_brightness):
-    global monitoring_brightness_event
+def wake_up_player(game_instance):
     game_instance.player.wake_up() #Wake up the player
-    monitoring_brightness_event.set()  # Signal the brightness monitoring thread to stop
 
 #Pause event handler
 def pause_event_handler(game):
@@ -176,13 +172,14 @@ def render_level_two(game):
 
 def init_level_two(game):
     global monitoring_brightness_event
-    monitoring_brightness_event.clear()  # Reset the event when initializing the level
+    game.monitoring_brightness_event = Event()  # Event to control the brightness monitoring thread
+    game.monitoring_brightness_event.clear()  # Reset the event when initializing the level
     game.player.status = 'asleep' #Set the player status to asleep in level 2
     game.player.controls_enabled = False #Disable player controls
     game.should_draw_cursor = False #Disable cursor drawing
     set_monitor_brightness(game.hardware_monitor, 0) #Set the monitor brightness to 0
 
     # Start monitoring brightness changes in a separate thread
-    monitor_thread = Thread(target=monitor_brightness_changes, args=(brightness_changed, game)) # Create a thread to monitor brightness changes
-    monitor_thread.daemon = True # Make the thread a daemon so it stops when the main thread stops
-    monitor_thread.start() # Start the thread
+    game.monitor_thread = Thread(target=monitor_brightness_changes, args=(wake_up_player, game)) # Create a thread to monitor brightness changes
+    game.monitor_thread.daemon = True # Make the thread a daemon so it stops when the main thread stops
+    game.monitor_thread.start() # Start the thread

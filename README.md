@@ -55,6 +55,7 @@ I plan to make an executable of this game at the end of development.
 * Enviroment: https://octoshrimpy.itch.io/tranquil-tunnels 
 * Portal sprite: https://pixelnauta.itch.io/pixel-dimensional-portal-32x32 
 * Font in pause menu and first level: https://joebrogers.itch.io/bitpotion
+* Pixel speakers in level three: https://gamebanana.com/mods/319025 
 * Bouncing blob in level 2: https://cactusturtle.itch.io/bouncing-blue-blob  (resized)
 * Smoke effects: https://bdragon1727.itch.io/free-smoke-fx-pixel-2 
 * UI Menu Sounds: https://souptonic.itch.io/souptonic-sfx-pack-1-ui-sounds 

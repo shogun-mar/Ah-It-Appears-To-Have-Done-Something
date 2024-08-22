@@ -489,22 +489,29 @@ class Player(PhysicsEntity):
     
     def spawn_landing_smoke_effect(self):
         """Function that spawns a landing effect when the player lands."""
-        
-        for effect in self.game.effects: #If there is already a landing effect spawned by the player end the function here
-            if effect.maker == self and effect.type == 'landing':
+
+        spawn_coords = self.rect.midbottom[0], self.rect.midbottom[1] + 5  # Spawn the effect slightly below the player's feet
+        x_interval = 10  # Define the interval within which no other effect should spawn
+
+        for effect in self.game.effects:
+            # If there is already a landing effect spawned by the player within the x interval, end the function here
+            if effect.maker == self and (effect.coords[0] - x_interval <= spawn_coords[0] <= effect.coords[0] + x_interval):
                 return
-            
-        spawn_coords = self.rect.midbottom[0], self.rect.midbottom[1] + 5 #Spawn the effect slightly below the player's feet
+
         self.game.effects.append(SmokeEffect(type='landing', coords=spawn_coords, game=self.game, maker=self))
 
     def spawn_jumping_smoke_effect(self):
         """Function that spawns a landing effect when the player jumps."""
 
-        for effect in self.game.effects: #If there is already a jumping effect spawned by the player end the function here
-            if effect.maker == self and effect.type == 'jumping':
+        spawn_coords = self.rect.midbottom  # Spawn the effect at the player's feet
+        x_interval = 10  # Define the interval within which no other effect should spawn
+
+        for effect in self.game.effects:
+            # If there is already a jumping effect spawned by the player within the x interval, end the function here
+            if effect.maker == self and effect.type == 'jumping' and (effect.coords[0] - x_interval <= spawn_coords[0] <= effect.coords[0] + x_interval):
                 return
-        
-        self.game.effects.append(SmokeEffect(type='jumping', coords=self.rect.midbottom, game=self.game, maker=self))
+
+        self.game.effects.append(SmokeEffect(type='jumping', coords=spawn_coords, game=self.game, maker=self))
 
     def advance_level(self):
         """Function that advances the player to the next level by increasing the current level number and resetting the player's position."""
@@ -548,6 +555,8 @@ class Player(PhysicsEntity):
     def wake_up(self):
         self.status = 'standing' #Set the player status to standing
         self.controls_enabled = True #Enable player controls
+        self.game.monitoring_brightness_event.set() #Set the event to monitor the brightness
+        self.game.monitor_thread.join() #Join the monitor thread
 
 class DeathEntity(PhysicsEntity):
     def __init__(self, game, mass, sprite = None, rect = None):

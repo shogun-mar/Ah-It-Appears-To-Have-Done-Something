@@ -7,7 +7,8 @@ class SmokeEffect:
         self.game = game #The game object
         self.current_frame = 0 #The current frame of the animation
         self.maker = maker #The object that created the effect (used to limit how many effects can be created by the same object)
-        self.type = type #The type of the effect (used to limit how many effects can be created by the same object and determine the animation)
+        self.coords = coords #The coordinates of the effect
+        self.type = type #The type of the effect
 
         match type:
             case 'landing':

@@ -7,6 +7,7 @@ from logic.states.gameState import GameState
 from logic.states.startMenu import handle_start_menu_events, update_start_menu, render_start_menu
 from logic.states.level_1 import handle_level_one_events, update_level_one, render_level_one, init_level_one
 from logic.states.level_2 import handle_level_two_events, update_level_two, render_level_two, init_level_two
+from logic.states.level_3 import handle_level_three_events, update_level_three, render_level_three
 from logic.states.pauseMenu import handle_pause_menu_events, update_pause_menu, render_pause_menu
 from logic.physicsEntities import Player
 from logic.interactibles import GravityController, JumpBlob
@@ -19,8 +20,7 @@ class Game:
         pg.init()
 
     	#Game variables
-        self.game_state: GameState = GameState.LEVEL_2
-        #self.game_state: GameState = GameState.START_MENU
+        self.game_state: GameState = GameState.START_MENU
         self.current_level_num: int = self.game_state.value
         self.should_draw_cursor: bool = True
 
@@ -35,9 +35,10 @@ class Game:
 
         #Game objects
         self.player = Player(self)
-        self.player.controls_enabled = True #FOR DEBUGGING PURPOSES ONLY
         self.entities = []
         self.effects = []
+        self.monitor_thread = None # Thread to monitor brightness changes
+        self.monitoring_brightness_event = None # Event to control the brightness monitoring thread
                 
         # Load necessary DLLs
         self.user32 = ctypes.WinDLL('user32')
@@ -49,8 +50,6 @@ class Game:
 
         #Init assets
         self.init_assets()
-
-        #init_level_two(self)
 
     def run(self):
         """Main game loop"""	
@@ -72,6 +71,7 @@ class Game:
                 case GameState.START_MENU: handle_start_menu_events(self, event)
                 case GameState.LEVEL_1: handle_level_one_events(self, event)
                 case GameState.LEVEL_2: handle_level_two_events(self, event)
+                case GameState.LEVEL_3: handle_level_three_events(self, event)
                 case GameState.PAUSE_MENU: handle_pause_menu_events(self, event)
             
     def update(self):
@@ -86,6 +86,7 @@ class Game:
             case GameState.START_MENU: update_start_menu(self)
             case GameState.LEVEL_1: update_level_one(self)
             case GameState.LEVEL_2: update_level_two(self)
+            case GameState.LEVEL_3: update_level_three(self)
             case GameState.PAUSE_MENU: update_pause_menu(self)
 
     def render(self):
@@ -97,6 +98,7 @@ class Game:
             case GameState.START_MENU: render_start_menu(self)
             case GameState.LEVEL_1: render_level_one(self)
             case GameState.LEVEL_2: render_level_two(self)
+            case GameState.LEVEL_3: render_level_three(self)
             case GameState.PAUSE_MENU: render_pause_menu(self)
 
         pg.display.flip()
@@ -166,7 +168,7 @@ class Game:
         
         #Pause menu
         self.paused_game_state: GameState = self.game_state #Variable to keep track of the previous game state used to return to the previous game state when unpausing
-        self.darken_surf: pg.Surface = pg.Surface(LEVEL_RESOLUTIONS[0]) #Create a surface to darken the screen
+        self.darken_surf: pg.Surface = pg.Surface(LEVEL_RESOLUTIONS[self.current_level_num]) #Create a surface to darken the screen
         self.darken_surf.set_alpha(PAUSE_MENU_BACKGROUND_ALPHA) #Set the alpha value of the darken surface
 
         screen_center_x = LEVEL_RESOLUTIONS[0][0] // 2

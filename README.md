@@ -16,6 +16,8 @@ The game is structured in a plethora of levels with varying mechanics, in which 
 
 Solutions will be available in a separate files to avoid spoilers.
 
+Any kind of review is deeply appreciated, but please keep in mind that this is my first platformer game made for my first game jam in rudimentary framework such as Pygame, in case feel free to send an email to:   marinipietro456@gmail.com 
+
 ## Keybinds and controls
 
 Keybinds are customizable by modifying the settings.py file is so desired (pygame key constants are available right below the keybinds). 

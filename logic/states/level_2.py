@@ -147,11 +147,15 @@ def update_level_two(game):
     player.update_animation() #Update the player animation
 
     #Environment
+    print(f"Action: {game.level_two_blob.action} with velocity: {game.level_two_blob.vertical_velocity}")
     game.update_portal_animation() #Update the portal animation
+    game.level_two_blob.update() #Update the jump blob position and action
     game.level_two_blob.update_animation() #Update the jump pad animation
     [effect.update_animation() for effect in game.effects] #Update all the effects
     if player.rect.colliderect(game.level_two_blob.rect):
-        exec(game.level_two_blob.action)
+        exec(game.level_two_blob.action) #Execute the action of the jump blob
+        game.level_two_blob.vertical_velocity = 16 #Reset the vertical velocity of the jump blob so it moves down
+        player.spawn_landing_smoke_effect() #Spawn a landing smoke effect
 
     #Exception handling
     if windows_api_exception and game.player.status == 'asleep': #If an exception occurred in the Windows API adn the player is asleep
@@ -169,6 +173,8 @@ def render_level_two(game):
 
     if game.should_draw_cursor and game.player.status != 'asleep': screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor
     if game.player.status == 'asleep': screen.blit(game.level_two_env_mask, (0, 0)) #Draw the environment mask
+
+    pg.draw.rect(screen, 'red', game.level_two_blob.rect, 2) 
 
 def init_level_two(game):
     global monitoring_brightness_event

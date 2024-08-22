@@ -25,6 +25,7 @@ def update_start_menu(game):
 
     #Environment
     [entity.move() for entity in game.entities] #Move all the entities 
+    [effect.update_animation() for effect in game.effects] #Update all the effects
     game.update_portal_animation() #Update the portal animation
 
 def render_start_menu(game):

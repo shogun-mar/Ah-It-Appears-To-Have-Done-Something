@@ -550,6 +550,7 @@ class Player(PhysicsEntity):
         for entity in self.game.entities:
             if entity != self and entity.rect.collidepoint(point):
                 return True
+
         return False
 
     def wake_up(self):

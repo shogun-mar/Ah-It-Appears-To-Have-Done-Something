@@ -16,10 +16,6 @@ def handle_pause_menu_events(game, event):
             game.exit_sound.play() #Play the exit sound
             game.quit_game()
 
-    if event.type == pg.MOUSEMOTION:
-        if game.pause_menu_resume_rect.collidepoint(event.pos) or game.pause_menu_quit_rect.collidepoint(event.pos):
-            game.ui_hover_sound.play() #Play the hover sound if the mouse is over a button
-
 def update_pause_menu(game):
     """Function that updates the pause menu game state"""
     match game.paused_game_state:

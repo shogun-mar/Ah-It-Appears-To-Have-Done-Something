@@ -10,7 +10,7 @@ from logic.states.level_2 import handle_level_two_events, update_level_two, rend
 from logic.states.level_3 import handle_level_three_events, update_level_three, render_level_three
 from logic.states.pauseMenu import handle_pause_menu_events, update_pause_menu, render_pause_menu
 from logic.physicsEntities import Player
-from logic.interactibles import GravityController, JumpBlob
+from logic.interactibles import GravityController, JumpBlob, Speaker
 from random import shuffle
 
 #Constants
@@ -38,6 +38,7 @@ class Game:
 
         #Game objects
         self.player = Player(self)
+        self.player.controls_enabled = True #FOR DEBUGGING PURPOSES ONLY
         self.entities = []
         self.effects = []
         self.monitor_thread = None # Thread to monitor brightness changes
@@ -139,8 +140,6 @@ class Game:
         self.resume_sound.set_volume(UI_SOUNDS_VOLUME)
         self.exit_sound: pg.mixer.Sound = pg.mixer.Sound("audio/sounds/ui/exit.wav")
         self.exit_sound.set_volume(UI_SOUNDS_VOLUME)
-        self.ui_hover_over_sound: pg.mixer.Sound = pg.mixer.Sound("audio/sounds/ui/hover over.wav")
-        self.ui_hover_over_sound.set_volume(UI_SOUNDS_VOLUME)
 
             # Portal animation and sprites
         self.portal_coords: list[tuple] = [(800, 494), (950, 334), (949, 94), (95, 687)] #Coordinates of the portal in each level (bottomright) (DO NOT CHANGE) (result may appear strange but its because the portal sprite have extra width to accomodate the particles)
@@ -177,6 +176,7 @@ class Game:
         #Level 3 assets
         self.level_three_ground_surf: pg.Surface = pg.image.load("graphics/assets/level 3/ground.png").convert_alpha()
         self.level_three_ground_rect: pg.Rect = self.level_three_ground_surf.get_rect(bottomleft = (0, LEVEL_RESOLUTIONS[3][1]))
+        self.level_three_speaker: Speaker = Speaker(game = self, sprite = pg.image.load("graphics/assets/interactibles/speaker.png").convert_alpha(), coords = (136, 559))
 
         #Pause menu
         self.paused_game_state: GameState = self.game_state #Variable to keep track of the previous game state used to return to the previous game state when unpausing
@@ -252,7 +252,7 @@ class Game:
     def handle_mouse_exit_event(self):
         """Function that handles the focus lost event"""
         self.should_draw_cursor = False
-        if not self.game_state == GameState.LEVEL_1 and not self.game_state == GameState.LEVEL_2: # If the game state is not level 1 pause the game
+        if not self.game_state == GameState.LEVEL_1: # If the game state is not level 1 pause the game (because the player has to exit the window to be able to move it)
             self.generic_pause_event_handler()
 
     def handle_mouse_enter_event(self):

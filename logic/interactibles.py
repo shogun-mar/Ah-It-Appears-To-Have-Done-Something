@@ -1,4 +1,4 @@
-import pygame as pg
+from settings import pg, WORLD_SOUNDS_VOLUME
 from random import randint
 
 class Interactibles:
@@ -14,20 +14,43 @@ class JumpBlob(Interactibles):
 
         #Graphical representation
         self.current_frame = 0
-        self.switching_delay = 10 #Variable to keep track of when to progress the animation (with 6 the delay is 96 ms at 60 fps, with 10 the delay is 160 ms at 60 fps)
+        self.switching_delay = 5 #Variable to keep track of when to progress the animation (with 6 the delay is 96 ms at 60 fps, with 10 the delay is 160 ms at 60 fps)
+        self.updating_delay = 5 #Variable to keep track of when to progress the position of the jump blob
         self.frames = [pg.image.load(f"graphics/assets/interactibles/jump blob/{i}.png").convert_alpha() for i in range(1, 24)]
         self.sprite = self.frames[self.current_frame]
 
         #Logic
         self.rect = self.sprite.get_rect(bottomleft = bottom_left_coords)
         self.action = "game.player.velocity[1] = -16" #Exec strings have to be written through the perspective of the name space in which they will be executed (in this case level_1.py)
+        self.vertical_velocity = -16
+
+    def update(self):
+        """Function that updates the jump blob"""
+
+        self.updating_delay -= 1
+        if self.updating_delay == 0:
+            self.updating_delay = 5
+       
+            self.rect.bottomleft = self.game.clamp_to_screen(self.rect.bottomleft[0], self.rect.bottomleft[1] + self.vertical_velocity)  #Move the jump blob
+
+            # Reduce vertical velocity
+            if self.vertical_velocity > 1:
+                self.vertical_velocity -= 1
+            elif self.vertical_velocity < 1:
+                self.vertical_velocity += 1
+
+            if self.vertical_velocity == 1: self.vertical_velocity = -16
+            elif self.vertical_velocity == -1: self.vertical_velocity = 16
+            
+            # Update the action string
+            self.action = f"game.player.velocity[1] = {self.vertical_velocity}"
 
     def update_animation(self):
         """Function that updates the animation of the jump blob"""
 
         self.switching_delay -= 1
         if self.switching_delay == 0:
-            self.switching_delay = 10
+            self.switching_delay = 5
 
             self.current_frame += 1
             if self.current_frame == 23:
@@ -35,13 +58,27 @@ class JumpBlob(Interactibles):
 
             self.sprite = self.frames[self.current_frame]
 
-    def move(self):
-        """Function that moves the jump blob"""
+class Speaker(Interactibles):
+    def __init__(self, game, sprite, coords):
+        super().__init__(game, sprite)
 
-        self.rect.y += 1
+        #Logic
+        self.rect = self.sprite.get_rect(midbottom = coords)
+        self.action = f"game.player.init_death_sequence(); game.death_sound.set_volume({WORLD_SOUNDS_VOLUME} * 5); game.death_sound.play()"
 
-        if self.rect.y > 800:
-            self.rect.y = -self.rect.height
+    def is_player_already_colliding(self):
+        return self.rect.colliderect(self.game.player.rect)
+    
+    def is_on(self):
+        return True #TODO: Implement this function
+
+class JumpPad(Interactibles):
+    def __init__(self, game, sprite, coords):
+        super().__init__(game, sprite)
+
+        #Logic
+        self.rect = self.sprite.get_rect(midbottom = coords)
+        self.action = "game.player.velocity = [game.player.velocity[0] * (-1), game.player.velocity[1] * (-1)]"
 
 class GravityController(Interactibles):
     def __init__(self, game, coords, direction):

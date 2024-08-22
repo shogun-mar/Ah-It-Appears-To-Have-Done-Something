@@ -16,9 +16,9 @@ Ah It Appears To Have Done Something is a 2D puzzle platformer structured in a p
 
 Solutions will be available in a separate files to avoid spoilers.
 
-Feel free to contact me at pmarini72107@gmail.com or message me on slack (name: Marini) if you want to report a bug or leave a review, but please keep in mind that this is my first platformer game made for my first game jam in rudimentary framework such as Pygame (i did the best I could in less than two weeks T-T).
+Feel free to contact me at pmarini72107@gmail.com or message me on slack (name: Marini) if you want to report a bug or leave a review, but please keep in mind that this is my first platformer game made for my first game jam in rudimentary framework such as Pygame (i did the best I could in less than two weeks    😭).
 
-IMPORTANT: Game may be interpreted as a virus because of the interaction with the Windows API.
+IMPORTANT: Game may be interpreted as a virus because of the interaction with the Windows API, if you see any Windows Defender messages or pop ups do not worry I can assure you I write nothing harmful (I know it's not very reassuring but idk to know much about it 😩).
 
 ## Keybinds and controls
 
@@ -60,4 +60,4 @@ I plan to make an executable of this game at the end of development.
 * Smoke effects: https://bdragon1727.itch.io/free-smoke-fx-pixel-2 
 * UI Menu Sounds: https://souptonic.itch.io/souptonic-sfx-pack-1-ui-sounds 
 * World sounds (player jump, death and portal entry): https://brackeysgames.itch.io/brackeys-platformer-bundle 
-* Music by DOS-88 on Youtube: https://www.youtube.com/channel/UC9VhwXkGozOjxLjg72-_W5g (Tracks: Flow State, Rest Easy, Times Enjoyed)
+* Music by DOS-88 on Youtube: https://www.youtube.com/channel/UC9VhwXkGozOjxLjg72-_W5g (Tracks: Flow State, Rest Easy, Times Enjoyed, HOME BASE)

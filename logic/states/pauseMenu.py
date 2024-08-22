@@ -23,7 +23,7 @@ def handle_pause_menu_events(game, event):
 def update_pause_menu(game):
     """Function that updates the pause menu game state"""
     match game.paused_game_state:
-        case GameState.START_MENU | GameState.LEVEL_1 | GameState.LEVEL_2:
+        case GameState.START_MENU | GameState.LEVEL_1 | GameState.LEVEL_2 | GameState.LEVEL_3:
             game.update_portal_animation() #Update the portal animation
             game.player.update_animation() #Update the player animation
             [effect.update_animation() for effect in game.effects] #Update all the effects
@@ -57,6 +57,13 @@ def render_pause_menu(game):
             screen.blit(game.level_two_blob.sprite, game.level_two_blob.rect) #Draw jump pad
 
             if game.player.status == 'asleep': screen.blit(game.level_two_env_mask, (0, 0)) #Draw the environment mask if the player is still asleep
+
+        case GameState.LEVEL_3:
+            screen.blit(game.level_three_ground_surf, game.level_three_ground_rect) #Draw the ground
+            #TODO: Draw interactibles
+            screen.blit(game.current_portal_sprite, game.portal_rect) #Draw the end of level portal
+            [screen.blit(effect.sprite, effect.rect) for effect in game.effects] #Draw all the effects
+            screen.blit(game.player.sprite, game.player.rect) #Draw the player
 
     screen.blit(game.darken_surf, (0, 0)) #Darken the screen
     screen.blit(game.pause_menu_pause_text, game.pause_menu_pause_rect) #Draw the pause text

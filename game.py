@@ -11,6 +11,7 @@ from logic.states.level_3 import handle_level_three_events, update_level_three, 
 from logic.states.pauseMenu import handle_pause_menu_events, update_pause_menu, render_pause_menu
 from logic.physicsEntities import Player
 from logic.interactibles import GravityController, JumpBlob
+from random import shuffle
 
 #Constants
 _MONITOR_DEFAULTTONEAREST = 2
@@ -20,12 +21,14 @@ class Game:
         pg.init()
 
     	#Game variables
-        self.game_state: GameState = GameState.START_MENU
+        self.game_state: GameState = GameState.LEVEL_3
+        #self.game_state: GameState = GameState.START_MENU
         self.current_level_num: int = self.game_state.value
         self.should_draw_cursor: bool = True
 
         #Screen settings
-        self.screen: pg.Surface = pg.display.set_mode((LEVEL_RESOLUTIONS[self.current_level_num]))
+        self.final_screen: pg.Surface = pg.display.set_mode((LEVEL_RESOLUTIONS[self.current_level_num]), flags=pg.RESIZABLE) #Final screen
+        self.screen: pg.Surface = self.final_screen.copy() #Dummy screen
         pg.display.set_caption("Ah It Appears To Have Done Something")
         pg.display.set_icon(pg.image.load("graphics/loophole_icon.jpg"))
         pg.mouse.set_visible(False) #Hide the mouse cursor
@@ -64,6 +67,9 @@ class Game:
             if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == QUICK_EXIT_KEY):
                 self.quit_game()
 
+            elif event.type == pg.VIDEORESIZE:
+                self.final_screen = pg.display.set_mode((event.w, event.h), flags=pg.RESIZABLE)
+
             elif event.type == pg.WINDOWLEAVE: self.handle_mouse_exit_event()
             elif event.type == pg.WINDOWENTER: self.handle_mouse_enter_event()
             
@@ -91,8 +97,6 @@ class Game:
 
     def render(self):
         """Function that renders the game by calling the appropriate render function by consulting the current game state""" 
-
-        self.screen.fill('white') #Clear the screen
         
         match self.game_state:
             case GameState.START_MENU: render_start_menu(self)
@@ -101,6 +105,7 @@ class Game:
             case GameState.LEVEL_3: render_level_three(self)
             case GameState.PAUSE_MENU: render_pause_menu(self)
 
+        self.final_screen.blit(pg.transform.scale(self.screen, self.final_screen.get_rect().size), (0, 0))
         pg.display.flip()
         self.clock.tick(MAX_FPS) #Could also use tick_busy_loop() for more accurate timing but it would use more CPU and regular tick accuracy is fine for this game
 
@@ -111,7 +116,10 @@ class Game:
         self.cursor_surf: pg.Surface = pg.image.load("graphics/assets/cursor.png").convert_alpha()
 
             #Music 
-        self.background_tracks: list[str] = ["audio/background tracks/Flow_State.mp3", "audio/background tracks/Rest_Easy.mp3", "audio/background tracks/Times_Enjoyed.mp3"]
+        self.background_tracks: list[str] = ["audio/background tracks/Flow_State.mp3", "audio/background tracks/Rest_Easy.mp3", 
+                                             "audio/background tracks/Times_Enjoyed.mp3", "audio/background tracks/HOME_BASE.mp3"]
+        shuffle(self.background_tracks) #Randomize the order of the background tracks    
+
         pg.mixer.music.load(self.background_tracks[self.current_level_num]) #Load the music
         pg.mixer.music.set_volume(MUSIC_VOLUME) #Set the volume of the music
         pg.mixer.music.play(loops=-1) #Start playing the music on loop
@@ -166,20 +174,23 @@ class Game:
         self.level_two_env_mask: pg.Surface = pg.image.load("graphics/assets/level 2/mask.png").convert_alpha() #Half transparent black circle used to show the player in the dark
         self.level_two_blob: JumpBlob = JumpBlob(game = self, bottom_left_coords = (1, LEVEL_RESOLUTIONS[2][1]))
         
+        #Level 3 assets
+        self.level_three_ground_surf: pg.Surface = pg.image.load("graphics/assets/level 3/ground.png").convert_alpha()
+        self.level_three_ground_rect: pg.Rect = self.level_three_ground_surf.get_rect(bottomleft = (0, LEVEL_RESOLUTIONS[3][1]))
+
         #Pause menu
         self.paused_game_state: GameState = self.game_state #Variable to keep track of the previous game state used to return to the previous game state when unpausing
         self.darken_surf: pg.Surface = pg.Surface(LEVEL_RESOLUTIONS[self.current_level_num]) #Create a surface to darken the screen
         self.darken_surf.set_alpha(PAUSE_MENU_BACKGROUND_ALPHA) #Set the alpha value of the darken surface
 
-        screen_center_x = LEVEL_RESOLUTIONS[0][0] // 2
         self.pause_menu_pause_text: pg.Surface = pg.image.load("graphics/assets/pause menu/pause.png").convert_alpha()
-        self.pause_menu_pause_rect: pg.Rect = self.pause_menu_pause_text.get_rect(midtop = (screen_center_x, LEVEL_RESOLUTIONS[0][1] // 4))
+        self.pause_menu_pause_rect: pg.Rect = self.pause_menu_pause_text.get_rect(midtop = (LEVEL_RESOLUTIONS[self.current_level_num][0] // 2, LEVEL_RESOLUTIONS[self.current_level_num][1] // 4))
 
         self.pause_menu_resume_text: pg.Surface = pg.image.load("graphics/assets/pause menu/resume.png").convert_alpha()
-        self.pause_menu_resume_rect: pg.Rect = self.pause_menu_resume_text.get_rect(midtop = (screen_center_x, LEVEL_RESOLUTIONS[0][1] // 2 - 50))
+        self.pause_menu_resume_rect: pg.Rect = self.pause_menu_resume_text.get_rect(midtop = (LEVEL_RESOLUTIONS[self.current_level_num][0] // 2, LEVEL_RESOLUTIONS[self.current_level_num][1] // 2 - 50))
 
         self.pause_menu_quit_text: pg.Surface = pg.image.load("graphics/assets/pause menu/quit.png").convert_alpha()
-        self.pause_menu_quit_rect: pg.Rect = self.pause_menu_quit_text.get_rect(midtop = (screen_center_x, (LEVEL_RESOLUTIONS[0][1] // 4) * 3 - 100))
+        self.pause_menu_quit_rect: pg.Rect = self.pause_menu_quit_text.get_rect(midtop = (LEVEL_RESOLUTIONS[self.current_level_num][0] // 2, (LEVEL_RESOLUTIONS[self.current_level_num][1] // 4) * 3 - 100))
 
     def update_portal_animation(self): #Written here so that it can be reused in all game states
         """Function that updates the portal animation"""
@@ -204,6 +215,9 @@ class Game:
 
         self.update_screen_dimensions() #Update the screen dimensions
         self.darken_surf = pg.transform.scale(self.darken_surf, LEVEL_RESOLUTIONS[self.current_level_num]) #Update the darken surface
+        self.pause_menu_pause_rect.midtop = (LEVEL_RESOLUTIONS[self.current_level_num][0] // 2, LEVEL_RESOLUTIONS[self.current_level_num][1] // 4) #Update the pause text rect
+        self.pause_menu_resume_rect.midtop = (LEVEL_RESOLUTIONS[self.current_level_num][0] // 2, LEVEL_RESOLUTIONS[self.current_level_num][1] // 2 - 50) #Update the resume text rect
+        self.pause_menu_quit_rect.midtop = (LEVEL_RESOLUTIONS[self.current_level_num][0] // 2, (LEVEL_RESOLUTIONS[self.current_level_num][1] // 4) * 3 - 100) #Update the quit text rect
         self.portal_rect = self.current_portal_sprite.get_rect(bottomright = self.portal_coords[self.current_level_num]) #Update the portal rect
         pg.mixer.music.load(self.background_tracks[self.current_level_num]) #Load the new level music
 
@@ -243,8 +257,10 @@ class Game:
 
     def handle_mouse_enter_event(self):
         """Function that handles the focus gained event"""
-        self.should_draw_cursor = True
-        self.game_state = self.paused_game_state
+
+        self.should_draw_cursor = True #Show the cursor
+        self.game_state = self.paused_game_state #Return to the previous game state
+        pg.mixer.music.unpause() #Unpause the music
 
     def get_monitor_handle(self):
         """Function that gets the handle of the monitor the game is running on"""

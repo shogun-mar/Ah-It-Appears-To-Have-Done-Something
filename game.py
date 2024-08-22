@@ -135,7 +135,7 @@ class Game:
         self.ui_hover_over_sound.set_volume(UI_SOUNDS_VOLUME)
 
             # Portal animation and sprites
-        self.portal_coords: list[tuple] = [(800, 494), (950, 334), (949, 94)] #Coordinates of the portal in each level (bottomright) (DO NOT CHANGE) (result may appear strange but its because the portal sprite have extra width to accomodate the particles)
+        self.portal_coords: list[tuple] = [(800, 494), (950, 334), (949, 94), (95, 687)] #Coordinates of the portal in each level (bottomright) (DO NOT CHANGE) (result may appear strange but its because the portal sprite have extra width to accomodate the particles)
         self.portal_animation_current_frame: int = 0 #Variable to keep track of the index of the current frame of the portal animation
         self.portal_animation_switching_delay: int = PORTAL_ANIMATION_SWITCHING_DELAY #Variable to keep track of when to progress the animation
         self.portal_animation: list[pg.Surface] = [pg.image.load(f"graphics/assets/portal/{i}.png").convert_alpha() for i in range(1, 7)]

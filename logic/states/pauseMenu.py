@@ -44,7 +44,7 @@ def render_pause_menu(game):
             [screen.blit(effect.sprite, effect.rect) for effect in game.effects] #Draw all the effects
             screen.blit(game.player.sprite, game.player.rect) #Draw the player
             screen.blit(game.current_portal_sprite, game.portal_rect) #Draw the end of level portal
-            screen.blit(game.level_two_jump_pad.sprite, game.level_two_jump_pad.rect) #Draw jump pad
+            screen.blit(game.level_two_blob.sprite, game.level_two_blob.rect) #Draw jump pad
 
             if game.player.status == 'asleep': screen.blit(game.level_two_env_mask, (0, 0)) #Draw the environment mask if the player is still asleep
 

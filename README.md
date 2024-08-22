@@ -18,6 +18,8 @@ Solutions will be available in a separate files to avoid spoilers.
 
 Feel free to contact me at pmarini72107@gmail.com or message me on slack (name: Marini) if you want to report a bug or leave a review, but please keep in mind that this is my first platformer game made for my first game jam in rudimentary framework such as Pygame (i did the best I could in less than two weeks T-T).
 
+IMPORTANT: Game may be interpreted as a virus because of the interaction with the Windows API.
+
 ## Keybinds and controls
 
 Keybinds are customizable by modifying the settings.py file is so desired (pygame key constants are available right below the keybinds). 
@@ -53,4 +55,6 @@ Font in lower left of first level: https://poppyworks.itch.io/silver
 Enviroment: https://octoshrimpy.itch.io/tranquil-tunnels 
 Portal sprite: https://pixelnauta.itch.io/pixel-dimensional-portal-32x32 
 Font in pause menu and first level: https://joebrogers.itch.io/bitpotion
+Bouncing blob in level 2: https://cactusturtle.itch.io/bouncing-blue-blob  (resized)
 Smoke effects: https://bdragon1727.itch.io/free-smoke-fx-pixel-2 
+UI Menu Sounds: https://souptonic.itch.io/souptonic-sfx-pack-1-ui-sounds 

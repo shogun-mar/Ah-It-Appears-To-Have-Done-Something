@@ -169,7 +169,6 @@ class Player(PhysicsEntity):
 
         match self.status:
             case 'damaged':
-                print(self.velocity)
                 #Vertical component of movement
                 desired_x, desired_y = clamp_to_screen(self.rect.midtop[0], self.rect.midtop[1] + self.velocity[1])
                 result = self.collision_manager.allow_movement(desired_x, desired_y)
@@ -223,11 +222,11 @@ class Player(PhysicsEntity):
                             self.velocity[0] = 0 #Stop the player's horizontal movement
 
                 #Reduce the player's velocity
-                if self.velocity[1] < 0: self.velocity[1] += 1
-                else: self.velocity[1] -= 1
+                # if self.velocity[1] < 0: self.velocity[1] += 1
+                # else: self.velocity[1] -= 1
                 
-                if self.velocity[0] < 0: self.velocity[0] += 1
-                else: self.velocity[0] -= 1
+                # if self.velocity[0] < 0: self.velocity[0] += 1
+                # else: self.velocity[0] -= 1
                 
                 self.clamp_velocity()  # Clamp the player's velocity
                 
@@ -489,13 +488,21 @@ class Player(PhysicsEntity):
     
     def spawn_landing_smoke_effect(self):
         """Function that spawns a landing effect when the player lands."""
-        print("Spawn landing effect")
-        self.game.effects.append(SmokeEffect(type='landing', coords=self.rect.midbottom, game=self.game))
+        
+        for effect in self.game.effects: #If there is already a landing effect spawned by the player end the function here
+            if effect.maker == self and effect.type == 'landing':
+                return
+            
+        self.game.effects.append(SmokeEffect(type='landing', coords=self.rect.midbottom, game=self.game, maker=self))
 
     def spawn_jumping_smoke_effect(self):
         """Function that spawns a landing effect when the player jumps."""
-        print("Spawn smoke effect")
-        self.game.effects.append(SmokeEffect(type='jumping', coords=self.rect.midbottom, game=self.game))
+
+        for effect in self.game.effects: #If there is already a jumping effect spawned by the player end the function here
+            if effect.maker == self and effect.type == 'jumping':
+                return
+        
+        self.game.effects.append(SmokeEffect(type='jumping', coords=self.rect.midbottom, game=self.game, maker=self))
 
     def advance_level(self):
         """Function that advances the player to the next level by increasing the current level number and resetting the player's position."""

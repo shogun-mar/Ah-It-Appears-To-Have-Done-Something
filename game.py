@@ -9,7 +9,7 @@ from logic.states.level_1 import handle_level_one_events, update_level_one, rend
 from logic.states.level_2 import handle_level_two_events, update_level_two, render_level_two, init_level_two
 from logic.states.pauseMenu import handle_pause_menu_events, update_pause_menu, render_pause_menu
 from logic.physicsEntities import Player
-from logic.interactibles import GravityController, JumpPad
+from logic.interactibles import GravityController, JumpBlob
 
 #Constants
 _MONITOR_DEFAULTTONEAREST = 2
@@ -19,7 +19,7 @@ class Game:
         pg.init()
 
     	#Game variables
-        self.game_state: GameState = GameState.LEVEL_1
+        self.game_state: GameState = GameState.LEVEL_2
         #self.game_state: GameState = GameState.START_MENU
         self.current_level_num: int = self.game_state.value
         self.should_draw_cursor: bool = True
@@ -50,7 +50,7 @@ class Game:
         #Init assets
         self.init_assets()
 
-        init_level_one(self)
+        #init_level_two(self)
 
     def run(self):
         """Main game loop"""	
@@ -138,7 +138,7 @@ class Game:
         self.level_two_ground_surf: pg.Surface = pg.image.load("graphics/assets/level 2/ground.png").convert_alpha()
         self.level_two_ground_rect: pg.Rect = self.level_two_ground_surf.get_rect(bottomleft = (0, LEVEL_RESOLUTIONS[2][1]))
         self.level_two_env_mask: pg.Surface = pg.image.load("graphics/assets/level 2/mask.png").convert_alpha() #Half transparent black circle used to show the player in the dark
-        self.level_two_jump_pad: JumpPad = JumpPad(game = self, bottom_left_coords = (0, LEVEL_RESOLUTIONS[2][1]))
+        self.level_two_blob: JumpBlob = JumpBlob(game = self, bottom_left_coords = (1, LEVEL_RESOLUTIONS[2][1]))
         
         #Pause menu
         self.paused_game_state: GameState = self.game_state #Variable to keep track of the previous game state used to return to the previous game state when unpausing

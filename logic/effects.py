@@ -1,11 +1,13 @@
 from settings import pg, EFFECTS_ANIMATION_SWITCHING_DELAY
 
 class SmokeEffect:
-    def __init__(self, type, coords, game):
+    def __init__(self, type, coords, game, maker):
 
-        self.animation_switching_delay = EFFECTS_ANIMATION_SWITCHING_DELAY
-        self.game = game
-        self.current_frame = 0
+        self.animation_switching_delay = EFFECTS_ANIMATION_SWITCHING_DELAY #The delay between switching frames
+        self.game = game #The game object
+        self.current_frame = 0 #The current frame of the animation
+        self.maker = maker #The object that created the effect (used to limit how many effects can be created by the same object)
+        self.type = type #The type of the effect (used to limit how many effects can be created by the same object and determine the animation)
 
         match type:
             case 'landing':

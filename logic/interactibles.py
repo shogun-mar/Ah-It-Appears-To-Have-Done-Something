@@ -8,16 +8,40 @@ class Interactibles:
         self.rect = rect
         self.action = action
 
-class JumpPad(Interactibles):
+class JumpBlob(Interactibles):
     def __init__(self, game, bottom_left_coords):
         super().__init__(game)
 
         #Graphical representation
-        self.sprite = pg.image.load("graphics/assets/interactibles/jump pad/jump pad.png").convert_alpha()
+        self.current_frame = 0
+        self.switching_delay = 10 #Variable to keep track of when to progress the animation (with 6 the delay is 96 ms at 60 fps, with 10 the delay is 160 ms at 60 fps)
+        self.frames = [pg.image.load(f"graphics/assets/interactibles/jump blob/{i}.png").convert_alpha() for i in range(1, 24)]
+        self.sprite = self.frames[self.current_frame]
 
         #Logic
         self.rect = self.sprite.get_rect(bottomleft = bottom_left_coords)
         self.action = "game.player.velocity[1] = -16" #Exec strings have to be written through the perspective of the name space in which they will be executed (in this case level_1.py)
+
+    def update_animation(self):
+        """Function that updates the animation of the jump blob"""
+
+        self.switching_delay -= 1
+        if self.switching_delay == 0:
+            self.switching_delay = 10
+
+            self.current_frame += 1
+            if self.current_frame == 23:
+                self.current_frame = 0
+
+            self.sprite = self.frames[self.current_frame]
+
+    def move(self):
+        """Function that moves the jump blob"""
+
+        self.rect.y += 1
+
+        if self.rect.y > 800:
+            self.rect.y = -self.rect.height
 
 class GravityController(Interactibles):
     def __init__(self, game, coords, direction):

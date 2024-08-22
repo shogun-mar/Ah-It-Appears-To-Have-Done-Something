@@ -125,9 +125,10 @@ def update_level_two(game):
 
     #Environment
     game.update_portal_animation() #Update the portal animation
+    game.level_two_blob.update_animation() #Update the jump pad animation
     [effect.update_animation() for effect in game.effects] #Update all the effects
-    if player.rect.colliderect(game.level_two_jump_pad.rect):
-        exec(game.level_two_jump_pad.action)
+    if player.rect.colliderect(game.level_two_blob.rect):
+        exec(game.level_two_blob.action)
 
 def render_level_two(game):
     
@@ -137,7 +138,7 @@ def render_level_two(game):
     [screen.blit(effect.sprite, effect.rect) for effect in game.effects] #Draw all the effects
     screen.blit(game.player.sprite, game.player.rect) #Draw the player
     screen.blit(game.current_portal_sprite, game.portal_rect) #Draw the end of level portal
-    screen.blit(game.level_two_jump_pad.sprite, game.level_two_jump_pad.rect) #Draw the jump pad
+    screen.blit(game.level_two_blob.sprite, game.level_two_blob.rect) #Draw the jump pad
 
     if game.should_draw_cursor and game.player.status != 'asleep': screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor
     if game.player.status == 'asleep': screen.blit(game.level_two_env_mask, (0, 0)) #Draw the environment mask

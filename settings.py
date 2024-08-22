@@ -28,6 +28,11 @@ PLAYER_ANIMATION_SWITCHING_DELAY = 15  #After how many frames the animation of t
 BASE_JUMP_SPEED = -8 #Initial player jump speed in pixel per frame (negative value for jumping up) (suggested: -8 --> value has to be negative)
 INITIAL_COORDS_PLAYER = [(50, 501), (50, 339), (887, 449)] #Initial coordinates the player should have in each level (midbottom) (DO NOT CHANGE)
 
+#Audio settings
+MUSIC_VOLUME = 0.1 #The volume of the music (suggested: 0.5)
+WORLD_SOUNDS_VOLUME = 0.2 #The volume of the world sounds (suggested: 0.5)
+UI_SOUNDS_VOLUME = 0.2 #The volume of the UI sounds (suggested: 0.5)
+
 #Key bindings (see below for key constants)
 PLAYER_LEFT_KEY = pg.K_a #The key to move the player left (suggested: pygame.K_a)
 PLAYER_RIGHT_KEY = pg.K_d #The key to move the player right (suggested: pygame.K_d)

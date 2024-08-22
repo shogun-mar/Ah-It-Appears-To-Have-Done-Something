@@ -1,8 +1,11 @@
 import ctypes, time
 from ctypes import wintypes
-from threading import Thread
+from threading import Thread, Event
 from logic.states.gameState import GameState
 from settings import PAUSE_KEY, BRIGHTNESS_CONTROL_INTERVAL, pg
+
+windows_api_exception = False
+monitoring_brightness_event = Event()  # Event to control the brightness monitoring thread
 
 # Define necessary structures
 class MONITORINFOEXW(ctypes.Structure):
@@ -43,49 +46,69 @@ dxva2.SetMonitorBrightness.argtypes = [wintypes.HANDLE, wintypes.DWORD]
 
 # Function to get monitor brightness
 def get_monitor_brightness(hmonitor):
-    
-    # Get number of physical monitors
-    num_monitors = wintypes.DWORD()
-    dxva2.GetNumberOfPhysicalMonitorsFromHMONITOR(hmonitor, ctypes.byref(num_monitors))
-    
-    # Get physical monitor handles
-    physical_monitors = (PHYSICAL_MONITOR * num_monitors.value)()
-    dxva2.GetPhysicalMonitorsFromHMONITOR(hmonitor, num_monitors.value, physical_monitors)
-    
-    # Get brightness of the first monitor
-    min_brightness = wintypes.DWORD()
-    current_brightness = wintypes.DWORD()
-    max_brightness = wintypes.DWORD()
-    dxva2.GetMonitorBrightness(physical_monitors[0].hPhysicalMonitor, ctypes.byref(min_brightness), ctypes.byref(current_brightness), ctypes.byref(max_brightness))
-    
-    # Clean up
-    dxva2.DestroyPhysicalMonitor(physical_monitors[0].hPhysicalMonitor)
-    
-    return current_brightness.value
+    global windows_api_exception
+
+    try:
+        # Get number of physical monitors
+        num_monitors = wintypes.DWORD()
+        if not dxva2.GetNumberOfPhysicalMonitorsFromHMONITOR(hmonitor, ctypes.byref(num_monitors)):
+            raise ctypes.WinError()
+
+        # Get physical monitor handles
+        physical_monitors = (PHYSICAL_MONITOR * num_monitors.value)()
+        if not dxva2.GetPhysicalMonitorsFromHMONITOR(hmonitor, num_monitors.value, physical_monitors):
+            raise ctypes.WinError()
+
+        # Get brightness of the first monitor
+        min_brightness = wintypes.DWORD()
+        current_brightness = wintypes.DWORD()
+        max_brightness = wintypes.DWORD()
+        if not dxva2.GetMonitorBrightness(physical_monitors[0].hPhysicalMonitor, ctypes.byref(min_brightness), ctypes.byref(current_brightness), ctypes.byref(max_brightness)):
+            raise ctypes.WinError()
+
+        return current_brightness.value
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        windows_api_exception = True #Flip the flag that indicates an exception occurred in the Windows API
+    finally:
+        # Clean up
+        if 'physical_monitors' in locals():
+            dxva2.DestroyPhysicalMonitor(physical_monitors[0].hPhysicalMonitor)
+        return
 
 # Function to set monitor brightness
 def set_monitor_brightness(hmonitor, brightness):
-   
-    # Get number of physical monitors
-    num_monitors = wintypes.DWORD()
-    dxva2.GetNumberOfPhysicalMonitorsFromHMONITOR(hmonitor, ctypes.byref(num_monitors))
-    
-    # Get physical monitor handles
-    physical_monitors = (PHYSICAL_MONITOR * num_monitors.value)()
-    dxva2.GetPhysicalMonitorsFromHMONITOR(hmonitor, num_monitors.value, physical_monitors)
-    
-    # Set brightness of the first monitor
-    dxva2.SetMonitorBrightness(physical_monitors[0].hPhysicalMonitor, brightness)
-    
-    # Clean up
-    dxva2.DestroyPhysicalMonitor(physical_monitors[0].hPhysicalMonitor)
+    global windows_api_exception
+
+    try:
+        # Get number of physical monitors
+        num_monitors = wintypes.DWORD()
+        if not dxva2.GetNumberOfPhysicalMonitorsFromHMONITOR(hmonitor, ctypes.byref(num_monitors)):
+            raise ctypes.WinError()
+
+        # Get physical monitor handles
+        physical_monitors = (PHYSICAL_MONITOR * num_monitors.value)()
+        if not dxva2.GetPhysicalMonitorsFromHMONITOR(hmonitor, num_monitors.value, physical_monitors):
+            raise ctypes.WinError()
+
+        # Set brightness of the first monitor
+        if not dxva2.SetMonitorBrightness(physical_monitors[0].hPhysicalMonitor, brightness):
+            raise ctypes.WinError()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        windows_api_exception = True #Flip the flag that indicates an exception occurred in the Windows API
+    finally:
+        # Clean up
+        if 'physical_monitors' in locals():
+            dxva2.DestroyPhysicalMonitor(physical_monitors[0].hPhysicalMonitor)
 
 # Function to monitor brightness changes
 def monitor_brightness_changes(callback, game_instance, interval=BRIGHTNESS_CONTROL_INTERVAL):
+    global monitoring_brightness_event
     hmonitor = game_instance.hardware_monitor # Get the hardware monitor handle
     previous_brightness = get_monitor_brightness(hmonitor) # Get the initial brightness
     
-    while True:
+    while not monitoring_brightness_event.is_set():
 
         time.sleep(interval) # Wait for the interval
         current_brightness = get_monitor_brightness(hmonitor) # Get the current brightness
@@ -98,8 +121,9 @@ def monitor_brightness_changes(callback, game_instance, interval=BRIGHTNESS_CONT
 
 # Callback function
 def brightness_changed(game_instance, new_brightness):
-    print(f"Brightness changed to: {new_brightness}")
+    global monitoring_brightness_event
     game_instance.player.wake_up() #Wake up the player
+    monitoring_brightness_event.set()  # Signal the brightness monitoring thread to stop
 
 #Pause event handler
 def pause_event_handler(game):
@@ -107,7 +131,9 @@ def pause_event_handler(game):
         game.player.status = 'standing'
     game.pause_sound.play() #Play the pause sound
     game.paused_game_state = game.game_state
+
     game.game_state = GameState.PAUSE_MENU
+    pg.mixer.music.pause() #Pause the music
 
 def handle_level_two_events(game, event):
         
@@ -131,6 +157,10 @@ def update_level_two(game):
     if player.rect.colliderect(game.level_two_blob.rect):
         exec(game.level_two_blob.action)
 
+    #Exception handling
+    if windows_api_exception and game.player.status == 'asleep': #If an exception occurred in the Windows API adn the player is asleep
+        game.player.wake_up() #Wake up the player
+
 def render_level_two(game):
     
     screen = game.screen
@@ -145,6 +175,8 @@ def render_level_two(game):
     if game.player.status == 'asleep': screen.blit(game.level_two_env_mask, (0, 0)) #Draw the environment mask
 
 def init_level_two(game):
+    global monitoring_brightness_event
+    monitoring_brightness_event.clear()  # Reset the event when initializing the level
     game.player.status = 'asleep' #Set the player status to asleep in level 2
     game.player.controls_enabled = False #Disable player controls
     game.should_draw_cursor = False #Disable cursor drawing

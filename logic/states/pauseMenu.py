@@ -4,8 +4,9 @@ from settings import PAUSE_KEY, pg
 def handle_pause_menu_events(game, event):
     """Function that handles events for the pause menu game state"""
     if event.type == pg.KEYDOWN and event.key == PAUSE_KEY:
-        game.resume_sound.play()
+        game.resume_sound.play() #Play the resume sound
         game.game_state = game.paused_game_state
+        pg.mixer.music.unpause() #Unpause the music
 
     if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
         if game.pause_menu_resume_rect.collidepoint(event.pos): 

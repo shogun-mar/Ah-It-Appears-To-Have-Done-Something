@@ -44,18 +44,19 @@ All the necessary pip packages can be installed through this command in the wind
 pip3 install pygame numpy pillow
 ```
 
-Written with Pygame 2.6.0, Numpy 2.0.1 and Pillow 10.4.0
+Written with Pygame 2.6.0, Numpy 2.0.1 and Pillow 10.4.0.  
 After doing this the program can be launched from any IDE or CLI by starting game.py.  
 I plan to make an executable of this game at the end of development.
 
 ## Assets credits
 
-Player spritesheet: https://dani-maccari.itch.io/player-animations-tim  
-Font in lower left of first level: https://poppyworks.itch.io/silver
-Enviroment: https://octoshrimpy.itch.io/tranquil-tunnels 
-Portal sprite: https://pixelnauta.itch.io/pixel-dimensional-portal-32x32 
-Font in pause menu and first level: https://joebrogers.itch.io/bitpotion
-Bouncing blob in level 2: https://cactusturtle.itch.io/bouncing-blue-blob  (resized)
-Smoke effects: https://bdragon1727.itch.io/free-smoke-fx-pixel-2 
-UI Menu Sounds: https://souptonic.itch.io/souptonic-sfx-pack-1-ui-sounds 
-World sounds (player jump, death and portal entry): https://brackeysgames.itch.io/brackeys-platformer-bundle 
+* Player spritesheet: https://dani-maccari.itch.io/player-animations-tim  
+* Font in lower left of first level: https://poppyworks.itch.io/silver
+* Enviroment: https://octoshrimpy.itch.io/tranquil-tunnels 
+* Portal sprite: https://pixelnauta.itch.io/pixel-dimensional-portal-32x32 
+* Font in pause menu and first level: https://joebrogers.itch.io/bitpotion
+* Bouncing blob in level 2: https://cactusturtle.itch.io/bouncing-blue-blob  (resized)
+* Smoke effects: https://bdragon1727.itch.io/free-smoke-fx-pixel-2 
+* UI Menu Sounds: https://souptonic.itch.io/souptonic-sfx-pack-1-ui-sounds 
+* World sounds (player jump, death and portal entry): https://brackeysgames.itch.io/brackeys-platformer-bundle 
+* Music by DOS-88 on Youtube: https://www.youtube.com/channel/UC9VhwXkGozOjxLjg72-_W5g (Tracks: Flow State, Rest Easy, Times Enjoyed)

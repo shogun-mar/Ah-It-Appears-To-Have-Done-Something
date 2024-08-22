@@ -1,7 +1,7 @@
 
 import contextlib, ctypes
 with contextlib.redirect_stdout(None): #Suppress pygame welcome message
-    from settings import LEVEL_RESOLUTIONS, PORTAL_ANIMATION_SWITCHING_DELAY, MAX_FPS, SCREEN_HEIGHT, PAUSE_MENU_BACKGROUND_ALPHA, QUICK_EXIT_KEY, pg
+    from settings import LEVEL_RESOLUTIONS, MUSIC_VOLUME, WORLD_SOUNDS_VOLUME, UI_SOUNDS_VOLUME, PORTAL_ANIMATION_SWITCHING_DELAY, MAX_FPS, SCREEN_HEIGHT, PAUSE_MENU_BACKGROUND_ALPHA, QUICK_EXIT_KEY, pg
 del contextlib
 from logic.states.gameState import GameState
 from logic.states.startMenu import handle_start_menu_events, update_start_menu, render_start_menu
@@ -19,7 +19,7 @@ class Game:
         pg.init()
 
     	#Game variables
-        self.game_state: GameState = GameState.LEVEL_1
+        self.game_state: GameState = GameState.LEVEL_2
         #self.game_state: GameState = GameState.START_MENU
         self.current_level_num: int = self.game_state.value
         self.should_draw_cursor: bool = True
@@ -108,19 +108,29 @@ class Game:
         #Init general assets
         self.cursor_surf: pg.Surface = pg.image.load("graphics/assets/cursor.png").convert_alpha()
 
+            #Music 
+        self.background_tracks: list[str] = ["audio/background tracks/Flow_State.mp3", "audio/background tracks/Rest_Easy.mp3", "audio/background tracks/Times_Enjoyed.mp3"]
+        pg.mixer.music.load(self.background_tracks[self.current_level_num]) #Load the music
+        pg.mixer.music.set_volume(MUSIC_VOLUME) #Set the volume of the music
+        pg.mixer.music.play(loops=-1) #Start playing the music on loop
+
             # World sounds
         self.death_sound: pg.mixer.Sound = pg.mixer.Sound("audio/sounds/world/death.wav")
-        self.death_sound.set_volume(0.1) #Set the volume of the death sound to 10%
+        self.death_sound.set_volume(WORLD_SOUNDS_VOLUME) #Set the volume of the death sound
         self.jump_sound: pg.mixer.Sound = pg.mixer.Sound("audio/sounds/world/jump.wav")
-        self.jump_sound.set_volume(0.1) #Set the volume of the jump sound to 10%
+        self.jump_sound.set_volume(WORLD_SOUNDS_VOLUME) #Set the volume of the jump sound
         self.portal_sound: pg.mixer.Sound = pg.mixer.Sound("audio/sounds/world/portal entry.wav")
-        self.portal_sound.set_volume(0.1) #Set the volume of the portal sound to 10%
+        self.portal_sound.set_volume(WORLD_SOUNDS_VOLUME) #Set the volume of the portal sound
 
             # UI sounds
         self.pause_sound: pg.mixer.Sound = pg.mixer.Sound("audio/sounds/ui/pause.wav")
+        self.pause_sound.set_volume(UI_SOUNDS_VOLUME) #Set the volume of the pause sound
         self.resume_sound: pg.mixer.Sound = pg.mixer.Sound("audio/sounds/ui/resume.wav")
+        self.resume_sound.set_volume(UI_SOUNDS_VOLUME)
         self.exit_sound: pg.mixer.Sound = pg.mixer.Sound("audio/sounds/ui/exit.wav")
+        self.exit_sound.set_volume(UI_SOUNDS_VOLUME)
         self.ui_hover_over_sound: pg.mixer.Sound = pg.mixer.Sound("audio/sounds/ui/hover over.wav")
+        self.ui_hover_over_sound.set_volume(UI_SOUNDS_VOLUME)
 
             # Portal animation and sprites
         self.portal_coords: list[tuple] = [(800, 494), (950, 334), (949, 94)] #Coordinates of the portal in each level (bottomright) (DO NOT CHANGE) (result may appear strange but its because the portal sprite have extra width to accomodate the particles)
@@ -193,6 +203,7 @@ class Game:
         self.update_screen_dimensions() #Update the screen dimensions
         self.darken_surf = pg.transform.scale(self.darken_surf, LEVEL_RESOLUTIONS[self.current_level_num]) #Update the darken surface
         self.portal_rect = self.current_portal_sprite.get_rect(bottomright = self.portal_coords[self.current_level_num]) #Update the portal rect
+        pg.mixer.music.load(self.background_tracks[self.current_level_num]) #Load the new level music
 
     def generic_pause_event_handler(self):
         """Function that handles the pause event"""
@@ -201,6 +212,7 @@ class Game:
         if not self.player.is_in_air: self.player.status = 'standing'
         self.paused_game_state = self.game_state
         self.game_state = GameState.PAUSE_MENU
+        pg.mixer.music.pause() #Pause the music
 
     def update_screen_dimensions(self):
         """Function that updates the screen dimensions"""

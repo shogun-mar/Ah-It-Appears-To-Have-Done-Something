@@ -222,13 +222,6 @@ class Player(PhysicsEntity):
 
                             self.velocity[0] = 0 #Stop the player's horizontal movement
 
-                #Reduce the player's velocity
-                # if self.velocity[1] < 0: self.velocity[1] += 1
-                # else: self.velocity[1] -= 1
-                
-                # if self.velocity[0] < 0: self.velocity[0] += 1
-                # else: self.velocity[0] -= 1
-                
                 self.clamp_velocity()  # Clamp the player's velocity
                 
             case 'left':
@@ -423,7 +416,7 @@ class Player(PhysicsEntity):
     def update_status(self):
         """Function that takes care of updating the player's status based on its velocity and previous status."""
 
-        if self.status == 'damaged': return #If the player is damaged end the function here
+        if self.status == 'damaged' or self.status == 'asleep': return #If the player is damaged end the function here
 
         elif self.velocity[0] < 0: #If the player is moving left
             if self.velocity[1] != BASE_GRAVITY_PULL: self.status = 'left airborne' 
@@ -547,7 +540,7 @@ class Player(PhysicsEntity):
     def init_death_sequence(self):
         """Function that initializes the player's death sequence."""
 
-        if self.status != 'damaged': #If the player is not already in damaged state
+        if self.status != 'damaged':
         
             self.game.death_sound.play() #Play the death sound
             self.controls_enabled = False #Disable the player's controls
@@ -565,9 +558,9 @@ class Player(PhysicsEntity):
     def reset(self):
         """Function that resets the player's value to default.""" 
         self.current_animation_frame = -1 #Reset the animation frame counter
+        self.status = 'standing' #Reset the player's status
         self.rect.midbottom = INITIAL_COORDS_PLAYER[self.game.current_level_num] #Reset the player's position to the initial values
         self.velocity = [0, BASE_GRAVITY_PULL] #Reset the player's velocity
-        self.status = 'standing' #Reset the player's status
         self.controls_enabled = True #Enable the player's controls
         self.should_float = False #Disable the player's floating
 
@@ -583,8 +576,6 @@ class Player(PhysicsEntity):
     def wake_up(self):
         self.status = 'standing' #Set the player status to standing
         self.controls_enabled = True #Enable player controls
-        self.game.monitoring_brightness_event.set() #Set the event to monitor the brightness
-        self.game.monitor_thread.join() #Join the monitor thread
 
 class DeathEntity(PhysicsEntity):
     def __init__(self, game, mass, sprite = None, rect = None):
@@ -612,9 +603,9 @@ class DeathEntity(PhysicsEntity):
                 if not self.collides_with_other_entities: self.rect.midbottom = (desired_x, desired_y)
             case 'collision': self.velocity[1] = BASE_GRAVITY_PULL
             case 'death': 
-                if not self.should_die: self.init_death_sequence() #If the entity has not started the death sequence yet, start it
+                if not self.should_die: self.init_death() #If the entity has not started the death sequence yet, start it
 
-    def init_death_sequence(self):
+    def init_death(self):
         self.should_die = True
         self.death_contact_time = pg.time.get_ticks()
 

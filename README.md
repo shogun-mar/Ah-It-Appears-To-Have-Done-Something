@@ -47,7 +47,6 @@ pip3 install pygame numpy pillow comtypes pycaw
 
 Written with Pygame 2.6.0, Numpy 2.0.1 and Pillow 10.4.0.  
 After doing this the program can be launched from any IDE or CLI by starting game.py.  
-I plan to make an executable of this game at the end of development.
 
 When you are finished playing the game you can delete all the packages by using this command: 
 

@@ -1,8 +1,8 @@
 import ctypes, time
 from ctypes import wintypes
-from threading import Thread, Event
+from threading import Thread
 from logic.states.gameState import GameState
-from settings import PAUSE_KEY, BRIGHTNESS_CONTROL_INTERVAL, pg
+from settings import PAUSE_KEY, BRIGHTNESS_CONTROL_INTERVAL, BASE_GRAVITY_PULL, pg
 
 windows_api_exception = False
 
@@ -69,11 +69,11 @@ def get_monitor_brightness(hmonitor):
     except Exception as e:
         print(f"An error occurred: {e}")
         windows_api_exception = True #Flip the flag that indicates an exception occurred in the Windows API
+        return
     finally:
         # Clean up
         if 'physical_monitors' in locals():
             dxva2.DestroyPhysicalMonitor(physical_monitors[0].hPhysicalMonitor)
-        return
 
 # Function to set monitor brightness
 def set_monitor_brightness(hmonitor, brightness):
@@ -104,18 +104,15 @@ def set_monitor_brightness(hmonitor, brightness):
 # Function to monitor brightness changes
 def monitor_brightness_changes(callback, game_instance, interval=BRIGHTNESS_CONTROL_INTERVAL):
     hmonitor = game_instance.hardware_monitor # Get the hardware monitor handle
-    previous_brightness = get_monitor_brightness(hmonitor) # Get the initial brightness
     
-    while not game_instance.monitoring_brightness_event.is_set():
-
+    while True:
         time.sleep(interval) # Wait for the interval
         current_brightness = get_monitor_brightness(hmonitor) # Get the current brightness
-        if current_brightness != previous_brightness: # If the brightness has changed
-
-            if current_brightness - previous_brightness >= 50: # If the brightness has increased by 50 or more
+        try:
+            if current_brightness >= 50 and game_instance.current_level_num == 2: # If the current brightness is greater than or equal to 50 and the current level is 2
                 callback(game_instance) # Call the callback function
-
-            previous_brightness = current_brightness # Update the previous brightness
+        except Exception as e:
+            windows_api_exception = True #Flip the flag that indicates an exception occurred in the Windows API
 
 # Callback function
 def wake_up_player(game_instance):
@@ -150,15 +147,21 @@ def update_level_two(game):
     player.update_animation() #Update the player animation
 
     #Environment
-    #print(f"Action: {game.level_two_blob.action} with velocity: {game.level_two_blob.vertical_velocity}")
     game.update_portal_animation() #Update the portal animation
     game.level_two_blob.update() #Update the jump blob position and action
     game.level_two_blob.update_animation() #Update the jump pad animation
     [effect.update_animation() for effect in game.effects] #Update all the effects
     if player.rect.colliderect(game.level_two_blob.rect):
+        if player.velocity[1] > BASE_GRAVITY_PULL: #If the player is moving down
+            game.level_two_blob.vertical_velocity = 16 #Reset the vertical velocity of the jump blob so it moves down
+        elif player.velocity[1] <= 0:
+            game.level_two_blob.vertical_velocity = 16 #Reset the vertical velocity of the jump blob so it moves UP
+        
         exec(game.level_two_blob.action) #Execute the action of the jump blob
-        game.level_two_blob.vertical_velocity = 16 #Reset the vertical velocity of the jump blob so it moves down
         player.spawn_landing_smoke_effect() #Spawn a landing smoke effect
+
+    if 0 <= player.rect.bottomright[0] <= game.level_two_blob.rect.bottomright[0] and player.rect.midtop[1] >= 660: #If the player is under the blob
+        player.init_death_sequence() #Kill the player
 
     #Exception handling
     if windows_api_exception and game.player.status == 'asleep': #If an exception occurred in the Windows API and the player is asleep
@@ -178,13 +181,8 @@ def render_level_two(game):
     if game.should_draw_cursor and game.player.status != 'asleep': screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor
     if game.player.status == 'asleep': screen.blit(game.level_two_env_mask, (0, 0)) #Draw the environment mask
 
-    pg.draw.rect(screen, 'red', game.level_two_blob.rect, 2) 
-
 def init_level_two(game):
-    global monitoring_brightness_event
 
-    game.monitoring_brightness_event = Event()  # Event to control the brightness monitoring thread
-    game.monitoring_brightness_event.clear()  # Reset the event when initializing the level
     game.player.status = 'asleep' #Set the player status to asleep in level 2
     game.player.controls_enabled = False #Disable player controls
     game.should_draw_cursor = False #Disable cursor drawing

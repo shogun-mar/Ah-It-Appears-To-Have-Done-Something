@@ -12,7 +12,7 @@ from logic.states.pauseMenu import handle_pause_menu_events, update_pause_menu, 
 from logic.states.endScreen import handle_end_screen_events, update_end_screen, render_end_screen, init_end_screen
 from logic.physicsEntities import Player
 from logic.interactibles import GravityController, JumpBlob, Speaker, BouncePad
-from random import shuffle
+from random import shuffle, randint
 
 #Constants
 _MONITOR_DEFAULTTONEAREST = 2
@@ -22,7 +22,6 @@ class Game:
         pg.init()
 
     	#Game variables
-        self.game_state: GameState = GameState.LEVEL_2
         #self.game_state: GameState = GameState.START_MENU
         self.current_level_num: int = self.game_state.value
         self.should_draw_cursor: bool = True
@@ -39,7 +38,6 @@ class Game:
 
         #Game objects
         self.player = Player(self)
-        self.player.controls_enabled = True #DEBUG
         self.entities = []
         self.effects = []
         self.monitor_thread = None # Thread to monitor brightness changes
@@ -56,7 +54,7 @@ class Game:
         #Init assets
         self.init_assets()
 
-        init_level_two(self)
+        init_level_three(self)
 
     def run(self):
         """Main game loop"""	
@@ -91,7 +89,8 @@ class Game:
         pg.display.set_caption(f" Ah It Appears To Have Done Something - FPS: {int(self.clock.get_fps())}") #Update the window title to show the FPS
 
         #If the player has just finished the damaged animation reset the player
-        if self.player.status == 'damaged' and self.player.current_animation_frame == 3: self.player.reset()
+        if self.player.status == 'damaged' and self.player.current_animation_frame == 3: 
+            self.player.reset()
         
         match self.game_state:
             case GameState.START_MENU: update_start_menu(self)
@@ -114,7 +113,8 @@ class Game:
 
         self.final_screen.blit(pg.transform.scale(self.screen, self.final_screen.get_rect().size), (0, 0))
         pg.display.flip()
-        self.clock.tick(MAX_FPS) #Could also use tick_busy_loop() for more accurate timing but it would use more CPU and regular tick accuracy is fine for this game
+        self.clock.tick(MAX_FPS if self.game_state != GameState.END_SCREEN else 3) 
+        #Could also use tick_busy_loop() for more accurate timing but it would use more CPU and regular tick accuracy is fine for this game
 
     def init_assets(self):
         """Function that initializes all the assets for the game"""
@@ -182,7 +182,7 @@ class Game:
         self.level_three_ground_surf: pg.Surface = pg.image.load("graphics/assets/level 3/ground.png").convert_alpha()
         self.level_three_ground_rect: pg.Rect = self.level_three_ground_surf.get_rect(bottomleft = (0, LEVEL_RESOLUTIONS[3][1]))
         self.level_three_speaker: Speaker = Speaker(game = self, coords = (136, 559))
-        self.level_three_bounce_pads: list[BouncePad] = [BouncePad(game = self, direction = 'up right', coords = (175, 350))]
+        self.level_three_bounce_pads: list[BouncePad] = [BouncePad(game = self, direction = 'up right', coords = (175, 310))]
 
         #Pause menu
         self.paused_game_state: GameState = self.game_state #Variable to keep track of the previous game state used to return to the previous game state when unpausing
@@ -212,28 +212,34 @@ class Game:
 
     def advance_level(self):
         """Function that advances the level"""
-        self.player.reset() #Reset the player
-        self.current_level_num += 1 #Advance the level counter
-        self.game_state = GameState(self.current_level_num) #Update the game state
+        if self.game_state != GameState.LEVEL_3: #If the game state is not the end screen
+            self.player.reset() #Reset the player
+            self.current_level_num += 1 #Advance the level counter
+            self.game_state = GameState(self.current_level_num) #Update the game state
 
-        match self.game_state: #Level specific entry settings
-            case GameState.LEVEL_1:
-                init_level_one(self)
-            case GameState.LEVEL_2: 
-                init_level_two(self)
-            case GameState.LEVEL_3:
-                init_level_three(self)
-            case GameState.END_SCREEN:
-                init_end_screen(self)
+            match self.game_state: #Level specific entry settings
+                case GameState.LEVEL_1:
+                    init_level_one(self)
+                case GameState.LEVEL_2:
+                    init_level_two(self)
+                case GameState.LEVEL_3:
+                    init_level_three(self)
 
-        self.update_screen_dimensions() #Update the screen dimensions
-        self.darken_surf = pg.transform.scale(self.darken_surf, LEVEL_RESOLUTIONS[self.current_level_num]) #Update the darken surface
-        self.pause_menu_pause_rect.midtop = (LEVEL_RESOLUTIONS[self.current_level_num][0] // 2, LEVEL_RESOLUTIONS[self.current_level_num][1] // 4) #Update the pause text rect
-        self.pause_menu_resume_rect.midtop = (LEVEL_RESOLUTIONS[self.current_level_num][0] // 2, LEVEL_RESOLUTIONS[self.current_level_num][1] // 2 - 50) #Update the resume text rect
-        self.pause_menu_quit_rect.midtop = (LEVEL_RESOLUTIONS[self.current_level_num][0] // 2, (LEVEL_RESOLUTIONS[self.current_level_num][1] // 4) * 3 - 100) #Update the quit text rect
-        self.portal_rect = self.current_portal_sprite.get_rect(bottomright = self.portal_coords[self.current_level_num]) #Update the portal rect
-        pg.mixer.music.load(self.background_tracks[self.current_level_num]) #Load the new level music
-        pg.mixer.music.play(loops=-1) #Start playing the music on loop
+            self.update_screen_dimensions() #Update the screen dimensions
+            self.darken_surf = pg.transform.scale(self.darken_surf, LEVEL_RESOLUTIONS[self.current_level_num]) #Update the darken surface
+            self.pause_menu_pause_rect.midtop = (LEVEL_RESOLUTIONS[self.current_level_num][0] // 2, LEVEL_RESOLUTIONS[self.current_level_num][1] // 4) #Update the pause text rect
+            self.pause_menu_resume_rect.midtop = (LEVEL_RESOLUTIONS[self.current_level_num][0] // 2, LEVEL_RESOLUTIONS[self.current_level_num][1] // 2 - 50) #Update the resume text rect
+            self.pause_menu_quit_rect.midtop = (LEVEL_RESOLUTIONS[self.current_level_num][0] // 2, (LEVEL_RESOLUTIONS[self.current_level_num][1] // 4) * 3 - 100) #Update the quit text rect
+            self.portal_rect = self.current_portal_sprite.get_rect(bottomright = self.portal_coords[self.current_level_num]) #Update the portal rect
+            pg.mixer.music.load(self.background_tracks[self.current_level_num]) #Load the new level music
+            pg.mixer.music.play(loops=-1) #Start playing the music on loop
+        else:
+            self.current_level_num = -1
+            self.game_state = GameState.END_SCREEN
+            self.update_screen_dimensions()
+            init_end_screen(self)
+            pg.mixer.music.load(self.background_tracks[randint(1, len(self.background_tracks) - 1)]) #Load the new level music
+            pg.mixer.music.play(loops=-1) #Start playing the music on loop
 
     def generic_pause_event_handler(self):
         """Function that handles the pause event"""
@@ -271,10 +277,10 @@ class Game:
 
     def handle_mouse_enter_event(self):
         """Function that handles the focus gained event"""
-
-        self.should_draw_cursor = True #Show the cursor
-        self.game_state = self.paused_game_state #Return to the previous game state
-        pg.mixer.music.unpause() #Unpause the music
+        if not self.game_state == GameState.LEVEL_1 and not self.game_state == GameState.END_SCREEN and not self.game_state == GameState.LEVEL_2:
+            self.should_draw_cursor = True #Show the cursor
+            self.game_state = self.paused_game_state #Return to the previous game state
+            pg.mixer.music.unpause() #Unpause the music
 
     def get_monitor_handle(self):
         """Function that gets the handle of the monitor the game is running on"""

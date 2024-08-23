@@ -55,6 +55,7 @@ def render_pause_menu(game):
             if game.player.status == 'asleep': screen.blit(game.level_two_env_mask, (0, 0)) #Draw the environment mask if the player is still asleep
 
         case GameState.LEVEL_3:
+            screen.fill((37, 30, 38)) #Fill the screen with a dark purple color (background color)
             screen.blit(game.level_three_ground_surf, game.level_three_ground_rect) #Draw the ground
             [screen.blit(pad.sprite, pad.rect) for pad in game.level_three_bounce_pads] #Draw the bounce pads
             screen.blit(game.current_portal_sprite, game.portal_rect) #Draw the end of level portal

@@ -9,7 +9,7 @@ PAUSE_MENU_BACKGROUND_ALPHA = 128 #The alpha value of the background of the paus
 
 #Miscellaneous graphical representation settings
 PORTAL_ANIMATION_SWITCHING_DELAY = 10 #After how many frames the portal animation should progress (suggested: 10)
-BRIGHTNESS_CONTROL_INTERVAL = 7 #The interval in seconds at which the monitor brightness should be checked (suggested: 7)
+BRIGHTNESS_CONTROL_INTERVAL = 8 #The interval in seconds at which the monitor brightness should be checked (suggested: 8)
 EFFECTS_ANIMATION_SWITCHING_DELAY = 10 #After how many frames the effects animation should progress (suggested: 10)
 
 #Physics simulation settings
@@ -27,7 +27,7 @@ PLAYER_SPEED = 2 #The speed of the player in pixels per frame while on the groun
 PLAYER_SPEED_MID_AIR = PLAYER_SPEED // 2  #The speed of the player in pixels per frame while in mid air (suggested: PLAYER_SPEED / 2)
 PLAYER_ANIMATION_SWITCHING_DELAY = 15  #After how many frames the animation of the player should progress (suggested: 12)
 BASE_JUMP_SPEED = -8 #Initial player jump speed in pixel per frame (negative value for jumping up) (suggested: -8 --> value has to be negative)
-INITIAL_COORDS_PLAYER = [(50, 501), (50, 339), (887, 459), (45, 63)] #Initial coordinates the player should have in each level (midbottom) (DO NOT CHANGE)
+INITIAL_COORDS_PLAYER = [(50, 501), (50, 339), (887, 460), (45, 63)] #Initial coordinates the player should have in each level (midbottom) (DO NOT CHANGE)
 
 #Audio settings
 MUSIC_VOLUME = 0.1 #The volume of the music (suggested: 0.5)

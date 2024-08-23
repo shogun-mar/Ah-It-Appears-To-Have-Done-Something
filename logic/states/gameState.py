@@ -6,4 +6,4 @@ class GameState(Enum):
     LEVEL_2 = 2
     LEVEL_3 = 3
     PAUSE_MENU = 4
-    END_SCREEN = 5
+    END_SCREEN = -1

@@ -137,8 +137,11 @@ def handle_level_two_events(game, event):
         if event.key == PAUSE_KEY:
             pause_event_handler(game)
 
+    elif event.type == pg.WINDOWLEAVE:
+        pause_event_handler(game)
+
 def update_level_two(game):
-    
+
     player = game.player #Rename player to make code easier to read
 
     #Player
@@ -147,7 +150,7 @@ def update_level_two(game):
     player.update_animation() #Update the player animation
 
     #Environment
-    print(f"Action: {game.level_two_blob.action} with velocity: {game.level_two_blob.vertical_velocity}")
+    #print(f"Action: {game.level_two_blob.action} with velocity: {game.level_two_blob.vertical_velocity}")
     game.update_portal_animation() #Update the portal animation
     game.level_two_blob.update() #Update the jump blob position and action
     game.level_two_blob.update_animation() #Update the jump pad animation
@@ -158,7 +161,8 @@ def update_level_two(game):
         player.spawn_landing_smoke_effect() #Spawn a landing smoke effect
 
     #Exception handling
-    if windows_api_exception and game.player.status == 'asleep': #If an exception occurred in the Windows API adn the player is asleep
+    if windows_api_exception and game.player.status == 'asleep': #If an exception occurred in the Windows API and the player is asleep
+        print("An exception occurred in the Windows API. Waking up the player...")
         game.player.wake_up() #Wake up the player
 
 def render_level_two(game):
@@ -178,6 +182,7 @@ def render_level_two(game):
 
 def init_level_two(game):
     global monitoring_brightness_event
+
     game.monitoring_brightness_event = Event()  # Event to control the brightness monitoring thread
     game.monitoring_brightness_event.clear()  # Reset the event when initializing the level
     game.player.status = 'asleep' #Set the player status to asleep in level 2

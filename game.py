@@ -9,7 +9,7 @@ from logic.states.level_1 import handle_level_one_events, update_level_one, rend
 from logic.states.level_2 import handle_level_two_events, update_level_two, render_level_two, init_level_two
 from logic.states.level_3 import handle_level_three_events, update_level_three, render_level_three, init_level_three
 from logic.states.pauseMenu import handle_pause_menu_events, update_pause_menu, render_pause_menu
-from logic.states.endScreen import handle_end_screen_events, update_end_screen, render_end_screen
+from logic.states.endScreen import handle_end_screen_events, update_end_screen, render_end_screen, init_end_screen
 from logic.physicsEntities import Player
 from logic.interactibles import GravityController, JumpBlob, Speaker, BouncePad
 from random import shuffle
@@ -22,7 +22,7 @@ class Game:
         pg.init()
 
     	#Game variables
-        self.game_state: GameState = GameState.LEVEL_3
+        self.game_state: GameState = GameState.LEVEL_2
         #self.game_state: GameState = GameState.START_MENU
         self.current_level_num: int = self.game_state.value
         self.should_draw_cursor: bool = True
@@ -39,7 +39,7 @@ class Game:
 
         #Game objects
         self.player = Player(self)
-        self.player.controls_enabled = True #FOR DEBUGGING PURPOSES ONLY
+        self.player.controls_enabled = True #DEBUG
         self.entities = []
         self.effects = []
         self.monitor_thread = None # Thread to monitor brightness changes
@@ -56,7 +56,7 @@ class Game:
         #Init assets
         self.init_assets()
 
-        init_level_three(self)
+        init_level_two(self)
 
     def run(self):
         """Main game loop"""	
@@ -198,6 +198,9 @@ class Game:
         self.pause_menu_quit_text: pg.Surface = pg.image.load("graphics/assets/pause menu/quit.png").convert_alpha()
         self.pause_menu_quit_rect: pg.Rect = self.pause_menu_quit_text.get_rect(midtop = (LEVEL_RESOLUTIONS[self.current_level_num][0] // 2, (LEVEL_RESOLUTIONS[self.current_level_num][1] // 4) * 3 - 100))
 
+        #End screen
+        self.end_screen_surf: pg.Surface = pg.image.load("graphics/assets/end_screen.png").convert_alpha()
+
     def update_portal_animation(self): #Written here so that it can be reused in all game states
         """Function that updates the portal animation"""
         self.portal_animation_switching_delay -= 1 #Decrease the delay
@@ -220,6 +223,8 @@ class Game:
                 init_level_two(self)
             case GameState.LEVEL_3:
                 init_level_three(self)
+            case GameState.END_SCREEN:
+                init_end_screen(self)
 
         self.update_screen_dimensions() #Update the screen dimensions
         self.darken_surf = pg.transform.scale(self.darken_surf, LEVEL_RESOLUTIONS[self.current_level_num]) #Update the darken surface
@@ -228,6 +233,7 @@ class Game:
         self.pause_menu_quit_rect.midtop = (LEVEL_RESOLUTIONS[self.current_level_num][0] // 2, (LEVEL_RESOLUTIONS[self.current_level_num][1] // 4) * 3 - 100) #Update the quit text rect
         self.portal_rect = self.current_portal_sprite.get_rect(bottomright = self.portal_coords[self.current_level_num]) #Update the portal rect
         pg.mixer.music.load(self.background_tracks[self.current_level_num]) #Load the new level music
+        pg.mixer.music.play(loops=-1) #Start playing the music on loop
 
     def generic_pause_event_handler(self):
         """Function that handles the pause event"""
@@ -260,7 +266,7 @@ class Game:
     def handle_mouse_exit_event(self):
         """Function that handles the focus lost event"""
         self.should_draw_cursor = False
-        if not self.game_state == GameState.LEVEL_1: # If the game state is not level 1 pause the game (because the player has to exit the window to be able to move it)
+        if not self.game_state == GameState.LEVEL_1 and not self.game_state == GameState.END_SCREEN and not self.game_state == GameState.LEVEL_2: # If the game state is not level 1 pause the game (because the player has to exit the window to be able to move it)
             self.generic_pause_event_handler()
 
     def handle_mouse_enter_event(self):

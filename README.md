@@ -49,13 +49,19 @@ Written with Pygame 2.6.0, Numpy 2.0.1 and Pillow 10.4.0.
 After doing this the program can be launched from any IDE or CLI by starting game.py.  
 I plan to make an executable of this game at the end of development.
 
+When you are finished playing the game you can delete all the packages by using this command: 
+
+```
+pip3 uninstall pygame numpy pillow comtypes pycaw
+```
+
 ## Assets credits
 
 * Player spritesheet: https://dani-maccari.itch.io/player-animations-tim  
 * Font in lower left of first level: https://poppyworks.itch.io/silver
 * Enviroment: https://octoshrimpy.itch.io/tranquil-tunnels 
 * Portal sprite: https://pixelnauta.itch.io/pixel-dimensional-portal-32x32 
-* Font in pause menu and first level: https://joebrogers.itch.io/bitpotion
+* Font in pause menu, first level and end screen: https://joebrogers.itch.io/bitpotion
 * Pixel speakers in level three: https://gamebanana.com/mods/319025 
 * Bouncing blob in level 2: https://cactusturtle.itch.io/bouncing-blue-blob  (resized)
 * Smoke effects: https://bdragon1727.itch.io/free-smoke-fx-pixel-2 

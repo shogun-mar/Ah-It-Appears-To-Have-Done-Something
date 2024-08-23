@@ -76,7 +76,6 @@ class Speaker(Interactibles):
     
     def switch_status(self):
         self.status = 'off' if self.status == 'on' else 'on'
-        print(f"Switching {self.status}")
 
 class BouncePad(Interactibles):
     def __init__(self, game, direction, coords):

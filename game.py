@@ -10,7 +10,7 @@ from logic.states.level_2 import handle_level_two_events, update_level_two, rend
 from logic.states.level_3 import handle_level_three_events, update_level_three, render_level_three
 from logic.states.pauseMenu import handle_pause_menu_events, update_pause_menu, render_pause_menu
 from logic.physicsEntities import Player
-from logic.interactibles import GravityController, JumpBlob, Speaker
+from logic.interactibles import GravityController, JumpBlob, Speaker, BouncePad
 from random import shuffle
 
 #Constants
@@ -124,7 +124,6 @@ class Game:
         pg.mixer.music.load(self.background_tracks[self.current_level_num]) #Load the music
         pg.mixer.music.set_volume(MUSIC_VOLUME) #Set the volume of the music
         pg.mixer.music.play(loops=-1) #Start playing the music on loop
-
             # World sounds
         self.death_sound: pg.mixer.Sound = pg.mixer.Sound("audio/sounds/world/death.wav")
         self.death_sound.set_volume(WORLD_SOUNDS_VOLUME) #Set the volume of the death sound
@@ -176,7 +175,8 @@ class Game:
         #Level 3 assets
         self.level_three_ground_surf: pg.Surface = pg.image.load("graphics/assets/level 3/ground.png").convert_alpha()
         self.level_three_ground_rect: pg.Rect = self.level_three_ground_surf.get_rect(bottomleft = (0, LEVEL_RESOLUTIONS[3][1]))
-        self.level_three_speaker: Speaker = Speaker(game = self, sprite = pg.image.load("graphics/assets/interactibles/speaker.png").convert_alpha(), coords = (136, 559))
+        self.level_three_speaker: Speaker = Speaker(game = self, coords = (136, 559))
+        self.level_three_bounce_pads: list[BouncePad] = [BouncePad(game = self, direction = 'up right', coords = (175, 350))]
 
         #Pause menu
         self.paused_game_state: GameState = self.game_state #Variable to keep track of the previous game state used to return to the previous game state when unpausing

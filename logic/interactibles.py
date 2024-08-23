@@ -59,26 +59,40 @@ class JumpBlob(Interactibles):
             self.sprite = self.frames[self.current_frame]
 
 class Speaker(Interactibles):
-    def __init__(self, game, sprite, coords):
-        super().__init__(game, sprite)
+    def __init__(self, game, coords):
+        super().__init__(game)
 
         #Logic
+        self.sprite = pg.image.load("graphics/assets/interactibles/speaker.png").convert_alpha()
         self.rect = self.sprite.get_rect(midbottom = coords)
         self.action = f"game.player.init_death_sequence(); game.death_sound.set_volume({WORLD_SOUNDS_VOLUME} * 5); game.death_sound.play()"
 
-    def is_player_already_colliding(self):
-        return self.rect.colliderect(self.game.player.rect)
+    def is_player_below(self):
+        return self.game.player.rect.midtop[1] >= self.rect.midtop[1]
     
     def is_on(self):
         return True #TODO: Implement this function
 
-class JumpPad(Interactibles):
-    def __init__(self, game, sprite, coords):
-        super().__init__(game, sprite)
+class BouncePad(Interactibles):
+    def __init__(self, game, direction, coords):
+        super().__init__(game)
 
         #Logic
-        self.rect = self.sprite.get_rect(midbottom = coords)
-        self.action = "game.player.velocity = [game.player.velocity[0] * (-1), game.player.velocity[1] * (-1)]"
+        self.sprite = pg.image.load("graphics/assets/interactibles/bounce pad.png").convert_alpha()
+        self.rect = self.sprite.get_rect(center = coords)
+        match direction:
+            case 'up' | 'down':
+                self.action = 'game.player.velocity[1] *= -1'
+            case 'left' | 'right':
+                self.action = 'game.player.velocity[0] *= -1'
+            case 'up right':
+                self.action = 'game.player.velocity[1] = -5; game.player.velocity[0] = 10'
+            case 'up left':
+                self.action = 'game.player.velocity[1] = -5; game.player.velocity[0] = -10'
+            case 'down right':
+                self.action = 'game.player.velocity[1] = 5; game.player.velocity[0] = 10'
+            case 'down left':
+                self.action = 'game.player.velocity[1] = 5; game.player.velocity[0] = -10'
 
 class GravityController(Interactibles):
     def __init__(self, game, coords, direction):

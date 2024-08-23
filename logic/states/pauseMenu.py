@@ -56,7 +56,7 @@ def render_pause_menu(game):
 
         case GameState.LEVEL_3:
             screen.blit(game.level_three_ground_surf, game.level_three_ground_rect) #Draw the ground
-            #TODO: Draw interactibles
+            [screen.blit(pad.sprite, pad.rect) for pad in game.level_three_bounce_pads] #Draw the bounce pads
             screen.blit(game.current_portal_sprite, game.portal_rect) #Draw the end of level portal
             [screen.blit(effect.sprite, effect.rect) for effect in game.effects] #Draw all the effects
             screen.blit(game.player.sprite, game.player.rect) #Draw the player

@@ -513,6 +513,32 @@ class Player(PhysicsEntity):
 
         self.game.effects.append(SmokeEffect(type='jumping', coords=spawn_coords, game=self.game, maker=self))
 
+    def spawn_bouncing_smoke_effect(self):
+        """Function that spawns a bouncing effect when the player bounces."""
+
+        spawn_coords = self.rect.midbottom
+        x_interval = 10
+
+        for effect in self.game.effects:
+            if effect.maker == self and effect.type == 'bouncing' and (effect.coords[0] - x_interval <= spawn_coords[0] <= effect.coords[0] + x_interval):
+                return
+            
+        self.game.effects.append(SmokeEffect(type='bouncing', coords=spawn_coords, game=self.game, maker=self))
+
+
+    def spawn_death_smoke_effect(self):
+        """Function that spawns a death effect when the player dies."""
+
+        spawn_coords = self.rect.midbottom  # Spawn the effect at the player's feet
+        x_interval = 10  # Define the interval within which no other effect should spawn
+
+        for effect in self.game.effects:
+            # If there is already a death effect spawned by the player within the x interval, end the function here
+            if effect.maker == self and effect.type == 'dying' and (effect.coords[0] - x_interval <= spawn_coords[0] <= effect.coords[0] + x_interval):
+                return
+            
+        self.game.effects.append(SmokeEffect(type='dying', coords=spawn_coords, game=self.game, maker=self))
+
     def advance_level(self):
         """Function that advances the player to the next level by increasing the current level number and resetting the player's position."""
         self.game.advance_level()
@@ -526,6 +552,7 @@ class Player(PhysicsEntity):
             self.game.death_sound.play() #Play the death sound
             self.controls_enabled = False #Disable the player's controls
             self.current_animation_frame = -1 #Reset the animation frame counter
+            self.spawn_death_smoke_effect() #Spawn a death effect
             
             #Set the player's velocity to simulate knockback
             if self.status in ['right', 'right airborne']: self.velocity = [-HOR_KNOCKBACK_STRENGTH, -VERT_KNOCKBACK_STRENGTH]

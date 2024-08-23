@@ -1,4 +1,6 @@
-
+import os
+os.chdir(os.path.dirname(os.path.abspath(__file__))) #Change the working directory to the directory of the script
+del os
 import contextlib, ctypes
 with contextlib.redirect_stdout(None): #Suppress pygame welcome message
     from settings import LEVEL_RESOLUTIONS, MUSIC_VOLUME, WORLD_SOUNDS_VOLUME, UI_SOUNDS_VOLUME, PORTAL_ANIMATION_SWITCHING_DELAY, MAX_FPS, SCREEN_HEIGHT, PAUSE_MENU_BACKGROUND_ALPHA, QUICK_EXIT_KEY, pg
@@ -22,7 +24,7 @@ class Game:
         pg.init()
 
     	#Game variables
-        #self.game_state: GameState = GameState.START_MENU
+        self.game_state: GameState = GameState.START_MENU
         self.current_level_num: int = self.game_state.value
         self.should_draw_cursor: bool = True
 

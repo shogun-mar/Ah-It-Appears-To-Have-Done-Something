@@ -66,12 +66,17 @@ class Speaker(Interactibles):
         self.sprite = pg.image.load("graphics/assets/interactibles/speaker.png").convert_alpha()
         self.rect = self.sprite.get_rect(midbottom = coords)
         self.action = f"game.player.init_death_sequence(); game.death_sound.set_volume({WORLD_SOUNDS_VOLUME} * 5); game.death_sound.play()"
+        self.status = 'on'
 
     def is_player_below(self):
         return self.game.player.rect.midtop[1] >= self.rect.midtop[1]
     
     def is_on(self):
-        return True #TODO: Implement this function
+        return self.status == 'on'
+    
+    def switch_status(self):
+        self.status = 'off' if self.status == 'on' else 'on'
+        print(f"Switching {self.status}")
 
 class BouncePad(Interactibles):
     def __init__(self, game, direction, coords):

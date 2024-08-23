@@ -19,6 +19,7 @@ Solutions will be available in a separate files to avoid spoilers.
 Feel free to contact me at pmarini72107@gmail.com or message me on slack (name: Marini) if you want to report a bug or leave a review, but please keep in mind that this is my first platformer game made for my first game jam in rudimentary framework such as Pygame (i did the best I could in less than two weeks    😭).
 
 IMPORTANT: Game may be interpreted as a virus because of the interaction with the Windows API, if you see any Windows Defender messages or pop ups do not worry I can assure you I write nothing harmful (I know it's not very reassuring but idk to know much about it 😩).
+Used Github Copilot a bit to guide me in the right direction to avoid having to look through hundreds of pages of documentation of the Windows API.
 
 ## Keybinds and controls
 
@@ -41,7 +42,7 @@ Python 3 required, the specific version of python used to write this project is 
 All the necessary pip packages can be installed through this command in the windows command prompt or any other equivalent command line tool.
 
 ```
-pip3 install pygame numpy pillow
+pip3 install pygame numpy pillow comtypes pycaw
 ```
 
 Written with Pygame 2.6.0, Numpy 2.0.1 and Pillow 10.4.0.  

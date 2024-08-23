@@ -1,4 +1,28 @@
 from settings import pg, PAUSE_KEY, WORLD_SOUNDS_VOLUME
+import threading
+import time
+from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+from comtypes import CLSCTX_ALL
+
+# Function to get the system volume on Windows
+def get_system_volume():
+    devices = AudioUtilities.GetSpeakers()
+    interface = devices.Activate(
+        IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+    volume = interface.QueryInterface(IAudioEndpointVolume)
+    current_volume = volume.GetMasterVolumeLevelScalar()
+    return round(current_volume * 100)  # Convert to percentage
+
+# Daemon thread function to monitor system volume
+def monitor_system_volume(game):
+    while True:
+        try:
+            volume = get_system_volume()
+            if volume == 0 or volume == 100:
+                game.level_three_speaker.switch_status()
+        except Exception as e:
+            game.level_three_speaker.switch_status()
+        time.sleep(1)  # Check every second
 
 def handle_level_three_events(game, event):
     """Function that handles events for the level three game state"""
@@ -44,3 +68,9 @@ def render_level_three(game):
     screen.blit(game.player.sprite, game.player.rect) #Draw the player
 
     if game.should_draw_cursor: screen.blit(game.cursor_surf, pg.mouse.get_pos()) #Draw the cursor
+
+# Start the daemon thread when the game starts
+def init_level_three(game):
+    volume_thread = threading.Thread(target=monitor_system_volume, args=(game,))
+    volume_thread.daemon = True
+    volume_thread.start()

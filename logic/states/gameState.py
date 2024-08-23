@@ -5,5 +5,5 @@ class GameState(Enum):
     LEVEL_1 = 1
     LEVEL_2 = 2
     LEVEL_3 = 3
-    LEVEL_4 = 4
-    PAUSE_MENU = 5
+    PAUSE_MENU = 4
+    END_SCREEN = 5

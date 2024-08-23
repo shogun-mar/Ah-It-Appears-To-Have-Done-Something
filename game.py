@@ -7,8 +7,9 @@ from logic.states.gameState import GameState
 from logic.states.startMenu import handle_start_menu_events, update_start_menu, render_start_menu
 from logic.states.level_1 import handle_level_one_events, update_level_one, render_level_one, init_level_one
 from logic.states.level_2 import handle_level_two_events, update_level_two, render_level_two, init_level_two
-from logic.states.level_3 import handle_level_three_events, update_level_three, render_level_three
+from logic.states.level_3 import handle_level_three_events, update_level_three, render_level_three, init_level_three
 from logic.states.pauseMenu import handle_pause_menu_events, update_pause_menu, render_pause_menu
+from logic.states.endScreen import handle_end_screen_events, update_end_screen, render_end_screen
 from logic.physicsEntities import Player
 from logic.interactibles import GravityController, JumpBlob, Speaker, BouncePad
 from random import shuffle
@@ -55,6 +56,8 @@ class Game:
         #Init assets
         self.init_assets()
 
+        init_level_three(self)
+
     def run(self):
         """Main game loop"""	
         while True:
@@ -80,6 +83,7 @@ class Game:
                 case GameState.LEVEL_2: handle_level_two_events(self, event)
                 case GameState.LEVEL_3: handle_level_three_events(self, event)
                 case GameState.PAUSE_MENU: handle_pause_menu_events(self, event)
+                case GameState.END_SCREEN: handle_end_screen_events(self, event)
             
     def update(self):
         """Function that updates generic values not specific to any game state and calls the appropriate update function by consulting the current game state"""
@@ -95,6 +99,7 @@ class Game:
             case GameState.LEVEL_2: update_level_two(self)
             case GameState.LEVEL_3: update_level_three(self)
             case GameState.PAUSE_MENU: update_pause_menu(self)
+            case GameState.END_SCREEN: update_end_screen(self)
 
     def render(self):
         """Function that renders the game by calling the appropriate render function by consulting the current game state""" 
@@ -105,6 +110,7 @@ class Game:
             case GameState.LEVEL_2: render_level_two(self)
             case GameState.LEVEL_3: render_level_three(self)
             case GameState.PAUSE_MENU: render_pause_menu(self)
+            case GameState.END_SCREEN: render_end_screen(self)
 
         self.final_screen.blit(pg.transform.scale(self.screen, self.final_screen.get_rect().size), (0, 0))
         pg.display.flip()
@@ -212,6 +218,8 @@ class Game:
                 init_level_one(self)
             case GameState.LEVEL_2: 
                 init_level_two(self)
+            case GameState.LEVEL_3:
+                init_level_three(self)
 
         self.update_screen_dimensions() #Update the screen dimensions
         self.darken_surf = pg.transform.scale(self.darken_surf, LEVEL_RESOLUTIONS[self.current_level_num]) #Update the darken surface

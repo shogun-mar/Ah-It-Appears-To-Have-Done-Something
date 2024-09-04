@@ -39,10 +39,10 @@ Windows 10 or 11 (written and tested on Windows 10 22H2).
 
 ## Installation and execution
 Python 3 required, the specific version of python used to write this project is Python 3.12 64 bit.
-All the necessary pip packages can be installed through this command in the windows command prompt or any other equivalent command line tool.
+All the necessary pip packages can be installed through this command in the windows command prompt or any other equivalent command line tool while in the main directory of the repository:
 
 ```
-pip3 install pygame numpy pillow comtypes pycaw
+pip install -r requirements.txt
 ```
 
 Written with Pygame 2.6.0, Numpy 2.0.1 and Pillow 10.4.0.  
@@ -53,6 +53,17 @@ When you are finished playing the game you can delete all the packages by using 
 ```
 pip3 uninstall pygame numpy pillow comtypes pycaw
 ```
+
+## Example images
+
+Start level:  
+![start level](https://github.com/user-attachments/assets/6dee0bad-8706-4030-99d4-b3dcbcab9c34)  
+
+Pause menu:  
+![pause menu](https://github.com/user-attachments/assets/2670afe3-21c0-4a65-8675-5305a48f567c)
+
+End screen:  
+![end_screen](https://github.com/user-attachments/assets/887d8049-f728-45c7-8135-719e918579ca)
 
 ## Assets credits
 
